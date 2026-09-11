@@ -2131,12 +2131,29 @@ const AI_KNOWLEDGE_PACK = [
   },
   {
     id: "foundation-m8", priority: 12,
-    triggers: ["m8", "ham ech", "ho gas", "mong"],
+    triggers: ["mong m8", "m8", "ham ech", "ho gas"],
     title: "Xử lý móng M8 giáp hố gas",
     body: "Theo ghi chú hiện trường đang có trong dự án: dừng công việc tại vùng mất ổn định, khoanh vùng/chống sạt, chụp ảnh và đo cao độ; vét sạch bùn rác trong hố gas cũ sâu khoảng 1,8 m; bơm bù bê tông lót M100 đá 1x2 để lấp kín phần rỗng. Chỉ sau khi có xác nhận xử lý, thực hiện cấy 4 thanh D18 neo sâu 600 mm bằng Ramset G5 Pro, nghiệm thu cấy thép và ván khuôn rồi mới đổ bê tông M250. Không tự đổi đường kính, chiều sâu neo hoặc kích thước móng.",
     links: [{ label: "Mở bản vẽ M8", tab: "tab-gallery", drawingId: "foundation-4" }, { label: "Mở QC-04", tab: "tab-qaqc" }, { label: "Checklist hồ sơ", tab: "tab-dossier" }],
     evidence: { drawings: ["foundation-4"], qaqc: ["QC-04"], boqRows: [13, 16, 19], dossier: [10], docs: ["acceptance", "defect"] },
     caution: "Nếu có nước ngầm, sạt tiếp hoặc lộ kết cấu hiện hữu chưa rõ: dừng và xin ý kiến kỹ sư kết cấu/TVGS trước khi bơm bù hoặc khoan cấy."
+  },
+  {
+    id: "foundation-overview", priority: 2,
+    triggers: ["mong", "dai kieng"],
+    title: "Tra cứu móng theo mã bản vẽ",
+    body: "Hãy nhập mã cụ thể như M1, M2, M3, M4, M5, M6, M7 hoặc M8 để trợ lý mở đúng trang bản vẽ và chuỗi QA/QC tương ứng. Không dùng một quy cách chung cho tất cả móng vì kích thước, cao độ và cốt thép từng loại có thể khác nhau.",
+    links: [{ label: "Mở thư viện bản vẽ móng", tab: "tab-gallery" }, { label: "Mở QA/QC móng", tab: "tab-qaqc" }, { label: "Checklist hồ sơ", tab: "tab-dossier" }],
+    evidence: { drawings: ["foundation-1", "foundation-2", "foundation-3", "foundation-4", "foundation-5"], qaqc: ["QC-01", "QC-02", "QC-03"], dossier: [10] }
+  },
+  {
+    id: "foundation-m5-m6", priority: 16,
+    triggers: ["mong m5", "mong m6", "m5", "m6"],
+    title: "Móng M5-M6 khu Nhà nhân viên",
+    body: "Theo bản vẽ kết cấu móng trang 3, M5-M6 khu Nhà nhân viên có kích thước tham chiếu 1.200 × 1.200 × 200 mm, cao độ đáy -1.000; cốt thép đáy 4Φ14 và đai Φ6a150 theo chi tiết bản vẽ. Khi thi công cần đối chiếu đúng mã móng, tim trục, cao độ đáy, kích thước bản móng, thép chờ/cổ cột và đà kiềng liên kết; nghiệm thu hố móng, cốt thép và ván khuôn trước khi đổ bê tông.",
+    links: [{ label: "Mở bản vẽ M5-M6", tab: "tab-gallery", drawingId: "foundation-3" }, { label: "Mở QA/QC móng", tab: "tab-qaqc" }, { label: "Checklist hồ sơ", tab: "tab-dossier" }],
+    evidence: { drawings: ["foundation-3"], qaqc: ["QC-01", "QC-02", "QC-03"], dossier: [10], docs: ["acceptance", "buildingChecklist"] },
+    caution: "Kích thước và thép phải chốt theo bản vẽ phát hành mới nhất; không suy ra M5/M6 giống M1-M4 hoặc M8 nếu chưa đối chiếu trang bản vẽ."
   },
   {
     id: "concrete-rebar", priority: 9,
