@@ -1,5 +1,5 @@
 /**
- * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.7 PRO
+ * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.8 PRO
  * Dự án: Cải tạo & Xây mới Cửa Hàng Hoa Sen Home Phủ Lý - Hà Nam
  * Hợp đồng: 01/2026/HĐXD/HSG-HG (Giá trị HĐ: 3.854.146.466 VNĐ - Không tính VAT)
  * Ngày khởi công: 10/09/2026 (Hôm nay - Ngày 01/60)
@@ -1029,8 +1029,8 @@ function renderConcreteGeometry() {
     footing: {
       title: 'Móng đơn — mặt bằng + mặt cắt',
       formula: 'V = L × B × H × n',
-      key: 'L dài đài · B rộng đài · H chiều cao · n số móng',
-      svg: `<svg viewBox="0 0 120 70" role="img" aria-label="Móng đơn"><path class="geo-fill" d="M18 30h44v24H18z"></path><path class="geo-stroke" d="M18 30l10-8h44l-10 8M62 30l10-8v24l-10 8M28 22v24M18 54l10-8h44"></path><path class="geo-accent" d="M35 26h10v16H35z"></path><path class="geo-stroke" d="M35 26l4-4h10l-4 4M45 26l4-4v16l-4 4M39 22v16"></path><text class="geo-text" x="36" y="64">L</text><text class="geo-text" x="76" y="42">B</text><text class="geo-text" x="22" y="43">H</text></svg>`
+      key: 'MB: bản móng + cổ cột · MC: bản móng + thép đáy · V sơ bộ, cổ cột tính theo bản vẽ',
+      svg: `<svg viewBox="0 0 180 80" role="img" aria-label="Móng đơn mặt bằng và mặt cắt"><text class="geo-text" x="5" y="10">MB</text><rect class="geo-fill" x="6" y="15" width="58" height="58"></rect><path class="geo-stroke" d="M6 15h58v58H6zM15 24h40v40H15zM35 15v58M6 44h58"></path><rect class="geo-accent" x="27" y="35" width="16" height="16"></rect><text class="geo-text" x="20" y="78">L × B</text><text class="geo-text" x="82" y="10">MC</text><path class="geo-fill" d="M86 56l8-17h62l8 17v16H86z"></path><rect class="geo-fill" x="112" y="24" width="26" height="15"></rect><rect class="geo-accent" x="119" y="11" width="12" height="13"></rect><path class="geo-stroke" d="M86 56h78M94 39h62M112 24h26M116 62v10M122 59v13M128 59v13M134 62v10M119 11h12M119 11v13M131 11v13"></path><path class="geo-accent" d="M101 58h52M101 65h52"></path><text class="geo-text" x="145" y="33">cổ cột</text><text class="geo-text" x="168" y="57">H</text></svg>`
     },
     strip_footing: {
       title: 'Móng băng — dải móng liên tục',
@@ -2313,7 +2313,7 @@ function showToast(msg, type = 'info') {
 // 15. GLOBAL EVENT LISTENERS & APP STARTUP
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('[HoaSenHome V9.7] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
+  console.log('[HoaSenHome V9.8] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
 
   setupLightboxInteractions();
 
@@ -2393,5 +2393,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     showToast("Đã kết nối Internet thành công!", "success");
   });
 
-  console.log('[HoaSenHome V9.7] Startup complete. Single source of truth active.');
+  console.log('[HoaSenHome V9.8] Startup complete. Single source of truth active.');
 });
