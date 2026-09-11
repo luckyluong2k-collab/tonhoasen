@@ -23,7 +23,7 @@
 
     <!-- Custom Modern Stylesheet with Left Sidebar Layout -->
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="responsive.css?v=10.5">
+    <link rel="stylesheet" href="responsive.css?v=10.7">
 </head>
 <body class="theme-light">
     <!-- Offline & Network Status Notification Bar -->
@@ -89,6 +89,12 @@
                 <a href="#progress" class="nav-item" data-tab="tab-progress" onclick="window.hshNavigateToTab('tab-progress'); return false;">
                     <i class="fas fa-tasks nav-icon"></i>
                     <span class="nav-text">Tiến độ & Nhật ký</span>
+                </a>
+
+                <a href="./dossier-editor.html?type=diary" class="nav-item diary-shortcut">
+                    <i class="fas fa-book-open nav-icon" aria-hidden="true"></i>
+                    <span class="nav-text">Nhật ký công trình</span>
+                    <span class="nav-badge badge-red">Điền mẫu</span>
                 </a>
 
                 <a href="#qaqc" class="nav-item" data-tab="tab-qaqc" onclick="window.hshNavigateToTab('tab-qaqc'); return false;">
@@ -1425,14 +1431,14 @@
     </nav>
     <!-- Core Application Logic -->
     <script src="assets/hoa-sen/project-document-index.js"></script>
-    <script src="app.js?v=10.5"></script>
+    <script src="app.js?v=10.7"></script>
     <script src="responsive.js?v=10.5"></script>
 
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=10.6')
+        navigator.serviceWorker.register('./sw.js?v=10.7')
                     .then(reg => console.log('Hoa Sen Home PWA SW registered successfully:', reg.scope))
                     .catch(err => console.log('SW registration error:', err));
             });

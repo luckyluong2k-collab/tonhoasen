@@ -2526,7 +2526,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await initDatabase();
 
-  document.querySelectorAll('.nav-item').forEach(link => {
+  document.querySelectorAll('.nav-item[data-tab]').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const targetTab = link.getAttribute('data-tab');
