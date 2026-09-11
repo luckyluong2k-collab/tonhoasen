@@ -580,9 +580,9 @@
                             <a href="./assets/hoa-sen/docs/20260908%20KC%20MÓNG%20PS.pdf" target="_blank"><i class="fas fa-cubes"></i><span><strong>Bản vẽ kết cấu móng</strong><small>KC MÓNG PS.pdf · 6 trang</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
                             <a href="./assets/hoa-sen/docs/2026.08.06%20TMCG%20THI%20CONG%20CAI%20TAO%20CUA%20HANG%20HOA%20SEN%20HOME%20PHU%20LY%20-%20NINH%20BINH%20r1.xlsx" target="_blank"><i class="fas fa-file-invoice-dollar"></i><span><strong>Bảng khối lượng/chào giá</strong><small>BOQ 333 dòng · xây lắp, tôn, bảng hiệu, MEP, PCCC</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
                             <a href="./assets/hoa-sen/docs/01.BAO%20CAO%20NGAY.xlsx" target="_blank"><i class="fas fa-file-excel"></i><span><strong>01. Báo cáo ngày</strong><small>01.BAO CAO NGAY.xlsx</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
-                            <a href="./assets/hoa-sen/docs/03.NHAT%20KY%20CONG%20TRINH.DOC" target="_blank"><i class="fas fa-file-word"></i><span><strong>03. Nhật ký công trình</strong><small>03.NHAT KY CONG TRINH.DOC</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
-                            <a href="./assets/hoa-sen/docs/07.BBNT%20CONG%20VIEC%20XAY%20DUNG.doc" target="_blank"><i class="fas fa-file-word"></i><span><strong>07. Biên bản nghiệm thu công việc xây dựng</strong><small>07.BBNT CONG VIEC XAY DUNG.doc</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
-                            <a href="./assets/hoa-sen/docs/09.BIEN%20BAN%20GHI%20NHAN%20DEFECT%20LIST.docx" target="_blank"><i class="fas fa-file-word"></i><span><strong>09. Biên bản ghi nhận Defect List</strong><small>09.BIEN BAN GHI NHAN DEFECT LIST.docx</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./dossier-editor.html?type=diary"><i class="fas fa-file-word"></i><span><strong>03. Nhật ký công trình</strong><small>03.NHAT KY CONG TRINH.DOC</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./dossier-editor.html?type=acceptance"><i class="fas fa-file-word"></i><span><strong>07. Biên bản nghiệm thu công việc xây dựng</strong><small>07.BBNT CONG VIEC XAY DUNG.doc</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./dossier-editor.html?type=defect"><i class="fas fa-file-word"></i><span><strong>09. Biên bản ghi nhận Defect List</strong><small>09.BIEN BAN GHI NHAN DEFECT LIST.docx</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
                             <div class="dossier-file-item dossier-file-item-featured">
                                 <a href="./assets/hoa-sen/docs/10.CHECKLIST%20NGHIEM%20THU%20PHAN%20XAY%20DUNG.xls" target="_blank"><i class="fas fa-file-excel"></i><span><strong>10. Checklist nghiệm thu phần xây dựng</strong><small>10.CHECKLIST NGHIEM THU PHAN XAY DUNG.xls · File gốc</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
                                 <button class="dossier-file-action-btn" onclick="window.hshOpenInspectionWorkspace('construction')" title="Mở checklist nghiệm thu tương tác"><i class="fas fa-list-check"></i><span>Mở tương tác</span></button>
@@ -1415,7 +1415,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=9.9')
+        navigator.serviceWorker.register('./sw.js?v=10.0')
                     .then(reg => console.log('Hoa Sen Home PWA SW registered successfully:', reg.scope))
                     .catch(err => console.log('SW registration error:', err));
             });
