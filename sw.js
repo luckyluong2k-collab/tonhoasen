@@ -26,8 +26,8 @@ const ASSETS_TO_CACHE = [
   './dossier-editor.html',
   './dossier-editor.css',
   './dossier-editor.js',
-  './dossier-editor.js?v=10.5',
-  './dossier-editor.css?v=10.5',
+  './dossier-editor.js?v=10.4',
+  './dossier-editor.css?v=10.4',
   './dossier-template-layout.js?v=10.1',
   './dossier-history.js?v=10.3',
   './dossier-github.js?v=10.3',
@@ -126,3 +126,4 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
