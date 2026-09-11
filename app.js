@@ -1,5 +1,5 @@
 /**
- * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.6 PRO
+ * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.7 PRO
  * Dự án: Cải tạo & Xây mới Cửa Hàng Hoa Sen Home Phủ Lý - Hà Nam
  * Hợp đồng: 01/2026/HĐXD/HSG-HG (Giá trị HĐ: 3.854.146.466 VNĐ - Không tính VAT)
  * Ngày khởi công: 10/09/2026 (Hôm nay - Ngày 01/60)
@@ -120,7 +120,69 @@ const COMPLETE_DRAWINGS = buildCompleteDrawings();
 // ==========================================================================
 // 3. DEXIE INDEXEDDB SETUP (v2)
 // ==========================================================================
-const db = new Dexie('HoaSenHomePhuLyDB_v85');
+function createLocalDatabaseFallback() {
+  const memoryStores = new Map();
+  const storagePrefix = 'hsh_local_fallback_';
+
+  const readStore = name => {
+    if (memoryStores.has(name)) return memoryStores.get(name);
+    try {
+      const stored = JSON.parse(localStorage.getItem(`${storagePrefix}${name}`) || '[]');
+      const value = Array.isArray(stored) ? stored : [];
+      memoryStores.set(name, value);
+      return value;
+    } catch (error) {
+      const value = [];
+      memoryStores.set(name, value);
+      return value;
+    }
+  };
+  const writeStore = (name, value) => {
+    memoryStores.set(name, value);
+    try { localStorage.setItem(`${storagePrefix}${name}`, JSON.stringify(value)); } catch (error) { /* memory fallback */ }
+  };
+  const collection = name => ({
+    count: async () => readStore(name).length,
+    toArray: async () => [...readStore(name)],
+    bulkAdd: async items => {
+      const rows = readStore(name);
+      items.forEach(item => rows.push({ ...item }));
+      writeStore(name, rows);
+    },
+    add: async item => {
+      const rows = readStore(name);
+      const nextId = rows.reduce((max, row) => Math.max(max, Number(row.id) || 0), 0) + 1;
+      const record = { ...item, id: item.id ?? nextId };
+      rows.push(record);
+      writeStore(name, rows);
+      return record.id;
+    },
+    get: async id => readStore(name).find(row => String(row.id) === String(id)),
+    update: async (id, changes) => {
+      const rows = readStore(name);
+      const index = rows.findIndex(row => String(row.id) === String(id));
+      if (index >= 0) rows[index] = { ...rows[index], ...changes };
+      writeStore(name, rows);
+    },
+    clear: async () => writeStore(name, []),
+    orderBy: field => ({
+      reverse: () => ({
+        toArray: async () => [...readStore(name)].sort((a, b) => String(b[field] ?? '').localeCompare(String(a[field] ?? '')))
+      })
+    })
+  });
+
+  return {
+    version: () => ({ stores: () => undefined }),
+    boq: collection('boq'),
+    drawings: collection('drawings'),
+    qaqc: collection('qaqc'),
+    dailyLogs: collection('dailyLogs'),
+    config: collection('config')
+  };
+}
+
+const db = typeof Dexie === 'function' ? new Dexie('HoaSenHomePhuLyDB_v85') : createLocalDatabaseFallback();
 db.version(2).stores({
   boq: '++id, row, stt, content, dvt, qty, code, brand, price_mat, price_labor, price_total, total_amt, sec, subsec, status',
   drawings: 'id, category, pageNumber, title, file, desc, scale',
@@ -690,6 +752,10 @@ window.hshToggleBoqStatus = async function(id) {
 };
 
 window.hshExportBOQExcel = function() {
+  if (typeof XLSX === 'undefined') {
+    showToast("Chưa tải được thư viện Excel. Hãy kết nối mạng rồi thử lại.", "error");
+    return;
+  }
   showToast("Đang kết xuất bảng BOQ 328 dòng ra file Excel...", "info");
   const ws_data = [
     ["DỰ ÁN CẢI TẠO HOA SEN HOME PHỦ LÝ - BẢNG TIÊN LƯỢNG BOQ CHI TIẾT (KHÔNG TÍNH VAT)"],
@@ -1565,6 +1631,10 @@ function runAllCalculators() {
 // 12. DASHBOARD CHARTS ENGINE (CHART.JS)
 // ==========================================================================
 function initDashboardCharts() {
+  if (typeof Chart === 'undefined') {
+    console.warn('[Dashboard] Chart.js chưa tải; bỏ qua biểu đồ nhưng các chức năng dữ liệu vẫn hoạt động.');
+    return;
+  }
   // 1. S-Curve Progress Chart
   const scurveCtx = document.getElementById('scurveChart');
   if (scurveCtx) {
@@ -2243,7 +2313,7 @@ function showToast(msg, type = 'info') {
 // 15. GLOBAL EVENT LISTENERS & APP STARTUP
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('[HoaSenHome V9.6] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
+  console.log('[HoaSenHome V9.7] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
 
   setupLightboxInteractions();
 
@@ -2323,5 +2393,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     showToast("Đã kết nối Internet thành công!", "success");
   });
 
-  console.log('[HoaSenHome V9.6] Startup complete. Single source of truth active.');
+  console.log('[HoaSenHome V9.7] Startup complete. Single source of truth active.');
 });
