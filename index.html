@@ -8,13 +8,13 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23C8102E' rx='20'/><text y='65' x='50' text-anchor='middle' fill='%23FFF' font-size='50' font-weight='bold' font-family='sans-serif'>HS</text></svg>">
     <title>Hoa Sen Home Phủ Lý - Chỉ huy, Kỹ thuật & Hồ sơ Công trường v9.8</title>
-    
+
     <!-- Google Fonts & Font Awesome 6.4 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
+
     <!-- Core External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
@@ -23,7 +23,7 @@
 
     <!-- Custom Modern Stylesheet with Left Sidebar Layout -->
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="responsive.css?v=10.4">
+    <link rel="stylesheet" href="responsive.css?v=10.5">
 </head>
 <body class="theme-light">
     <!-- Offline & Network Status Notification Bar -->
@@ -34,7 +34,7 @@
     <button class="sidebar-backdrop" id="sidebarBackdrop" aria-label="Đóng menu" hidden></button>
     <!-- MAIN APP CONTAINER (Left Sidebar + Right Content Area) -->
     <div class="app-container">
-        
+
         <!-- LEFT VERTICAL SIDEBAR -->
         <aside class="left-sidebar" id="leftSidebar">
             <!-- Brand Header -->
@@ -67,7 +67,7 @@
             <!-- Vertical Navigation Menu -->
             <nav class="sidebar-nav" id="sidebarNav">
                 <div class="nav-section-title">HỆ THỐNG QUẢN LÝ</div>
-                
+
                 <a href="#dashboard" class="nav-item active" data-tab="tab-dashboard" onclick="window.hshNavigateToTab('tab-dashboard'); return false;">
                     <i class="fas fa-chart-pie nav-icon"></i>
                     <span class="nav-text">Tổng quan Dự án</span>
@@ -139,7 +139,7 @@
 
         <!-- MAIN CONTENT AREA (Scrollable) -->
         <main class="main-content-area" id="mainContentArea">
-            
+
             <!-- TOP APP BAR -->
             <header class="top-app-bar">
                 <div class="top-bar-left">
@@ -183,13 +183,20 @@
 
             <!-- TAB 1: DASHBOARD (TỔNG QUAN) -->
             <section id="tab-dashboard" class="content-tab-view active">
+
+                <div class="field-actions" aria-label="Thao tác hiện trường">
+                    <button class="field-action primary" onclick="window.hshOpenDailyLogModal()"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span><strong>Ghi nhật ký thi công</strong><small>Nhập công việc, nhân lực, phát sinh</small></span><b aria-hidden="true">＋</b></button>
+                    <a class="field-action" href="./dossier-editor.html?type=acceptance"><i class="fas fa-file-signature" aria-hidden="true"></i><span><strong>Lập biên bản nghiệm thu</strong><small>Mở mẫu để điền hồ sơ</small></span><b aria-hidden="true">→</b></a>
+                    <button class="field-action" onclick="window.hshNavigateToTab('tab-qaqc')"><i class="fas fa-clipboard-check" aria-hidden="true"></i><span><strong>Kiểm tra QA/QC</strong><small>Mở checklist nghiệm thu</small></span><b aria-hidden="true">→</b></button>
+                </div>
+
                 <!-- Project Identity Banner -->
                 <div class="dashboard-hero-card">
                     <div class="hero-left">
                         <div class="hero-chip"><i class="fas fa-building"></i> TẬP ĐOÀN HOA SEN - DỰ ÁN NÂNG CẤP ĐẠI DIỆN 2026</div>
                         <h2 class="hero-title">CẢI TẠO & XÂY MỚI HOA SEN HOME PHỦ LÝ</h2>
                         <p class="hero-desc">
-                            <i class="fas fa-map-marker-alt text-danger"></i> Quốc lộ 1A, Phường Liêm Chính, TP. Phủ Lý, Hà Nam | 
+                            <i class="fas fa-map-marker-alt text-danger"></i> Quốc lộ 1A, Phường Liêm Chính, TP. Phủ Lý, Hà Nam |
                             <strong>HĐ:</strong> 01/2026/HĐXD/HSG-HG | <strong>Thời gian:</strong> 60 ngày (10/09/2026 - 09/11/2026)
                         </p>
                     </div>
@@ -328,7 +335,7 @@
                         <h2><i class="fas fa-layer-group text-primary"></i> Thư viện Bản vẽ Thi công Chuyên mục</h2>
                         <p class="text-muted">Tổng hợp đầy đủ 76 trang bản vẽ từ hồ sơ PDF gốc - Phân loại theo 4 Chuyên mục thi công</p>
                     </div>
-                    
+
                     <div class="drawings-actions-col">
                         <!-- View Mode Selector -->
                         <div class="view-mode-button-group">
@@ -464,7 +471,7 @@
                         <h2><i class="fas fa-tasks text-primary"></i> Kế hoạch Tiến độ 60 Ngày (10/09 - 09/11/2026) & Nhật ký</h2>
                         <p class="text-muted">Theo dõi đường găng tiến độ (Critical Path), nhân lực, thời tiết và nhật trình thi công hàng ngày</p>
                     </div>
-                    <button class="btn btn-primary" onclick="window.hshOpenDailyLogModal()"><i class="fas fa-plus"></i> Ghi Nhật ký Hôm nay</button>
+                    <button class="btn btn-primary" onclick="window.hshOpenDailyLogModal()"><i class="fas fa-plus"></i> Ghi nhật ký thi công</button>
                 </div>
 
                 <!-- Milestones Timeline Grid -->
@@ -640,7 +647,7 @@
 
                 <!-- 10 Field Tools Interactive Grid -->
                 <div class="field-tools-grid">
-                    
+
                     <!-- TOOL 1: BÊ TÔNG & CẤP PHỐI -->
                     <div class="tool-card">
                         <div class="tool-card-head">
@@ -1171,7 +1178,7 @@
                     <div class="card p-4">
                         <h4><i class="fas fa-database text-success"></i> Quản trị Dữ liệu Dexie IndexedDB & Offline</h4>
                         <p class="text-muted">Cơ sở dữ liệu cục bộ tốc độ cao, hoạt động 100% không phụ thuộc Internet.</p>
-                        
+
                         <div class="db-action-list mt-3">
                             <div class="db-action-item">
                                 <div>
@@ -1222,7 +1229,7 @@
                 <div class="lightbox-code-badge" id="lbDrawingCode">KT-01</div>
                 <div class="lightbox-title-text" id="lbDrawingTitle">Mặt bằng Bố trí Cải tạo Tổng thể</div>
             </div>
-            
+
             <!-- Lightbox Toolbar -->
             <div class="lightbox-controls">
                 <button class="lb-btn" id="lbBtnZoomIn" title="Phóng to (+)" onclick="window.hshLightboxZoom(0.25)"><i class="fas fa-search-plus"></i></button>
@@ -1305,20 +1312,20 @@
     </div>
 
     <!-- DAILY LOG ENTRY MODAL -->
-    <div id="dailyLogModal" class="custom-modal-overlay">
+    <div id="dailyLogModal" class="custom-modal-overlay" role="dialog" aria-modal="true" aria-label="Ghi nhật ký thi công">
         <div class="custom-modal-card">
             <div class="modal-header">
-                <div class="modal-title"><i class="fas fa-edit text-primary"></i> Ghi Nhật ký Thi công Ngày Hôm nay</div>
+                <div class="modal-title"><i class="fas fa-edit text-primary"></i> Ghi nhật ký thi công</div>
                 <button class="btn-close-modal" onclick="window.hshCloseDailyLogModal()"><i class="fas fa-times"></i></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body"><p class="entry-hint">Điền thông tin thực tế trong ngày. Các ô có dấu * là bắt buộc.</p><p id="dailyLogError" role="alert"></p>
                 <div class="form-row-2">
                     <div class="form-group">
-                        <label>Ngày ghi nhật ký:</label>
-                        <input type="date" id="logInputDate" class="form-control" value="2026-09-10">
+                        <label for="logInputDate">Ngày ghi nhật ký: *</label>
+                        <input type="date" id="logInputDate" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label>Thời tiết:</label>
+                        <label for="logInputWeather">Thời tiết:</label>
                         <select id="logInputWeather" class="form-control">
                             <option value="Nắng ráo, nhiệt độ 31°C, độ ẩm 68%">Nắng ráo (Thuận lợi)</option>
                             <option value="Mưa rào nhẹ buổi chiều, thi công trong nhà">Mưa rào nhẹ</option>
@@ -1329,26 +1336,26 @@
                 </div>
                 <div class="form-row-2">
                     <div class="form-group">
-                        <label>Tổng quân số nhân lực (người):</label>
-                        <input type="number" id="logInputWorkers" class="form-control" value="18" step="1">
+                        <label for="logInputWorkers">Tổng quân số nhân lực (người): *</label>
+                        <input type="number" id="logInputWorkers" class="form-control" min="0" step="1" inputmode="numeric" required placeholder="Ví dụ: 18">
                     </div>
                     <div class="form-group">
-                        <label>Máy móc thiết bị hoạt động:</label>
-                        <input type="text" id="logInputEquipment" class="form-control" value="01 Máy xúc Kobelco 0.3m3, 01 máy kinh vĩ định vị, 02 xe tải chở vật tư">
+                        <label for="logInputEquipment">Máy móc thiết bị hoạt động:</label>
+                        <input type="text" id="logInputEquipment" class="form-control" placeholder="Ví dụ: 1 máy xúc, 2 xe tải">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Nội dung công việc thực hiện:</label>
-                    <textarea id="logInputWorkDone" class="form-control" rows="3" placeholder="Chi tiết các vị trí thi công...">KHỞI CÔNG DỰ ÁN: Bàn giao mặt bằng từ Ban QLDA Tập đoàn Hoa Sen; Định vị tim trục móng M1-M8; Lắp dựng hàng rào tôn bảo vệ an toàn công trường; Tập kết máy móc, lán trại điều hành.</textarea>
+                    <label for="logInputWorkDone">Nội dung công việc thực hiện: *</label>
+                    <textarea id="logInputWorkDone" class="form-control" rows="5" required placeholder="Chi tiết các vị trí thi công..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Vấn đề phát sinh & Chỉ đạo hiện trường:</label>
-                    <textarea id="logInputIssues" class="form-control" rows="2" placeholder="Ghi nhận tồn tại, cảnh báo an toàn lao động, chỉ đạo xử lý...">Mặt bằng tiếp giáp đường Quốc lộ 1A có mật độ giao thông cao, đã bố trí biển cảnh báo và cử người trực điều tiết giao thông.</textarea>
+                    <label for="logInputIssues">Vấn đề phát sinh & Chỉ đạo hiện trường:</label>
+                    <textarea id="logInputIssues" class="form-control" rows="3" placeholder="Ghi nhận tồn tại, cảnh báo an toàn lao động, chỉ đạo xử lý..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="window.hshCloseDailyLogModal()">Hủy</button>
-                <button class="btn btn-primary" onclick="window.hshSaveDailyLog()"><i class="fas fa-save"></i> Lưu Nhật Ký</button>
+                <button class="btn btn-primary" id="saveDailyLogButton" onclick="window.hshSaveDailyLog()"><i class="fas fa-save"></i> Lưu Nhật Ký</button>
             </div>
         </div>
     </div>
@@ -1418,14 +1425,14 @@
     </nav>
     <!-- Core Application Logic -->
     <script src="assets/hoa-sen/project-document-index.js"></script>
-    <script src="app.js?v=9.9"></script>
-    <script src="responsive.js?v=10.4"></script>
+    <script src="app.js?v=10.5"></script>
+    <script src="responsive.js?v=10.5"></script>
 
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=10.4')
+        navigator.serviceWorker.register('./sw.js?v=10.5')
                     .then(reg => console.log('Hoa Sen Home PWA SW registered successfully:', reg.scope))
                     .catch(err => console.log('SW registration error:', err));
             });

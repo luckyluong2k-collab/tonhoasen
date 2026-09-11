@@ -802,19 +802,19 @@ async function renderDailyLogs() {
   container.innerHTML = logs.map(l => `
     <div class="log-item-card">
       <div class="log-item-head">
-        <div class="log-item-date"><i class="fas fa-calendar-day text-primary"></i> ${l.dateDisplay || l.date}</div>
+        <div class="log-item-date"><i class="fas fa-calendar-day text-primary"></i> ${escapeDossierHtml(l.dateDisplay || l.date)}</div>
         <div class="log-item-meta">
-          <span><i class="fas fa-cloud-sun text-warning"></i> ${l.weather}</span>
-          <span><i class="fas fa-users text-primary"></i> Quân số: <strong>${l.workers} người</strong></span>
+          <span><i class="fas fa-cloud-sun text-warning"></i> ${escapeDossierHtml(l.weather)}</span>
+          <span><i class="fas fa-users text-primary"></i> Quân số: <strong>${escapeDossierHtml(l.workers)} người</strong></span>
         </div>
       </div>
       <div class="log-work-desc">
-        <strong>Nội dung thực hiện:</strong> ${l.workContent}
+        <strong>Nội dung thực hiện:</strong> ${escapeDossierHtml(l.workContent)}
       </div>
       <div style="font-size: 11.5px; color: #64748B;">
-        <i class="fas fa-truck-monster text-secondary"></i> Thiết bị: ${l.equipment}
+        <i class="fas fa-truck-monster text-secondary"></i> Thiết bị: ${escapeDossierHtml(l.equipment)}
       </div>
-      ${l.issues ? `<div class="log-issues-box"><i class="fas fa-exclamation-triangle"></i> Ghi nhận: ${l.issues}</div>` : ''}
+      ${l.issues ? `<div class="log-issues-box"><i class="fas fa-exclamation-triangle"></i> Ghi nhận: ${escapeDossierHtml(l.issues)}</div>` : ''}
     </div>
   `).join('');
 
@@ -825,7 +825,7 @@ async function renderDailyLogs() {
 window.hshOpenDailyLogModal = function() {
   const modal = document.getElementById('dailyLogModal');
   const dateInput = document.getElementById('logInputDate');
-  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+  if (dateInput && !dateInput.value) { const today = new Date(); dateInput.value = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
   if (modal) modal.classList.add('active');
 };
 
@@ -835,33 +835,31 @@ window.hshCloseDailyLogModal = function() {
 };
 
 window.hshSaveDailyLog = async function() {
-  const date = document.getElementById('logInputDate')?.value || new Date().toISOString().split('T')[0];
-  const weather = document.getElementById('logInputWeather')?.value;
-  const workers = parseInt(document.getElementById('logInputWorkers')?.value || 18);
-  const equipment = document.getElementById('logInputEquipment')?.value;
-  const workContent = document.getElementById('logInputWorkDone')?.value;
-  const issues = document.getElementById('logInputIssues')?.value;
-
-  if (!workContent) {
-    alert("Vui lòng nhập nội dung công việc thực hiện trong ngày.");
-    return;
+  const button = document.getElementById('saveDailyLogButton');
+  if (button.disabled) return;
+  const error = document.getElementById('dailyLogError');
+  error.textContent = '';
+  for (const id of ['logInputDate', 'logInputWorkers', 'logInputWorkDone']) {
+    const input = document.getElementById(id);
+    if (!input.checkValidity() || !input.value.trim()) {
+      error.textContent = 'Vui lòng điền ngày, số nhân lực hợp lệ và nội dung công việc.';
+      input.focus(); input.reportValidity(); return;
+    }
   }
-
-  const dateDisplay = `${date.split('-').reverse().join('/')} (Ngày 01/60)`;
-
-  await db.dailyLogs.add({
-    date,
-    dateDisplay,
-    weather,
-    workers,
-    equipment,
-    workContent,
-    issues
-  });
-
-  window.hshCloseDailyLogModal();
-  renderDailyLogs();
-  showToast("Đã lưu nhật ký thi công vào cơ sở dữ liệu thành công!", "success");
+  const value = id => document.getElementById(id).value.trim();
+  const date = value('logInputDate');
+  button.disabled = true;
+  try {
+    await db.dailyLogs.add({date, dateDisplay: date.split('-').reverse().join('/'),
+      weather: value('logInputWeather'), workers: Number(value('logInputWorkers')),
+      equipment: value('logInputEquipment'), workContent: value('logInputWorkDone'), issues: value('logInputIssues')});
+    ['logInputWorkDone', 'logInputIssues', 'logInputEquipment', 'logInputWorkers'].forEach(id => document.getElementById(id).value = '');
+    window.hshCloseDailyLogModal();
+    window.hshNavigateToTab('tab-progress');
+    showToast('Đã lưu nhật ký trên thiết bị này.', 'success');
+  } catch (err) {
+    error.textContent = 'Chưa lưu được nhật ký. Nội dung vẫn được giữ trong biểu mẫu, vui lòng thử lại.';
+  } finally { button.disabled = false; }
 };
 
 // ==========================================================================
