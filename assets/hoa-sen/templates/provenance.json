@@ -1,0 +1,105 @@
+{
+  "method": "Microsoft Word fixed-layout PDF export; SVG glyph outlines preserve all original static typography. Editable slot coordinates and font sizes are audited against the PDF.",
+  "templates": [
+    {
+      "source": "03.NHAT KY CONG TRINH.DOC",
+      "sha256": "72406ac096477419c5e157f0e440a07078000442c1d08571783ae2223936bd0e",
+      "pages": [
+        {
+          "asset": "03-1.svg",
+          "widthPt": 595.32,
+          "heightPt": 842.04,
+          "fonts": [
+            "TimesNewRomanPS-BoldMT",
+            "TimesNewRomanPS-ItalicMT",
+            "TimesNewRomanPSMT",
+            "VNI-Times"
+          ]
+        },
+        {
+          "asset": "03-2.svg",
+          "widthPt": 595.32,
+          "heightPt": 842.04,
+          "fonts": [
+            "TimesNewRomanPS-BoldMT",
+            "TimesNewRomanPS-ItalicMT",
+            "TimesNewRomanPSMT",
+            "VNI-Times",
+            "Wingdings-Regular"
+          ]
+        },
+        {
+          "asset": "03-3.svg",
+          "widthPt": 595.32,
+          "heightPt": 842.04,
+          "fonts": [
+            "TimesNewRomanPS-BoldMT",
+            "TimesNewRomanPS-ItalicMT",
+            "TimesNewRomanPSMT",
+            "VNI-Times"
+          ]
+        },
+        {
+          "asset": "03-4.svg",
+          "widthPt": 595.32,
+          "heightPt": 842.04,
+          "fonts": [
+            "TimesNewRomanPS-BoldMT",
+            "TimesNewRomanPS-ItalicMT",
+            "TimesNewRomanPSMT",
+            "VNI-Times"
+          ]
+        }
+      ]
+    },
+    {
+      "source": "07.BBNT CONG VIEC XAY DUNG.doc",
+      "sha256": "f14d4fe480de39caad840867b3a6560b881b1d75debd4aae98f5a5ef919772ea",
+      "pages": [
+        {
+          "asset": "07-1.svg",
+          "widthPt": 595.32,
+          "heightPt": 842.04,
+          "fonts": [
+            "ArialMT",
+            "TimesNewRomanPS-BoldMT",
+            "TimesNewRomanPS-ItalicMT",
+            "TimesNewRomanPSMT",
+            "VnTime"
+          ]
+        },
+        {
+          "asset": "07-2.svg",
+          "widthPt": 595.32,
+          "heightPt": 842.04,
+          "fonts": [
+            "Arial-ItalicMT",
+            "ArialMT",
+            "TimesNewRomanPS-BoldMT",
+            "TimesNewRomanPS-ItalicMT",
+            "TimesNewRomanPSMT",
+            "VnTime"
+          ]
+        }
+      ]
+    },
+    {
+      "source": "09.BIEN BAN GHI NHAN DEFECT LIST.docx",
+      "sha256": "a14ab97b29108adf8612b233f3d85d25c071cea501922c5de92d505dc8947aeb",
+      "pages": [
+        {
+          "asset": "09-1.svg",
+          "widthPt": 595.32,
+          "heightPt": 842.04,
+          "fonts": [
+            "Arial-BoldMT",
+            "ArialMT",
+            "TimesNewRomanPS-BoldMT",
+            "TimesNewRomanPS-ItalicMT",
+            "TimesNewRomanPSMT"
+          ]
+        }
+      ]
+    }
+  ]
+}
