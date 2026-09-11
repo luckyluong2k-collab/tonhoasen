@@ -1,5 +1,5 @@
 /**
- * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.4 PRO
+ * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.5 PRO
  * Dự án: Cải tạo & Xây mới Cửa Hàng Hoa Sen Home Phủ Lý - Hà Nam
  * Hợp đồng: 01/2026/HĐXD/HSG-HG (Giá trị HĐ: 3.854.146.466 VNĐ - Không tính VAT)
  * Ngày khởi công: 10/09/2026 (Hôm nay - Ngày 01/60)
@@ -139,6 +139,7 @@ let currentLightboxZoom = 1;
 let currentLightboxRotation = 0;
 let isCADInverted = false;
 let currentLightboxPan = { x: 0, y: 0 };
+let lightboxPointerDrag = null;
 let chartInstances = {};
 
 // Formatting Helpers
@@ -474,6 +475,13 @@ window.hshLightboxZoom = function(delta) {
   applyLightboxTransform();
 };
 
+window.hshLightboxSetZoom = function(value) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return;
+  currentLightboxZoom = Math.max(0.5, Math.min(5.0, numericValue / 100));
+  applyLightboxTransform();
+};
+
 window.hshLightboxResetZoom = function() {
   currentLightboxZoom = 1;
   currentLightboxRotation = 0;
@@ -529,6 +537,63 @@ function applyLightboxTransform() {
   if (imgWrapper) {
     imgWrapper.style.transform = `translate(${currentLightboxPan.x}px, ${currentLightboxPan.y}px) scale(${currentLightboxZoom}) rotate(${currentLightboxRotation}deg)`;
   }
+  const zoomText = document.getElementById('lbZoomText');
+  const zoomRange = document.getElementById('lbZoomRange');
+  if (zoomText) zoomText.innerText = `${Math.round(currentLightboxZoom * 100)}%`;
+  if (zoomRange) zoomRange.value = String(Math.round(currentLightboxZoom * 100));
+  const viewport = document.getElementById('lbViewport');
+  if (viewport) viewport.classList.toggle('is-pannable', currentLightboxZoom > 1);
+}
+
+function setupLightboxInteractions() {
+  const viewport = document.getElementById('lbViewport');
+  if (!viewport || viewport.dataset.interactionsReady === 'true') return;
+  viewport.dataset.interactionsReady = 'true';
+
+  viewport.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    window.hshLightboxZoom(event.deltaY < 0 ? 0.25 : -0.25);
+  }, { passive: false });
+
+  viewport.addEventListener('dblclick', (event) => {
+    if (event.target.closest('button, input')) return;
+    currentLightboxZoom = currentLightboxZoom > 1 ? 1 : 2.5;
+    if (currentLightboxZoom === 1) currentLightboxPan = { x: 0, y: 0 };
+    applyLightboxTransform();
+  });
+
+  viewport.addEventListener('pointerdown', (event) => {
+    if (currentLightboxZoom <= 1 || event.target.closest('button, input')) return;
+    lightboxPointerDrag = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: currentLightboxPan.x,
+      originY: currentLightboxPan.y
+    };
+    viewport.setPointerCapture?.(event.pointerId);
+  });
+
+  viewport.addEventListener('pointermove', (event) => {
+    if (!lightboxPointerDrag || lightboxPointerDrag.pointerId !== event.pointerId) return;
+    currentLightboxPan = {
+      x: lightboxPointerDrag.originX + event.clientX - lightboxPointerDrag.startX,
+      y: lightboxPointerDrag.originY + event.clientY - lightboxPointerDrag.startY
+    };
+    applyLightboxTransform();
+  });
+
+  const stopPointerDrag = (event) => {
+    if (lightboxPointerDrag?.pointerId === event.pointerId) {
+      lightboxPointerDrag = null;
+      viewport.releasePointerCapture?.(event.pointerId);
+    }
+  };
+  viewport.addEventListener('pointerup', stopPointerDrag);
+  viewport.addEventListener('pointercancel', stopPointerDrag);
+  viewport.addEventListener('pointerleave', (event) => {
+    if (event.buttons === 0) stopPointerDrag(event);
+  });
 }
 
 // ==========================================================================
@@ -2076,7 +2141,9 @@ function showToast(msg, type = 'info') {
 // 15. GLOBAL EVENT LISTENERS & APP STARTUP
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('[HoaSenHome V9.4] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
+  console.log('[HoaSenHome V9.5] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
+
+  setupLightboxInteractions();
 
   await initDatabase();
 
@@ -2100,6 +2167,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
       window.hshOpenQuickSearch();
+    }
+    const lightboxActive = document.getElementById('enhancedCadLightboxModal')?.classList.contains('active');
+    const typingInControl = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+    if (lightboxActive && !typingInControl) {
+      if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        window.hshLightboxZoom(0.25);
+      } else if (e.key === '-') {
+        e.preventDefault();
+        window.hshLightboxZoom(-0.25);
+      } else if (e.key === '0') {
+        e.preventDefault();
+        window.hshLightboxResetZoom();
+      } else if (currentLightboxZoom > 1 && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        e.preventDefault();
+        const panStep = e.shiftKey ? 60 : 24;
+        const panDelta = {
+          ArrowLeft: { x: -panStep, y: 0 },
+          ArrowRight: { x: panStep, y: 0 },
+          ArrowUp: { x: 0, y: -panStep },
+          ArrowDown: { x: 0, y: panStep }
+        }[e.key];
+        currentLightboxPan = { x: currentLightboxPan.x + panDelta.x, y: currentLightboxPan.y + panDelta.y };
+        applyLightboxTransform();
+      }
     }
     if (e.key === 'Escape') {
       window.hshCloseQuickSearch();
@@ -2128,5 +2220,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     showToast("Đã kết nối Internet thành công!", "success");
   });
 
-  console.log('[HoaSenHome V9.4] Startup complete. Single source of truth active.');
+  console.log('[HoaSenHome V9.5] Startup complete. Single source of truth active.');
 });

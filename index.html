@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="theme-color" content="#0A2C54">
-    <meta name="description" content="Hệ thống Quản lý Kỹ thuật, Thi công và Hồ sơ Dự án HOA SEN HOME Phủ Lý - Phiên bản Hiện trường v9.4">
+    <meta name="description" content="Hệ thống Quản lý Kỹ thuật, Thi công và Hồ sơ Dự án HOA SEN HOME Phủ Lý - Phiên bản Hiện trường v9.5">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23C8102E' rx='20'/><text y='65' x='50' text-anchor='middle' fill='%23FFF' font-size='50' font-weight='bold' font-family='sans-serif'>HS</text></svg>">
-    <title>Hoa Sen Home Phủ Lý - Chỉ huy, Kỹ thuật & Hồ sơ Công trường v9.4</title>
+    <title>Hoa Sen Home Phủ Lý - Chỉ huy, Kỹ thuật & Hồ sơ Công trường v9.5</title>
     
     <!-- Google Fonts & Font Awesome 6.4 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -129,7 +129,7 @@
                     <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
                     <div class="user-details">
                         <div class="user-name">Chỉ huy trưởng</div>
-                        <div class="user-role">Dự án HSH Phủ Lý v9.4</div>
+                        <div class="user-role">Dự án HSH Phủ Lý v9.5</div>
                     </div>
                 </div>
             </div>
@@ -1194,6 +1194,8 @@
             <div class="lightbox-controls">
                 <button class="lb-btn" id="lbBtnZoomIn" title="Phóng to (+)" onclick="window.hshLightboxZoom(0.25)"><i class="fas fa-search-plus"></i></button>
                 <button class="lb-btn" id="lbBtnZoomOut" title="Thu nhỏ (-)" onclick="window.hshLightboxZoom(-0.25)"><i class="fas fa-search-minus"></i></button>
+                <span class="lb-zoom-readout" id="lbZoomText" aria-live="polite">100%</span>
+                <input class="lb-zoom-range" id="lbZoomRange" type="range" min="50" max="500" step="25" value="100" aria-label="Mức phóng bản vẽ" title="Kéo để chỉnh mức phóng" oninput="window.hshLightboxSetZoom(this.value)">
                 <button class="lb-btn" id="lbBtnResetZoom" title="Đặt lại phóng to 100%" onclick="window.hshLightboxResetZoom()"><i class="fas fa-compress-arrows-alt"></i></button>
                 <button class="lb-btn" id="lbBtnRotate" title="Xoay bản vẽ 90 độ" onclick="window.hshLightboxRotate()"><i class="fas fa-redo"></i> Xoay 90°</button>
                 <button class="lb-btn" id="lbBtnCadInvert" title="Chế độ CAD nền đen (Invert Colors)" onclick="window.hshLightboxCadInvert()"><i class="fas fa-adjust"></i> CAD Mode</button>
@@ -1355,13 +1357,13 @@
     </div>
 
     <!-- Core Application Logic -->
-    <script src="app.js?v=9.4"></script>
+    <script src="app.js?v=9.5"></script>
 
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=9.4')
+                navigator.serviceWorker.register('./sw.js?v=9.5')
                     .then(reg => console.log('Hoa Sen Home PWA SW registered successfully:', reg.scope))
                     .catch(err => console.log('SW registration error:', err));
             });

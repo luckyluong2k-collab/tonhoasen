@@ -1883,6 +1883,8 @@ body {
   align-items: center;
   justify-content: center;
   cursor: grab;
+  touch-action: none;
+  user-select: none;
 }
 
 .lightbox-viewport:active {
@@ -1894,6 +1896,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  transform-origin: center center;
+  will-change: transform;
 }
 
 .lightbox-img {
@@ -1902,6 +1906,31 @@ body {
   object-fit: contain;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   border-radius: 4px;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.lightbox-viewport.is-pannable {
+  cursor: grab;
+}
+
+.lightbox-viewport.is-pannable:active {
+  cursor: grabbing;
+}
+
+.lb-zoom-readout {
+  min-width: 48px;
+  color: #BAE6FD;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.lb-zoom-range {
+  width: 86px;
+  accent-color: #38BDF8;
+  cursor: pointer;
 }
 
 /* CAD Invert Filter Mode */
