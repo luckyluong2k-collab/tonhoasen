@@ -1,5 +1,5 @@
 /**
- * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.5 PRO
+ * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.6 PRO
  * Dự án: Cải tạo & Xây mới Cửa Hàng Hoa Sen Home Phủ Lý - Hà Nam
  * Hợp đồng: 01/2026/HĐXD/HSG-HG (Giá trị HĐ: 3.854.146.466 VNĐ - Không tính VAT)
  * Ngày khởi công: 10/09/2026 (Hôm nay - Ngày 01/60)
@@ -844,7 +844,109 @@ window.hshToggleQcItem = async function(id) {
   const newStatus = item.status === 'done' ? 'pending' : 'done';
   await db.qaqc.update(id, { status: newStatus });
   renderQaqcGrid();
+  if (document.getElementById('inspectionWorkspaceModal')?.classList.contains('active')) {
+    renderInspectionWorkspace();
+  }
   showToast(`Đã cập nhật hạng mục QA/QC [${item.code}]`, "success");
+};
+
+// Interactive bridge from dossier checklist files to the relevant QA/QC records.
+const INSPECTION_SCOPE_CODES = {
+  construction: ['QC-01', 'QC-02', 'QC-03', 'QC-04', 'QC-05', 'QC-06', 'QC-07', 'QC-08', 'QC-09', 'QC-10', 'QC-11', 'QC-12', 'QC-13', 'QC-16'],
+  mep: ['QC-14', 'QC-15']
+};
+const INSPECTION_SCOPE_TITLES = {
+  construction: 'Checklist nghiệm thu phần xây dựng',
+  mep: 'Checklist nghiệm thu phần MEP'
+};
+const INSPECTION_DRAWING_LINKS = {
+  'QC-01': ['foundation-1', 'foundation-2'],
+  'QC-02': ['foundation-2', 'foundation-3'],
+  'QC-03': ['foundation-2', 'foundation-4'],
+  'QC-04': ['foundation-5'],
+  'QC-05': ['design-24'],
+  'QC-06': ['foundation-4', 'foundation-5'],
+  'QC-07': ['foundation-6'],
+  'QC-08': ['design-24'],
+  'QC-09': ['design-24', 'design-35'],
+  'QC-10': ['design-24'],
+  'QC-11': ['design-16'],
+  'QC-12': ['design-5', 'design-35'],
+  'QC-13': ['design-7'],
+  'QC-14': ['design-52'],
+  'QC-15': ['design-68'],
+  'QC-16': ['design-16']
+};
+let activeInspectionScope = 'construction';
+
+function inspectionStatusLabel(status) {
+  return status === 'done' ? 'Đã đạt · Hủy đạt' : 'Chưa đạt · Xác nhận đạt';
+}
+
+async function renderInspectionWorkspace() {
+  const list = document.getElementById('inspectionChecklistList');
+  if (!list) return;
+  const codes = INSPECTION_SCOPE_CODES[activeInspectionScope] || INSPECTION_SCOPE_CODES.construction;
+  const allItems = await db.qaqc.toArray();
+  const items = codes.map(code => allItems.find(item => item.code === code)).filter(Boolean);
+  const done = items.filter(item => item.status === 'done').length;
+  const title = INSPECTION_SCOPE_TITLES[activeInspectionScope] || INSPECTION_SCOPE_TITLES.construction;
+  const titleEl = document.getElementById('inspectionWorkspaceTitle');
+  const summaryEl = document.getElementById('inspectionWorkspaceSummary');
+  if (titleEl) titleEl.textContent = title;
+  if (summaryEl) {
+    summaryEl.innerHTML = `<div><strong>${done}/${items.length}</strong><span>hạng mục đã xác nhận đạt</span></div><div class="inspection-progress-track"><span style="width:${items.length ? (done / items.length) * 100 : 0}%"></span></div><small>Tiến độ lưu tự động trong trình duyệt</small>`;
+  }
+  list.innerHTML = items.map((item, index) => {
+    const drawingButtons = (INSPECTION_DRAWING_LINKS[item.code] || []).map(drawingId => {
+      const drawing = COMPLETE_DRAWINGS.find(entry => entry.id === drawingId);
+      return drawing ? `<button class="inspection-link-btn" onclick="window.hshOpenInspectionDrawing('${drawing.id}')"><i class="fas fa-drafting-compass"></i> BV p.${drawing.pageNumber}</button>` : '';
+    }).join('');
+    return `<div class="inspection-item inspection-item-${item.status === 'done' ? 'done' : 'pending'}">
+      <div class="inspection-item-index">${String(index + 1).padStart(2, '0')}</div>
+      <div class="inspection-item-content">
+        <strong>${escapeDossierHtml(item.code)} · ${escapeDossierHtml(item.title)}</strong>
+        <span><i class="fas fa-book"></i> ${escapeDossierHtml(item.std)} · Phụ trách: ${escapeDossierHtml(item.inspector)}</span>
+        <div class="inspection-item-links">${drawingButtons || '<span class="inspection-no-link">Chưa gắn bản vẽ</span>'}</div>
+      </div>
+      <button class="inspection-status-btn inspection-status-btn-${item.status === 'done' ? 'done' : 'pending'}" onclick="window.hshToggleInspectionStatus(${item.id})">${inspectionStatusLabel(item.status)}</button>
+    </div>`;
+  }).join('') || '<div class="inspection-empty">Chưa có dữ liệu QA/QC cho nhóm này.</div>';
+}
+
+window.hshOpenInspectionWorkspace = async function(scope = 'construction') {
+  activeInspectionScope = INSPECTION_SCOPE_CODES[scope] ? scope : 'construction';
+  const modal = document.getElementById('inspectionWorkspaceModal');
+  if (!modal) return;
+  modal.classList.add('active');
+  await renderInspectionWorkspace();
+};
+
+window.hshCloseInspectionWorkspace = function() {
+  document.getElementById('inspectionWorkspaceModal')?.classList.remove('active');
+};
+
+window.hshToggleInspectionStatus = async function(id) {
+  await window.hshToggleQcItem(id);
+};
+
+window.hshOpenInspectionDrawing = function(drawingId) {
+  window.hshCloseInspectionWorkspace();
+  switchTab('tab-gallery');
+  setTimeout(() => window.hshLightboxOpen(drawingId), 80);
+};
+
+window.hshOpenInspectionQaqc = function() {
+  window.hshCloseInspectionWorkspace();
+  switchTab('tab-qaqc');
+};
+
+window.hshOpenInspectionSource = function() {
+  const scope = activeInspectionScope;
+  const file = scope === 'mep'
+    ? './assets/hoa-sen/docs/11.CHECKLIST%20NGHIEM%20THU%20PHAN%20MEP.xls'
+    : './assets/hoa-sen/docs/10.CHECKLIST%20NGHIEM%20THU%20PHAN%20XAY%20DUNG.xls';
+  window.open(file, '_blank');
 };
 
 // ==========================================================================
@@ -2141,7 +2243,7 @@ function showToast(msg, type = 'info') {
 // 15. GLOBAL EVENT LISTENERS & APP STARTUP
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('[HoaSenHome V9.5] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
+  console.log('[HoaSenHome V9.6] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
 
   setupLightboxInteractions();
 
@@ -2199,6 +2301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.hshCloseDailyLogModal();
       window.hshCloseAiAssistant();
       window.hshCloseExportModal();
+      window.hshCloseInspectionWorkspace();
     }
   });
 
@@ -2220,5 +2323,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     showToast("Đã kết nối Internet thành công!", "success");
   });
 
-  console.log('[HoaSenHome V9.5] Startup complete. Single source of truth active.');
+  console.log('[HoaSenHome V9.6] Startup complete. Single source of truth active.');
 });

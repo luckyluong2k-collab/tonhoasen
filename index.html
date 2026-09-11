@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="theme-color" content="#0A2C54">
-    <meta name="description" content="Hệ thống Quản lý Kỹ thuật, Thi công và Hồ sơ Dự án HOA SEN HOME Phủ Lý - Phiên bản Hiện trường v9.5">
+    <meta name="description" content="Hệ thống Quản lý Kỹ thuật, Thi công và Hồ sơ Dự án HOA SEN HOME Phủ Lý - Phiên bản Hiện trường v9.6">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23C8102E' rx='20'/><text y='65' x='50' text-anchor='middle' fill='%23FFF' font-size='50' font-weight='bold' font-family='sans-serif'>HS</text></svg>">
-    <title>Hoa Sen Home Phủ Lý - Chỉ huy, Kỹ thuật & Hồ sơ Công trường v9.5</title>
+    <title>Hoa Sen Home Phủ Lý - Chỉ huy, Kỹ thuật & Hồ sơ Công trường v9.6</title>
     
     <!-- Google Fonts & Font Awesome 6.4 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -129,7 +129,7 @@
                     <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
                     <div class="user-details">
                         <div class="user-name">Chỉ huy trưởng</div>
-                        <div class="user-role">Dự án HSH Phủ Lý v9.5</div>
+                        <div class="user-role">Dự án HSH Phủ Lý v9.6</div>
                     </div>
                 </div>
             </div>
@@ -583,8 +583,14 @@
                             <a href="./assets/hoa-sen/docs/03.NHAT%20KY%20CONG%20TRINH.DOC" target="_blank"><i class="fas fa-file-word"></i><span><strong>03. Nhật ký công trình</strong><small>03.NHAT KY CONG TRINH.DOC</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
                             <a href="./assets/hoa-sen/docs/07.BBNT%20CONG%20VIEC%20XAY%20DUNG.doc" target="_blank"><i class="fas fa-file-word"></i><span><strong>07. Biên bản nghiệm thu công việc xây dựng</strong><small>07.BBNT CONG VIEC XAY DUNG.doc</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
                             <a href="./assets/hoa-sen/docs/09.BIEN%20BAN%20GHI%20NHAN%20DEFECT%20LIST.docx" target="_blank"><i class="fas fa-file-word"></i><span><strong>09. Biên bản ghi nhận Defect List</strong><small>09.BIEN BAN GHI NHAN DEFECT LIST.docx</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
-                            <a href="./assets/hoa-sen/docs/10.CHECKLIST%20NGHIEM%20THU%20PHAN%20XAY%20DUNG.xls" target="_blank"><i class="fas fa-file-excel"></i><span><strong>10. Checklist nghiệm thu phần xây dựng</strong><small>10.CHECKLIST NGHIEM THU PHAN XAY DUNG.xls</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
-                            <a href="./assets/hoa-sen/docs/11.CHECKLIST%20NGHIEM%20THU%20PHAN%20MEP.xls" target="_blank"><i class="fas fa-file-excel"></i><span><strong>11. Checklist nghiệm thu phần MEP</strong><small>11.CHECKLIST NGHIEM THU PHAN MEP.xls</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <div class="dossier-file-item dossier-file-item-featured">
+                                <a href="./assets/hoa-sen/docs/10.CHECKLIST%20NGHIEM%20THU%20PHAN%20XAY%20DUNG.xls" target="_blank"><i class="fas fa-file-excel"></i><span><strong>10. Checklist nghiệm thu phần xây dựng</strong><small>10.CHECKLIST NGHIEM THU PHAN XAY DUNG.xls · File gốc</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                                <button class="dossier-file-action-btn" onclick="window.hshOpenInspectionWorkspace('construction')" title="Mở checklist nghiệm thu tương tác"><i class="fas fa-list-check"></i><span>Mở tương tác</span></button>
+                            </div>
+                            <div class="dossier-file-item">
+                                <a href="./assets/hoa-sen/docs/11.CHECKLIST%20NGHIEM%20THU%20PHAN%20MEP.xls" target="_blank"><i class="fas fa-file-excel"></i><span><strong>11. Checklist nghiệm thu phần MEP</strong><small>11.CHECKLIST NGHIEM THU PHAN MEP.xls · File gốc</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                                <button class="dossier-file-action-btn dossier-file-action-btn-muted" onclick="window.hshOpenInspectionWorkspace('mep')" title="Mở checklist MEP tương tác"><i class="fas fa-plug"></i><span>Mở tương tác</span></button>
+                            </div>
                             <a href="./assets/hoa-sen/docs/BM%20-%20HO%20SO%20THANH%20-%20QUYET%20TOAN.xlsx" target="_blank"><i class="fas fa-file-invoice-dollar"></i><span><strong>Biểu mẫu hồ sơ thanh - quyết toán</strong><small>BM - HO SO THANH - QUYET TOAN.xlsx</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
                         </div>
                         <div class="dossier-warning"><i class="fas fa-circle-info"></i><span>Mẫu thanh quyết toán hiện có còn ghi tên công trình cũ. Hãy thay tên, số hợp đồng và địa điểm trước khi dùng.</span></div>
@@ -1350,6 +1356,26 @@
         </div>
     </div>
 
+    <!-- INTERACTIVE INSPECTION WORKSPACE -->
+    <div id="inspectionWorkspaceModal" class="custom-modal-overlay">
+        <div class="custom-modal-card inspection-workspace-card">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-clipboard-check text-primary"></i> <span id="inspectionWorkspaceTitle">Checklist nghiệm thu phần xây dựng</span></div>
+                <button class="btn-close-modal" onclick="window.hshCloseInspectionWorkspace()" title="Đóng"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="inspection-workspace-summary" id="inspectionWorkspaceSummary"></div>
+            <div class="modal-body inspection-workspace-body">
+                <div class="inspection-workspace-note"><i class="fas fa-circle-info"></i><span>Chọn <strong>Đạt</strong> sau khi đã kiểm tra thực tế và có biên bản/ảnh kèm theo. Trạng thái tự lưu trên máy này.</span></div>
+                <div class="inspection-checklist-list" id="inspectionChecklistList"></div>
+            </div>
+            <div class="modal-footer inspection-workspace-footer">
+                <button class="btn btn-outline" onclick="window.hshCloseInspectionWorkspace()">Đóng</button>
+                <button class="btn btn-outline" onclick="window.hshOpenInspectionQaqc()"><i class="fas fa-clipboard-check"></i> Mở toàn bộ QA/QC</button>
+                <button class="btn btn-primary" onclick="window.hshOpenInspectionSource()"><i class="fas fa-file-excel"></i> Mở file gốc</button>
+            </div>
+        </div>
+    </div>
+
     <!-- FLOATING TOAST NOTIFICATION -->
     <div id="toastNotification" class="toast-popup">
         <i class="fas fa-info-circle toast-icon"></i>
@@ -1357,13 +1383,13 @@
     </div>
 
     <!-- Core Application Logic -->
-    <script src="app.js?v=9.5"></script>
+    <script src="app.js?v=9.6"></script>
 
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=9.5')
+                navigator.serviceWorker.register('./sw.js?v=9.6')
                     .then(reg => console.log('Hoa Sen Home PWA SW registered successfully:', reg.scope))
                     .catch(err => console.log('SW registration error:', err));
             });
