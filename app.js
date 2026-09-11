@@ -1027,10 +1027,10 @@ function renderConcreteGeometry() {
   const type = document.getElementById('t1_struct')?.value || 'footing';
   const diagrams = {
     footing: {
-      title: 'Móng đơn — mặt bằng + mặt cắt',
-      formula: 'V = L × B × H × n',
-      key: 'MB: bản móng + cổ cột · MC: bản móng + thép đáy · V sơ bộ, cổ cột tính theo bản vẽ',
-      svg: `<svg viewBox="0 0 180 80" role="img" aria-label="Móng đơn mặt bằng và mặt cắt"><text class="geo-text" x="5" y="10">MB</text><rect class="geo-fill" x="6" y="15" width="58" height="58"></rect><path class="geo-stroke" d="M6 15h58v58H6zM15 24h40v40H15zM35 15v58M6 44h58"></path><rect class="geo-accent" x="27" y="35" width="16" height="16"></rect><text class="geo-text" x="20" y="78">L × B</text><text class="geo-text" x="82" y="10">MC</text><path class="geo-fill" d="M86 56l8-17h62l8 17v16H86z"></path><rect class="geo-fill" x="112" y="24" width="26" height="15"></rect><rect class="geo-accent" x="119" y="11" width="12" height="13"></rect><path class="geo-stroke" d="M86 56h78M94 39h62M112 24h26M116 62v10M122 59v13M128 59v13M134 62v10M119 11h12M119 11v13M131 11v13"></path><path class="geo-accent" d="M101 58h52M101 65h52"></path><text class="geo-text" x="145" y="33">cổ cột</text><text class="geo-text" x="168" y="57">H</text></svg>`
+      title: 'Móng đơn thực tế — bản móng vát + cổ cột + đà kiềng',
+      formula: 'V = Vđế phẳng + Vphần vát + Vcổ cột',
+      key: 'MB: nhiều móng đơn liên kết bằng đà kiềng · MC: đáy phẳng + phần vát/lăng trụ cụt + cổ cột · không gộp đà kiềng vào V móng',
+      svg: `<svg viewBox="0 0 180 80" role="img" aria-label="Móng đơn bản móng vát, cổ cột và đà kiềng"><text class="geo-text" x="4" y="9">MB</text><path class="geo-stroke" d="M15 24H78M15 53H78M15 24V53M46 24V53M78 24V53"></path><rect class="geo-fill" x="7" y="17" width="18" height="14"></rect><rect class="geo-fill" x="37" y="17" width="18" height="14"></rect><rect class="geo-fill" x="67" y="17" width="18" height="14"></rect><rect class="geo-fill" x="7" y="46" width="18" height="14"></rect><rect class="geo-fill" x="37" y="46" width="18" height="14"></rect><rect class="geo-fill" x="67" y="46" width="18" height="14"></rect><path class="geo-accent" d="M14 22h4v4h-4zM44 22h4v4h-4zM74 22h4v4h-4zM14 51h4v4h-4zM44 51h4v4h-4zM74 51h4v4h-4z"></path><text class="geo-text" x="18" y="72">đà kiềng</text><text class="geo-text" x="94" y="9">MC</text><path class="geo-fill" d="M98 59H174V70H98z"></path><path class="geo-fill" d="M105 59L115 41H157L167 59z"></path><rect class="geo-fill" x="128" y="23" width="16" height="18"></rect><rect class="geo-accent" x="132" y="10" width="8" height="13"></rect><path class="geo-stroke" d="M98 59h76M105 59h62M115 41h42M128 23h16M132 10h8M106 66h60M111 69h50"></path><text class="geo-text" x="145" y="37">cổ cột</text><text class="geo-text" x="167" y="54">H</text></svg>`
     },
     strip_footing: {
       title: 'Móng băng — dải móng liên tục',
@@ -1062,16 +1062,44 @@ function renderConcreteGeometry() {
   target.innerHTML = `${diagram.svg}<div><strong>${diagram.title}</strong><small>${diagram.formula}</small><div class="geo-key">${diagram.key}</div></div>`;
 }
 
+window.hshToggleConcreteType = function() {
+  const type = document.getElementById('t1_struct')?.value || 'footing';
+  const footingDims = document.getElementById('t1_footing_dims');
+  const hgtLabel = document.getElementById('t1_hgt_label');
+  const hgtInput = document.getElementById('t1_hgt');
+  if (footingDims) footingDims.style.display = type === 'footing' ? 'block' : 'none';
+  if (hgtLabel) hgtLabel.textContent = type === 'footing' ? 'Tổng cao H (tự tính):' : 'Cao/Dày H (m):';
+  if (hgtInput) hgtInput.readOnly = type === 'footing';
+};
+
 window.hshCalcConcrete = function() {
   const structType = document.getElementById('t1_struct')?.value || 'footing';
+  window.hshToggleConcreteType();
   renderConcreteGeometry();
   const grade = document.getElementById('t1_grade')?.value || 'M250';
   const len = parseFloat(document.getElementById('t1_len')?.value || 2.2);
   const wid = parseFloat(document.getElementById('t1_wid')?.value || 2.0);
-  const hgt = parseFloat(document.getElementById('t1_hgt')?.value || 0.7);
+  let hgt = parseFloat(document.getElementById('t1_hgt')?.value || 0.7);
   const qty = parseFloat(document.getElementById('t1_qty')?.value || 8);
 
-  const volPerItem = len * wid * hgt;
+  let volPerItem = len * wid * hgt;
+  let volumeDetail = `L × B × H = ${fmtDecimal(volPerItem, 3)} m³`;
+
+  if (structType === 'footing') {
+    const baseH = Math.max(0, parseFloat(document.getElementById('t1_base_h')?.value || 0.15));
+    const topLen = Math.min(len, Math.max(0, parseFloat(document.getElementById('t1_top_len')?.value || 0.6)));
+    const topWid = Math.min(wid, Math.max(0, parseFloat(document.getElementById('t1_top_wid')?.value || 0.6)));
+    const taperH = Math.max(0, parseFloat(document.getElementById('t1_taper_h')?.value || 0.2));
+    const neckH = Math.max(0, parseFloat(document.getElementById('t1_neck_h')?.value || 0.4));
+    hgt = baseH + taperH + neckH;
+    const hgtInput = document.getElementById('t1_hgt');
+    if (hgtInput) hgtInput.value = hgt.toFixed(2);
+    const baseVol = len * wid * baseH;
+    const taperVol = (taperH / 3) * (len * wid + topLen * topWid + Math.sqrt(len * wid * topLen * topWid));
+    const neckVol = topLen * topWid * neckH;
+    volPerItem = baseVol + taperVol + neckVol;
+    volumeDetail = `đế ${fmtDecimal(baseVol, 3)} + vát ${fmtDecimal(taperVol, 3)} + cổ ${fmtDecimal(neckVol, 3)} = ${fmtDecimal(volPerItem, 3)} m³`;
+  }
   const totalVol = volPerItem * qty;
 
   const mixes = {
@@ -1090,8 +1118,9 @@ window.hshCalcConcrete = function() {
   const resEl = document.getElementById('t1_result');
   if (resEl) {
     resEl.innerHTML = `
-      <div class="result-main-val">Thể tích Bê tông: ${fmtDecimal(totalVol, 2)} m³ (${qty} cấu kiện x ${fmtDecimal(volPerItem, 2)} m³)</div>
+      <div class="result-main-val">Thể tích Bê tông sơ bộ: ${fmtDecimal(totalVol, 2)} m³ (${qty} cấu kiện x ${fmtDecimal(volPerItem, 3)} m³)</div>
       <div class="result-breakdown">
+        <div>• <strong>Phân rã hình học:</strong> <span>${volumeDetail}</span></div>
         <div>• <strong>Xi măng PCB40:</strong> <span>${fmtNumber(cement)} kg</span> (${fmtDecimal(cement/50, 1)} bao 50kg)</div>
         <div>• <strong>Cát vàng sạch:</strong> <span>${fmtDecimal(sand, 2)} m³</span></div>
         <div>• <strong>Đá 1x2 tuyển chọn:</strong> <span>${fmtDecimal(stone, 2)} m³</span></div>

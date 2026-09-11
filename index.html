@@ -651,7 +651,7 @@
                             <div class="form-row-2">
                                 <div class="form-group">
                                     <label>Cấu kiện:</label>
-                                    <select id="t1_struct" class="form-control" onchange="window.hshCalcConcrete()">
+                                    <select id="t1_struct" class="form-control" onchange="window.hshToggleConcreteType(); window.hshCalcConcrete()">
                                         <option value="footing">Móng đơn</option>
                                         <option value="strip_footing">Móng băng</option>
                                         <option value="beam">Dầm / Đà kiềng (ĐK)</option>
@@ -679,13 +679,38 @@
                                     <input type="number" id="t1_wid" class="form-control" value="2.0" step="0.1" oninput="window.hshCalcConcrete()">
                                 </div>
                                 <div class="form-group">
-                                    <label>Cao/Dày H (m):</label>
+                                    <label id="t1_hgt_label">Tổng cao H (m):</label>
                                     <input type="number" id="t1_hgt" class="form-control" value="0.7" step="0.05" oninput="window.hshCalcConcrete()">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label>Số lượng cấu kiện (cái/hố):</label>
                                 <input type="number" id="t1_qty" class="form-control" value="8" step="1" oninput="window.hshCalcConcrete()">
+                            </div>
+                            <div id="t1_footing_dims" class="tool-subform">
+                                <div class="form-row-3">
+                                    <div class="form-group">
+                                        <label>Cao đế Hđ (m):</label>
+                                        <input type="number" id="t1_base_h" class="form-control" value="0.15" min="0" step="0.05" oninput="window.hshCalcConcrete()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Dài bậc trên Lt (m):</label>
+                                        <input type="number" id="t1_top_len" class="form-control" value="0.60" min="0" step="0.05" oninput="window.hshCalcConcrete()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Rộng bậc trên Bt (m):</label>
+                                        <input type="number" id="t1_top_wid" class="form-control" value="0.60" min="0" step="0.05" oninput="window.hshCalcConcrete()">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Cao phần vát Hv (m):</label>
+                                    <input type="number" id="t1_taper_h" class="form-control" value="0.20" min="0" step="0.05" oninput="window.hshCalcConcrete()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Cao cổ cột Hc (m):</label>
+                                    <input type="number" id="t1_neck_h" class="form-control" value="0.35" min="0" step="0.05" oninput="window.hshCalcConcrete()">
+                                </div>
+                                <div class="text-muted text-xs">Tổng cao H = Hđ + Hv + Hc. Móng đơn được tách: đế phẳng + phần vát/lăng trụ cụt + cổ cột; đà kiềng tính riêng.</div>
                             </div>
                         </div>
                         <div class="tool-result-box" id="t1_result">
