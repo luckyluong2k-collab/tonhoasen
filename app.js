@@ -2373,6 +2373,9 @@ function aiProjectLookup(message) {
     addFact(`Dự án: ${PROJECT_CONFIG.projectName}; hợp đồng ${PROJECT_CONFIG.contractNo}; giá trị hợp đồng ${fmtNumber(PROJECT_CONFIG.contractValue)} VNĐ, không tính VAT.`);
     addFact(`Phạm vi chính: Nhà nhân viên D30, khung thép & canopy, khối cửa hàng Hoa Sen Home, MEP & PCCC.`);
     addFact(`Nguồn hiện có: ${COMPLETE_DRAWINGS.length} trang bản vẽ, ${RAW_BOQ.length} dòng BOQ, ${INITIAL_QAQC.length} mã QA/QC và ${DOSSIER_ITEMS.length} mục hồ sơ.`);
+    const indexedCount = Array.isArray(window.PROJECT_DOCUMENT_INDEX) ? window.PROJECT_DOCUMENT_INDEX.length : 0;
+    const indexedFiles = Array.isArray(window.PROJECT_DOCUMENT_MANIFEST) ? window.PROJECT_DOCUMENT_MANIFEST.length : 0;
+    if (indexedCount) addFact(`Đã nạp offline ${indexedCount.toLocaleString('vi-VN')} mục nội dung từ ${indexedFiles} tài liệu gốc; kết quả sẽ kèm sheet/dòng hoặc trang PDF khi tìm thấy.`);
     addUnique(evidence.docs, 'contract');
     matched = true;
   }
@@ -2380,11 +2383,59 @@ function aiProjectLookup(message) {
   return matched ? { facts, evidence } : null;
 }
 
+const AI_DOCUMENT_STOPWORDS = new Set([
+  'toi', 'can', 'cho', 'biet', 'tra', 'tim', 'xem', 'giup', 'hay', 'voi', 'cua', 'va', 'la', 'co', 'mot',
+  'nhung', 'nao', 'tren', 'trong', 'du', 'an', 'theo', 'nhu', 'phai', 'lam', 'sao', 'noi', 'dung', 'nhe',
+  'tai', 'lieu', 'ho', 'so', 'tiep', 'the', 'chi', 'dinh', 'thong', 'tin', 'cho', 'minh'
+]);
+
+function aiDocumentSearch(message) {
+  const documents = Array.isArray(window.PROJECT_DOCUMENT_INDEX) ? window.PROJECT_DOCUMENT_INDEX : [];
+  if (!documents.length) return null;
+  const normalized = aiNormalize(message);
+  const projectSignal = /(hoa sen|phu ly|ninh binh|mong|thep|boq|qaqc|qc|nghiem thu|nhat ky|bao cao|defect|checklist|hop dong|quyet toan|ban ve|trang|page|dai kieng|be phot|pccc|mep)/.test(normalized);
+  if (!projectSignal) return null;
+  const tokens = normalized.split(/[^a-z0-9]+/).filter(token => token.length >= 3 && !AI_DOCUMENT_STOPWORDS.has(token));
+  if (!tokens.length) return null;
+
+  const ranked = documents.map(document => {
+    const sourceText = aiNormalize(document.source);
+    const haystack = aiNormalize([document.source, document.locator, document.text].join(' '));
+    let score = 0;
+    tokens.forEach(token => {
+      if (haystack.includes(token)) score += token.length >= 5 ? 2 : 1;
+      if (sourceText.includes(token)) score += 5;
+    });
+    if (normalized.includes(aiNormalize(document.source))) score += 8;
+    return { document, score };
+  }).filter(item => item.score >= 2).sort((a, b) => b.score - a.score);
+
+  const matches = ranked.slice(0, 4).map(item => item.document);
+  if (!matches.length) return null;
+  const facts = matches.map(document => {
+    const snippet = cleanAiSnippet(document.text, 280);
+    return `${document.source} · ${document.locator}: ${snippet}`;
+  });
+  return { facts, matches };
+}
+
+function cleanAiSnippet(value, limit = 280) {
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
+  return text.length <= limit ? text : `${text.slice(0, limit).replace(/\s+\S*$/, '')} ...`;
+}
+
+function aiDocumentIndexLinks(matches = []) {
+  if (!matches.length) return '';
+  const links = matches.map(document => `<a class="ai-action-link" href="${aiEscape(document.url)}" target="_blank" rel="noopener"><i class="fas fa-file-lines"></i> ${aiEscape(cleanAiSnippet(`${document.source} · ${document.locator}`, 90))}</a>`).join('');
+  return `<div class="ai-evidence"><div class="ai-evidence-title"><i class="fas fa-book-open"></i> Nguồn nội dung đã nạp</div><div class="ai-action-links">${links}</div></div>`;
+}
+
 function aiProjectEvidenceHtml(message) {
   const lookup = aiProjectLookup(message);
-  if (!lookup) return '';
-  const facts = lookup.facts.slice(0, 7).map(fact => `<div>• ${aiEscape(fact)}</div>`).join('');
-  return `<div class="ai-project-source"><div class="ai-answer-section"><strong>Tra cứu trực tiếp trong dữ liệu dự án:</strong>${facts}</div>${aiEvidenceLinks(lookup.evidence)}</div>`;
+  const documentSearch = aiDocumentSearch(message);
+  if (!lookup && !documentSearch) return '';
+  const facts = [...(lookup ? lookup.facts : []), ...(documentSearch ? documentSearch.facts : [])].slice(0, 8).map(fact => `<div>• ${aiEscape(fact)}</div>`).join('');
+  return `<div class="ai-project-source"><div class="ai-answer-section"><strong>Tra cứu trực tiếp trong dữ liệu dự án:</strong>${facts}</div>${lookup ? aiEvidenceLinks(lookup.evidence) : ''}${documentSearch ? aiDocumentIndexLinks(documentSearch.matches) : ''}</div>`;
 }
 
 function buildAiReply(message) {

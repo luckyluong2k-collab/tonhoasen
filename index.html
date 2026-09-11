@@ -1408,13 +1408,14 @@
     </div>
 
     <!-- Core Application Logic -->
-    <script src="app.js?v=9.8"></script>
+    <script src="assets/hoa-sen/project-document-index.js"></script>
+    <script src="app.js?v=9.9"></script>
 
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=9.8')
+        navigator.serviceWorker.register('./sw.js?v=9.9')
                     .then(reg => console.log('Hoa Sen Home PWA SW registered successfully:', reg.scope))
                     .catch(err => console.log('SW registration error:', err));
             });
