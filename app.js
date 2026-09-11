@@ -2277,8 +2277,119 @@ function aiEvidenceLinks(evidence = {}) {
   return links.length ? `<div class="ai-evidence"><div class="ai-evidence-title"><i class="fas fa-fingerprint"></i> Nguồn trong hồ sơ dự án</div><div class="ai-action-links">${links.join("")}</div></div>` : "";
 }
 
+function aiProjectLookup(message) {
+  const normalized = aiNormalize(message);
+  const evidence = { drawings: [], qaqc: [], boqRows: [], dossier: [], docs: [] };
+  const facts = [];
+  const addUnique = (list, value) => { if (value && !list.includes(value)) list.push(value); };
+  const addFact = value => { if (value && !facts.includes(value)) facts.push(value); };
+  let matched = false;
+
+  const footingCodes = [...normalized.matchAll(/\b(?:mong\s*)?m([1-8])\b/g)].map(match => Number(match[1]));
+  footingCodes.forEach(code => {
+    const drawingId = code <= 3 ? 'foundation-2' : code <= 6 ? 'foundation-3' : 'foundation-4';
+    const drawing = COMPLETE_DRAWINGS.find(item => item.id === drawingId);
+    if (drawing) {
+      addUnique(evidence.drawings, drawing.id);
+      addFact(`Móng M${code}: ${drawing.title} — ${drawing.desc}`);
+      matched = true;
+    }
+  });
+
+  const pageMatch = normalized.match(/\b(?:trang|page|p)\s*(\d{1,3})\b/);
+  if (pageMatch) {
+    const page = Number(pageMatch[1]);
+    const isFoundation = normalized.includes('mong') || normalized.includes('dai kieng') || normalized.includes('kc');
+    const drawing = COMPLETE_DRAWINGS.find(item => item.pageNumber === page && (isFoundation ? item.id.startsWith('foundation-') : item.id.startsWith('design-')));
+    if (drawing) {
+      addUnique(evidence.drawings, drawing.id);
+      addFact(`Bản vẽ trang ${page}: ${drawing.title} — ${drawing.desc}`);
+      matched = true;
+    }
+  }
+
+  const qaMatch = normalized.match(/\bqc[-\s]?(\d{1,2})\b/);
+  if (qaMatch) {
+    const code = `QC-${String(Number(qaMatch[1])).padStart(2, '0')}`;
+    const item = INITIAL_QAQC.find(row => row.code === code);
+    if (item) {
+      addUnique(evidence.qaqc, item.code);
+      addFact(`${item.code}: ${item.title} — căn cứ ${item.std}; trạng thái ${item.status === 'done' ? 'đã hoàn tất' : 'chưa hoàn tất'}.`);
+      matched = true;
+    }
+  }
+
+  const boqMatch = normalized.match(/\b(?:boq\s*)?(?:dong\s*|row\s*)?(\d{1,3})\b/);
+  const hasBoqContext = normalized.includes('boq') || normalized.includes('khoi luong') || normalized.includes('don gia');
+  if (hasBoqContext && boqMatch) {
+    const rowNumber = Number(boqMatch[1]);
+    const item = RAW_BOQ.find(row => Number(row.row) === rowNumber);
+    if (item) {
+      addUnique(evidence.boqRows, item.row);
+      addFact(`BOQ dòng ${item.row}: ${item.content} — ${item.qty ? `${fmtDecimal(item.qty, 2)} ${item.dvt}` : 'dòng tiêu đề'}${item.brand ? ` · ${item.brand}` : ''}${item.note ? ` · ${item.note}` : ''}.`);
+      matched = true;
+    }
+  }
+
+  if (hasBoqContext && !boqMatch) {
+    const tokens = normalized.split(/\s+/).filter(token => token.length > 2 && !['boq', 'dong', 'khoi', 'luong', 'don', 'gia', 'cho', 'toi', 'can', 'tra'].includes(token));
+    const matches = tokens.length
+      ? RAW_BOQ.filter(row => {
+          const haystack = aiNormalize([row.content, row.code, row.brand, row.note, row.sec, row.subsec].join(' '));
+          return tokens.some(token => haystack.includes(token));
+        }).slice(0, 5)
+      : [];
+    matches.forEach(item => {
+      addUnique(evidence.boqRows, item.row);
+      addFact(`BOQ dòng ${item.row}: ${item.content} — ${item.qty ? `${fmtDecimal(item.qty, 2)} ${item.dvt}` : 'dòng tiêu đề'}.`);
+    });
+    addFact(`Kho BOQ dự án hiện có ${RAW_BOQ.length} dòng; nhập “BOQ dòng 19” hoặc tên công việc để tra chính xác.`);
+    matched = true;
+  }
+
+  const dossierMatch = normalized.match(/\b(?:ho so|muc)\s*(?:muc\s*)?(\d{1,2})\b/);
+  if (dossierMatch) {
+    const item = DOSSIER_ITEMS.find(row => row.id === Number(dossierMatch[1]));
+    if (item) {
+      addUnique(evidence.dossier, item.id);
+      addFact(`Hồ sơ mục ${String(item.id).padStart(2, '0')}: ${item.title} — đầu ra: ${item.output}.`);
+      matched = true;
+    }
+  }
+
+  const documentMatchers = [
+    ['bao cao ngay', 'dailyReport'], ['nhat ky', 'journal'], ['bien ban nghiem thu', 'acceptance'],
+    ['defect', 'defect'], ['checklist xay dung', 'buildingChecklist'], ['checklist mep', 'mepChecklist'],
+    ['thanh quyet toan', 'settlement'], ['quyet toan', 'settlement'], ['hop dong', 'contract']
+  ];
+  documentMatchers.forEach(([keyword, key]) => {
+    if (normalized.includes(keyword)) {
+      addUnique(evidence.docs, key);
+      matched = true;
+    }
+  });
+
+  if (normalized.includes('du an') || normalized.includes('hoa sen') || normalized.includes('phu ly') || normalized.includes('ninh binh')) {
+    addFact(`Dự án: ${PROJECT_CONFIG.projectName}; hợp đồng ${PROJECT_CONFIG.contractNo}; giá trị hợp đồng ${fmtNumber(PROJECT_CONFIG.contractValue)} VNĐ, không tính VAT.`);
+    addFact(`Phạm vi chính: Nhà nhân viên D30, khung thép & canopy, khối cửa hàng Hoa Sen Home, MEP & PCCC.`);
+    addFact(`Nguồn hiện có: ${COMPLETE_DRAWINGS.length} trang bản vẽ, ${RAW_BOQ.length} dòng BOQ, ${INITIAL_QAQC.length} mã QA/QC và ${DOSSIER_ITEMS.length} mục hồ sơ.`);
+    addUnique(evidence.docs, 'contract');
+    matched = true;
+  }
+
+  return matched ? { facts, evidence } : null;
+}
+
+function aiProjectEvidenceHtml(message) {
+  const lookup = aiProjectLookup(message);
+  if (!lookup) return '';
+  const facts = lookup.facts.slice(0, 7).map(fact => `<div>• ${aiEscape(fact)}</div>`).join('');
+  return `<div class="ai-project-source"><div class="ai-answer-section"><strong>Tra cứu trực tiếp trong dữ liệu dự án:</strong>${facts}</div>${aiEvidenceLinks(lookup.evidence)}</div>`;
+}
+
 function buildAiReply(message) {
   const normalized = aiNormalize(message);
+  const projectEvidence = aiProjectEvidenceHtml(message);
   let best = null;
   let bestScore = 0;
   AI_KNOWLEDGE_PACK.forEach(entry => {
@@ -2287,11 +2398,12 @@ function buildAiReply(message) {
   });
 
   if (!best) {
+    if (projectEvidence) return `<div class="ai-answer-title"><i class="fas fa-database text-primary"></i> Tra cứu dữ liệu dự án</div>${projectEvidence}`;
     return `<div class="ai-answer-title">Chưa đủ ngữ cảnh để chốt việc</div><div>Hãy nhập một trong các dạng: <strong>mã bản vẽ/trang</strong>, <strong>mã BOQ</strong>, <strong>vị trí thi công</strong>, hoặc <strong>hạng mục cần nghiệm thu</strong>. Tôi sẽ trả về đúng 4 phần: việc cần làm, hồ sơ cần lập, điểm dừng kiểm tra và nơi mở tiếp theo.</div>${aiActionLinks([{ label: "Mở thư viện bản vẽ", tab: "tab-gallery" }, { label: "Mở BOQ", tab: "tab-boq" }, { label: "Mở checklist hồ sơ", tab: "tab-dossier" }])}`;
   }
 
   const caution = best.caution ? `<div class="ai-safety-note"><i class="fas fa-triangle-exclamation"></i> ${aiEscape(best.caution)}</div>` : "";
-  return `<div class="ai-answer-title"><i class="fas fa-check-circle text-success"></i> ${aiEscape(best.title)}</div><div>${best.body}</div><div class="ai-answer-section"><strong>Chuỗi hồ sơ nên tạo:</strong> ghi nhận hiện trường → kiểm tra/biên bản → ảnh và kết quả thử → xác nhận khối lượng → cập nhật hồ sơ.</div>${caution}${aiActionLinks(best.links)}${aiEvidenceLinks(best.evidence)}${aiSourceLinks(best.sources)}`;
+  return `<div class="ai-answer-title"><i class="fas fa-check-circle text-success"></i> ${aiEscape(best.title)}</div><div>${best.body}</div><div class="ai-answer-section"><strong>Chuỗi hồ sơ nên tạo:</strong> ghi nhận hiện trường → kiểm tra/biên bản → ảnh và kết quả thử → xác nhận khối lượng → cập nhật hồ sơ.</div>${caution}${aiActionLinks(best.links)}${aiEvidenceLinks(best.evidence)}${projectEvidence}${aiSourceLinks(best.sources)}`;
 }
 
 window.hshAskAiPreset = function(message) {
