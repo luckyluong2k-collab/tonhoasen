@@ -1,5 +1,5 @@
 // Hoa Sen Home Phủ Lý - Service Worker Cache V9.9
-const CACHE_NAME = 'hsh-phuly-v10.5';
+const CACHE_NAME = 'hsh-phuly-v10.6';
 const FULL_DRAWING_ASSETS = [
   ...Array.from({ length: 6 }, (_, index) => `./assets/hoa-sen/foundation-full-page-${index + 1}.png`),
   ...Array.from({ length: 70 }, (_, index) => `./assets/hoa-sen/design-full-page-${String(index + 1).padStart(2, '0')}.png`)
@@ -26,10 +26,10 @@ const ASSETS_TO_CACHE = [
   './dossier-editor.html',
   './dossier-editor.css',
   './dossier-editor.js',
-  './dossier-editor.js?v=10.4',
+  './dossier-editor.js?v=10.6',
   './dossier-editor.css?v=10.4',
   './dossier-template-layout.js?v=10.1',
-  './dossier-history.js?v=10.3',
+  './dossier-history.js?v=10.6',
   './dossier-github.js?v=10.3',
   './dossier-workflow.js?v=10.3',
   './vendor/fflate.min.js',
