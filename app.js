@@ -1,5 +1,5 @@
 /**
- * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.3 PRO
+ * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.4 PRO
  * Dự án: Cải tạo & Xây mới Cửa Hàng Hoa Sen Home Phủ Lý - Hà Nam
  * Hợp đồng: 01/2026/HĐXD/HSG-HG (Giá trị HĐ: 3.854.146.466 VNĐ - Không tính VAT)
  * Ngày khởi công: 10/09/2026 (Hôm nay - Ngày 01/60)
@@ -955,6 +955,22 @@ window.hshCalcSteel = function() {
 };
 
 // Tool 3: Sika Grout & Ramset
+function renderSikaGeometry() {
+  const target = document.getElementById('t3_geometry');
+  if (!target) return;
+  const mode = document.getElementById('t3_mode')?.value || 'sika';
+  if (mode === 'sika') {
+    const thick = parseFloat(document.getElementById('t3_thick')?.value || 50);
+    const baseplate = document.getElementById('t3_baseplate')?.value || '450×300';
+    target.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Khe rót SikaGrout"><rect class="geo-fill" x="17" y="15" width="78" height="39" rx="2"></rect><rect class="geo-accent" x="30" y="42" width="52" height="9"></rect><path class="geo-stroke" d="M26 42V25h60M86 25v17M96 18v36M92 18h9M92 54h9"></path><text class="geo-text" x="99" y="39">h</text><text class="geo-text" x="39" y="39">D×R</text><text class="geo-text" x="35" y="66">${thick} mm</text></svg><div><strong>Khe rót chân cột</strong><small>V = D × R × h × n</small><div class="geo-key">Bản mã ${baseplate} · h khe ${thick} mm · n vị trí</div></div>`;
+  } else {
+    const size = document.getElementById('t3_rebar_size')?.value || '16';
+    const hole = { '16': 20, '18': 22, '20': 25 }[size] || 20;
+    const depth = { '16': 160, '18': 180, '20': 200 }[size] || 160;
+    target.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Khoan cấy thép Ramset"><path class="geo-fill" d="M28 12h62v15H43v31H28z"></path><path class="geo-accent" d="M43 27h25v10H43z"></path><path class="geo-stroke" d="M43 42h35M78 42v16M83 42v16M78 58h5M99 28v30M95 28h8M95 58h8"></path><text class="geo-text" x="100" y="47">L</text><text class="geo-text" x="48" y="25">d${hole}</text><text class="geo-text" x="34" y="67">D${size} · ${depth} mm</text></svg><div><strong>Khoan cấy thép bằng keo</strong><small>V keo = ml/lỗ × n</small><div class="geo-key">Thép D${size} · lỗ khoan d${hole} · sâu neo ${depth} mm</div></div>`;
+  }
+}
+
 window.hshToggleSikaMode = function() {
   const mode = document.getElementById('t3_mode')?.value;
   const sikaDims = document.getElementById('t3_sika_dims');
@@ -974,6 +990,7 @@ window.hshToggleSikaMode = function() {
 
 window.hshCalcSika = function() {
   const mode = document.getElementById('t3_mode')?.value || 'sika';
+  renderSikaGeometry();
   const resEl = document.getElementById('t3_result');
   if (!resEl) return;
 
@@ -983,16 +1000,16 @@ window.hshCalcSika = function() {
     const baseplateArea = 0.45 * 0.30;
     const volPerColM3 = baseplateArea * (thickMm / 1000);
     const totalVolM3 = volPerColM3 * colQty * 1.15; // 15% hao hụt
-    const sikaKg = totalVolM3 * 2000;
-    const bags = Math.ceil(sikaKg / 25);
-    const waterLiters = bags * 3.25;
+    const sikaYieldLiters = 13.30; // Sika PDS: 13.30 L/bao 25 kg
+    const bags = Math.ceil((totalVolM3 * 1000) / sikaYieldLiters);
+    const waterLiters = bags * 4.25; // Sika PDS: 4.25 L/bao ở cấp phối tham chiếu
 
     resEl.innerHTML = `
-      <div class="result-main-val">Sika Grout 214-11: ${bags} Bao (25kg/bao) = ${fmtNumber(sikaKg)} kg</div>
+      <div class="result-main-val">Sika Grout 214-11: ${bags} Bao (25kg/bao) = ${fmtNumber(bags * 25)} kg</div>
       <div class="result-breakdown">
         <div>• <strong>Tổng thể tích rót (kèm 15% hao hụt):</strong> <span>${fmtDecimal(totalVolM3, 3)} m³</span> (${colQty} chân cột)</div>
-        <div>• <strong>Lượng nước trộn tiêu chuẩn (13%):</strong> <span>${fmtDecimal(waterLiters, 1)} Lít nước sạch</span></div>
-        <div>• <strong>Cường độ đạt được:</strong> <span>R28 ≥ 60 N/mm² (Không co ngót)</span></div>
+        <div>• <strong>Định mức theo PDS Sika:</strong> <span>13,30 L/bao 25 kg · ${fmtDecimal(waterLiters, 1)} L nước</span></div>
+        <div>• <strong>Phạm vi dùng:</strong> <span>Khe rót 20–100 mm; chốt lại theo datasheet/lô hàng thực tế</span></div>
       </div>
     `;
   } else {
@@ -1015,16 +1032,32 @@ window.hshCalcSika = function() {
 };
 
 // Tool 4: Gạch xây & Vữa
+function renderBrickGeometry() {
+  const target = document.getElementById('t4_geometry');
+  if (!target) return;
+  const wallType = document.getElementById('t4_wall_type')?.value || 'wall200';
+  const thickness = wallType === 'wall200' ? 200 : 100;
+  const brickRate = (1 / ((0.19 + 0.01) * (0.08 + 0.01)) * (wallType === 'wall200' ? 2 : 1)).toFixed(1);
+  target.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Tường gạch ${thickness} mm"><rect class="geo-fill" x="22" y="12" width="65" height="45"></rect><path class="geo-stroke" d="M22 27h65M22 42h65M42 12v15M66 27v15M42 42v15M22 12h65"></path><path class="geo-accent" d="M91 17h16v40H91z"></path><path class="geo-stroke" d="M91 12h16M91 60h16M91 9v6M107 9v6"></path><text class="geo-text" x="52" y="9">L</text><text class="geo-text" x="90" y="37">H</text><text class="geo-text" x="91" y="68">t=${thickness}</text></svg><div><strong>Tường ${wallType === 'wall200' ? '200' : '100'} mm</strong><small>A net = L × H − A cửa</small><div class="geo-key">Gạch 8×8×19 · định mức tham chiếu ${brickRate} viên/m² · trừ lỗ mở</div></div>`;
+}
+
 window.hshCalcBrick = function() {
   const wallType = document.getElementById('t4_wall_type')?.value || 'wall200';
   const grade = document.getElementById('t4_mortar_grade')?.value || 'M75';
   const len = parseFloat(document.getElementById('t4_len')?.value || 28.5);
   const hgt = parseFloat(document.getElementById('t4_hgt')?.value || 3.6);
   const minus = parseFloat(document.getElementById('t4_minus')?.value || 12.0);
+  renderBrickGeometry();
 
   const netArea = Math.max(0, (len * hgt) - minus);
-  const brickPerM2 = wallType === 'wall200' ? 130 : 68;
-  const mortarPerM2 = wallType === 'wall200' ? 0.085 : 0.042;
+  // Quy đổi theo gạch 80x80x190 mm + mạch vữa 10 mm; tường 200 dùng 2 lớp.
+  const brickL = 0.19;
+  const brickH = 0.08;
+  const joint = 0.01;
+  const brickPerM2 = (1 / ((brickL + joint) * (brickH + joint))) * (wallType === 'wall200' ? 2 : 1);
+  const wallThickness = wallType === 'wall200' ? 0.20 : 0.10;
+  const brickVolumePerM2 = brickPerM2 * brickL * brickH * brickH;
+  const mortarPerM2 = Math.max(0, wallThickness - brickVolumePerM2);
 
   const totalBricks = Math.ceil(netArea * brickPerM2 * 1.03);
   const totalMortar = netArea * mortarPerM2;
@@ -1046,11 +1079,23 @@ window.hshCalcBrick = function() {
 };
 
 // Tool 5: Gạch ốp lát & Keo
+function renderTileGeometry() {
+  const target = document.getElementById('t5_geometry');
+  if (!target) return;
+  const size = document.getElementById('t5_tile_size')?.value || '600x600';
+  const adhesive = document.getElementById('t5_adhesive')?.value || 'glue';
+  const boxAreaMap = { '600x600': 1.44, '300x600': 1.44, '800x800': 1.92, '300x300': 0.99 };
+  const boxArea = boxAreaMap[size] || 1.44;
+  const binder = adhesive === 'glue' ? 'keo dán gạch' : 'hồ dầu xi măng';
+  target.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Bố trí gạch ${size} mm"><rect class="geo-fill" x="17" y="10" width="56" height="50"></rect><path class="geo-stroke" d="M45 10v50M17 35h56"></path><path class="geo-accent" d="M81 20h25M81 50h25M94 20v30"></path><text class="geo-text" x="26" y="68">${size}</text><text class="geo-text" x="88" y="16">thùng</text></svg><div><strong>Gạch ${size} mm</strong><small>N thùng = ⌈A × (1 + w) / A thùng⌉</small><div class="geo-key">${boxArea} m²/thùng · ${binder} · w hao hụt cắt</div></div>`;
+}
+
 window.hshCalcTile = function() {
   const size = document.getElementById('t5_tile_size')?.value || '600x600';
   const area = parseFloat(document.getElementById('t5_area')?.value || 185);
   const waste = parseFloat(document.getElementById('t5_waste')?.value || 5);
   const adhesive = document.getElementById('t5_adhesive')?.value || 'glue';
+  renderTileGeometry();
 
   const totalArea = area * (1 + waste / 100);
   const boxAreaMap = { '600x600': 1.44, '300x600': 1.44, '800x800': 1.92, '300x300': 0.99 };
@@ -1081,9 +1126,22 @@ window.hshCalcTile = function() {
 };
 
 // Tool 6: Sơn KCC & Bột bả
+function renderPaintGeometry() {
+  const target = document.getElementById('t6_geometry');
+  if (!target) return;
+  const type = document.getElementById('t6_paint_type')?.value || 'wall_ext';
+  const isFloor = type === 'floor_epoxy';
+  const isSteel = type === 'steel_alkyd';
+  const title = isFloor ? 'Sàn epoxy — nền + lót + 2 phủ' : isSteel ? 'Kết cấu thép — làm sạch + chống rỉ + phủ' : type === 'wall_int' ? 'Tường nội thất — bột bả + lót + 2 phủ' : 'Tường ngoại thất — bột bả + lót + 2 phủ';
+  const formula = isFloor ? 'Vật tư = A × định mức theo lớp' : 'Lít sơn = A × số lớp / độ phủ';
+  const key = isSteel ? 'A diện tích thép · kiểm tra gỉ, bề mặt và thời gian khô' : 'A diện tích · nền → lót → phủ · định mức theo PDS';
+  target.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Các lớp sơn"><rect class="geo-stroke" x="18" y="13" width="16" height="45"></rect><rect class="geo-fill" x="34" y="13" width="19" height="45"></rect><rect class="geo-accent" x="53" y="13" width="19" height="45"></rect><rect fill="#FDE68A" stroke="#153E73" stroke-width="2" x="72" y="13" width="19" height="45"></rect><text class="geo-text" x="17" y="68">nền</text><text class="geo-text" x="35" y="9">lót</text><text class="geo-text" x="51" y="9">P1</text><text class="geo-text" x="72" y="9">P2</text></svg><div><strong>${title}</strong><small>${formula}</small><div class="geo-key">${key}</div></div>`;
+}
+
 window.hshCalcPaint = function() {
   const type = document.getElementById('t6_paint_type')?.value || 'wall_ext';
   const area = parseFloat(document.getElementById('t6_area')?.value || 450);
+  renderPaintGeometry();
 
   let resHtml = '';
   if (type === 'floor_epoxy') {
@@ -1117,17 +1175,27 @@ window.hshCalcPaint = function() {
 };
 
 // Tool 7: Tôn Mag Shield & Thủy lực
+function renderRoofGeometry() {
+  const target = document.getElementById('t7_geometry');
+  if (!target) return;
+  const area = parseFloat(document.getElementById('t7_roof_area')?.value || 380);
+  const slope = parseFloat(document.getElementById('t7_slope')?.value || 15);
+  const pipe = document.getElementById('t7_pipe_dia')?.value || '110';
+  target.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Mái dốc và thoát nước"><path class="geo-fill" d="M13 51L53 17l54 34z"></path><path class="geo-stroke" d="M13 51h94M53 17v34M53 29h17M70 29l-4-3M70 29l-4 3M90 48v17M96 48v17M87 65h12"></path><circle class="geo-accent" cx="92" cy="47" r="5"></circle><text class="geo-text" x="51" y="14">i=${slope}%</text><text class="geo-text" x="15" y="64">A=${area}m²</text><text class="geo-text" x="86" y="43">D${pipe}</text></svg><div><strong>Mái dốc → máng → ống D${pipe}</strong><small>Q = i × A / 3.600 (L/s)</small><div class="geo-key">A hình chiếu ${area} m² · i độ dốc ${slope}% · chọn ống theo thủy lực</div></div>`;
+}
+
 window.hshCalcRoofHydraulics = function() {
   const roofArea = parseFloat(document.getElementById('t7_roof_area')?.value || 380);
   const slope = parseFloat(document.getElementById('t7_slope')?.value || 15);
   const rainQ = parseFloat(document.getElementById('t7_rain_intensity')?.value || 420);
   const pipeDia = parseInt(document.getElementById('t7_pipe_dia')?.value || 110);
+  renderRoofGeometry();
 
   const cosSlope = Math.cos(Math.atan(slope / 100));
   const realRoofArea = roofArea / cosSlope;
   const sheetTons = Math.ceil(realRoofArea * 1.08);
 
-  const flowLps = (rainQ * roofArea * 1.0) / 10000;
+  const flowLps = (rainQ * roofArea * 1.0) / 3600; // Rational method: i (mm/h) × A (m²) / 3600 = L/s
   const capacityPerPipe = pipeDia === 110 ? 12.0 : 25.0;
   const minPipes = Math.max(2, Math.ceil(flowLps / capacityPerPipe));
 
@@ -1137,19 +1205,32 @@ window.hshCalcRoofHydraulics = function() {
       <div class="result-main-val">Tôn Mag Shield 0.50mm: ${sheetTons} m² | Cần tối thiểu: ${minPipes} Ống D${pipeDia}</div>
       <div class="result-breakdown">
         <div>• <strong>Diện tích mái thực (độ dốc ${slope}%):</strong> <span>${fmtDecimal(realRoofArea, 1)} m²</span></div>
-        <div>• <strong>Lưu lượng mưa tính toán (TCVN 4474):</strong> <span>${fmtDecimal(flowLps, 1)} Lít/giây</span></div>
-        <div>• <strong>Máng xối Inox 304:</strong> <span>Bề rộng tối thiểu W ≥ 350mm, sâu H ≥ 200mm, độ dốc 0.5%</span></div>
+        <div>• <strong>Lưu lượng theo Rational Method:</strong> <span>${fmtDecimal(flowLps, 1)} Lít/giây (i=${rainQ} mm/h × A=${roofArea} m²)</span></div>
+        <div>• <strong>Máng xối Inox 304:</strong> <span>Kiểm tra tiết diện, độ dốc và khả năng thoát theo hồ sơ thiết kế</span></div>
       </div>
     `;
   }
 };
 
 // Tool 8: Chiếu sáng & Điện 3 Pha
+function renderLightingGeometry() {
+  const target = document.getElementById('t8_geometry');
+  if (!target) return;
+  const room = document.getElementById('t8_room_type')?.value || 'showroom';
+  const area = parseFloat(document.getElementById('t8_area')?.value || 320);
+  const lamp = document.getElementById('t8_lamp_type')?.value || 'highbay50';
+  const targetLux = room === 'showroom' ? 500 : room === 'office' ? 300 : 150;
+  const lampLmMap = { highbay50: 5000, highbay100: 10500, panel40: 3600, tube20: 2200 };
+  const lmPerLamp = lampLmMap[lamp] || 5000;
+  target.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Bố trí đèn"><rect class="geo-fill" x="15" y="12" width="90" height="46"></rect><circle class="geo-accent" cx="35" cy="27" r="6"></circle><circle class="geo-accent" cx="60" cy="27" r="6"></circle><circle class="geo-accent" cx="85" cy="27" r="6"></circle><circle class="geo-accent" cx="47" cy="45" r="6"></circle><circle class="geo-accent" cx="73" cy="45" r="6"></circle><text class="geo-text" x="18" y="67">A=${area}m²</text><text class="geo-text" x="70" y="9">E=${targetLux}lx</text></svg><div><strong>Bố trí đèn theo lumen method</strong><small>n = E × A / (Φ × UF × MF)</small><div class="geo-key">E=${targetLux} Lux · A=${area} m² · Φ=${lmPerLamp} lm/bộ</div></div>`;
+}
+
 window.hshCalcLightingAndPower = function() {
   const room = document.getElementById('t8_room_type')?.value || 'showroom';
   const area = parseFloat(document.getElementById('t8_area')?.value || 320);
   const lamp = document.getElementById('t8_lamp_type')?.value || 'highbay50';
   const totalKw = parseFloat(document.getElementById('t8_total_kw')?.value || 35);
+  renderLightingGeometry();
 
   const targetLux = room === 'showroom' ? 500 : room === 'office' ? 300 : 150;
   const lampLmMap = { highbay50: 5000, highbay100: 10500, panel40: 3600, tube20: 2200 };
@@ -1175,10 +1256,21 @@ window.hshCalcLightingAndPower = function() {
 };
 
 // Tool 9: Báo cháy & PCCC
+function renderPcccGeometry() {
+  const target = document.getElementById('t9_geometry');
+  if (!target) return;
+  const height = parseFloat(document.getElementById('t9_ceiling_hgt')?.value || 4.5);
+  const area = parseFloat(document.getElementById('t9_area')?.value || 650);
+  const hazard = document.getElementById('t9_hazard')?.value || 'medium';
+  const extinguisherArea = hazard === 'high' ? 50 : 75;
+  target.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Bố trí đầu báo và bình chữa cháy"><rect class="geo-fill" x="15" y="14" width="90" height="44"></rect><circle class="geo-accent" cx="35" cy="29" r="6"></circle><circle class="geo-accent" cx="78" cy="29" r="6"></circle><path class="geo-stroke" d="M28 48h14M71 48h14M35 42v6M78 42v6"></path><text class="geo-text" x="18" y="67">A=${area}m²</text><text class="geo-text" x="77" y="10">H=${height}m</text></svg><div><strong>Vùng bảo vệ đầu báo + bình</strong><small>n báo = ⌈A / S⌉ · n bình = ⌈A / ${extinguisherArea}⌉</small><div class="geo-key">A=${area} m² · H trần ${height} m · nguy cơ ${hazard === 'high' ? 'cao' : 'trung bình'}</div></div>`;
+}
+
 window.hshCalcPCCC = function() {
   const ceilHgt = parseFloat(document.getElementById('t9_ceiling_hgt')?.value || 4.5);
   const area = parseFloat(document.getElementById('t9_area')?.value || 650);
   const hazard = document.getElementById('t9_hazard')?.value || 'medium';
+  renderPcccGeometry();
 
   const detectors = Math.ceil(area / 80.0);
   const extinguishers = Math.ceil(area / (hazard === 'high' ? 50.0 : 75.0));
@@ -1272,6 +1364,10 @@ window.hshRenderFieldGate = function() {
   const state = getFieldGateState();
   const checked = new Set(state[type] || []);
   const done = preset.checks.filter((_, index) => checked.has(index)).length;
+  const geometry = document.getElementById('t10_geometry');
+  if (geometry) {
+    geometry.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Cổng kiểm tra ${aiEscape(preset.title)}"><path class="geo-stroke" d="M16 35h88M29 35l10-12M52 35l10-12M75 35l10-12"></path><circle class="geo-fill" cx="16" cy="35" r="8"></circle><circle class="geo-fill" cx="39" cy="35" r="8"></circle><circle class="geo-fill" cx="62" cy="35" r="8"></circle><circle class="geo-accent" cx="85" cy="35" r="8"></circle><text class="geo-text" x="13" y="38">1</text><text class="geo-text" x="36" y="38">2</text><text class="geo-text" x="59" y="38">3</text><text class="geo-text" x="82" y="38">4</text><text class="geo-text" x="12" y="61">BV</text><text class="geo-text" x="35" y="61">VL</text><text class="geo-text" x="58" y="61">TC</text><text class="geo-text" x="81" y="61">HS</text></svg><div><strong>${aiEscape(preset.title)}</strong><small>Checklist 4 cổng trước nghiệm thu</small><div class="geo-key">Bản vẽ · vật liệu · thi công · hồ sơ</div></div>`;
+  }
   const drawingLinks = preset.drawings.map(id => COMPLETE_DRAWINGS.find(item => item.id === id)).filter(Boolean).map(drawing => `<button class="field-gate-link" onclick="window.hshOpenDrawingRelation('tab-gallery','${drawing.id}')"><i class="fas fa-drafting-compass"></i> BV p.${drawing.pageNumber}</button>`).join('');
   const qaqcLinks = preset.qaqc.map(code => `<button class="field-gate-link" onclick="window.hshOpenQaQcSource('${code}')"><i class="fas fa-clipboard-check"></i> ${code}</button>`).join('');
   const boqLinks = preset.boq.map(row => `<button class="field-gate-link" onclick="window.hshOpenBoqSource(${row})"><i class="fas fa-list-ol"></i> BOQ ${row}</button>`).join('');
@@ -1980,7 +2076,7 @@ function showToast(msg, type = 'info') {
 // 15. GLOBAL EVENT LISTENERS & APP STARTUP
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('[HoaSenHome V9.3] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
+  console.log('[HoaSenHome V9.4] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
 
   await initDatabase();
 
@@ -2032,5 +2128,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     showToast("Đã kết nối Internet thành công!", "success");
   });
 
-  console.log('[HoaSenHome V9.3] Startup complete. Single source of truth active.');
+  console.log('[HoaSenHome V9.4] Startup complete. Single source of truth active.');
 });
