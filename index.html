@@ -23,7 +23,7 @@
 
     <!-- Custom Modern Stylesheet with Left Sidebar Layout -->
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="responsive.css?v=10.7">
+    <link rel="stylesheet" href="responsive.css?v=10.8">
 </head>
 <body class="theme-light">
     <!-- Offline & Network Status Notification Bar -->
@@ -523,6 +523,7 @@
                     </div>
                 </div>
 
+                <section id="constructionProcesses" aria-label="Quy trình thi công"></section>
                 <!-- Daily Logs History & Weather Stream -->
                 <div class="daily-logs-section">
                     <div class="section-heading-row">
@@ -1324,7 +1325,7 @@
                 <div class="modal-title"><i class="fas fa-edit text-primary"></i> Ghi nhật ký thi công</div>
                 <button class="btn-close-modal" onclick="window.hshCloseDailyLogModal()"><i class="fas fa-times"></i></button>
             </div>
-            <div class="modal-body"><p class="entry-hint">Điền thông tin thực tế trong ngày. Các ô có dấu * là bắt buộc.</p><p id="dailyLogError" role="alert"></p>
+            <div class="modal-body"><p class="entry-hint">Điền thông tin thực tế trong ngày. Các ô có dấu * là bắt buộc.</p><button type="button" id="copyPreviousLog" class="btn btn-outline" onclick="window.hshCopyPreviousLog()">Sao chép hôm trước</button><p id="copyPreviousStatus" role="status"></p><p id="dailyLogError" role="alert"></p>
                 <div class="form-row-2">
                     <div class="form-group">
                         <label for="logInputDate">Ngày ghi nhật ký: *</label>
@@ -1350,6 +1351,8 @@
                         <input type="text" id="logInputEquipment" class="form-control" placeholder="Ví dụ: 1 máy xúc, 2 xe tải">
                     </div>
                 </div>
+                <div class="form-group"><label for="logInputLocation">Vị trí thi công:</label><input id="logInputLocation" class="form-control" placeholder="Ví dụ: Móng M1–M3, trục A–B"></div>
+                <div class="form-group"><label for="logInputQuantity">Khối lượng thực hiện (kèm đơn vị):</label><input id="logInputQuantity" class="form-control" placeholder="Ví dụ: Bê tông 12 m³; cốt thép 850 kg"></div>
                 <div class="form-group">
                     <label for="logInputWorkDone">Nội dung công việc thực hiện: *</label>
                     <textarea id="logInputWorkDone" class="form-control" rows="5" required placeholder="Chi tiết các vị trí thi công..."></textarea>
@@ -1431,14 +1434,15 @@
     </nav>
     <!-- Core Application Logic -->
     <script src="assets/hoa-sen/project-document-index.js"></script>
-    <script src="app.js?v=10.7"></script>
+    <script src="app.js?v=10.8"></script>
     <script src="responsive.js?v=10.5"></script>
+    <script src="construction-processes.js?v=10.8"></script>
 
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=10.7')
+        navigator.serviceWorker.register('./sw.js?v=10.8')
                     .then(reg => console.log('Hoa Sen Home PWA SW registered successfully:', reg.scope))
                     .catch(err => console.log('SW registration error:', err));
             });

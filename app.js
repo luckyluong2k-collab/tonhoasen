@@ -809,6 +809,8 @@ async function renderDailyLogs() {
         </div>
       </div>
       <div class="log-work-desc">
+        ${l.location ? `<p><strong>Vị trí:</strong> ${escapeDossierHtml(l.location)}</p>` : ''}
+        ${l.quantity ? `<p><strong>Khối lượng:</strong> ${escapeDossierHtml(l.quantity)}</p>` : ''}
         <strong>Nội dung thực hiện:</strong> ${escapeDossierHtml(l.workContent)}
       </div>
       <div style="font-size: 11.5px; color: #64748B;">
@@ -851,9 +853,9 @@ window.hshSaveDailyLog = async function() {
   button.disabled = true;
   try {
     await db.dailyLogs.add({date, dateDisplay: date.split('-').reverse().join('/'),
-      weather: value('logInputWeather'), workers: Number(value('logInputWorkers')),
+      location: value('logInputLocation'), quantity: value('logInputQuantity'), weather: value('logInputWeather'), workers: Number(value('logInputWorkers')),
       equipment: value('logInputEquipment'), workContent: value('logInputWorkDone'), issues: value('logInputIssues')});
-    ['logInputWorkDone', 'logInputIssues', 'logInputEquipment', 'logInputWorkers'].forEach(id => document.getElementById(id).value = '');
+    ['logInputWorkDone', 'logInputIssues', 'logInputEquipment', 'logInputWorkers', 'logInputLocation', 'logInputQuantity'].forEach(id => document.getElementById(id).value = '');
     window.hshCloseDailyLogModal();
     window.hshNavigateToTab('tab-progress');
     showToast('Đã lưu nhật ký trên thiết bị này.', 'success');
@@ -2602,3 +2604,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   console.log('[HoaSenHome V9.8] Startup complete. Single source of truth active.');
 });
+
+window.hshCopyPreviousLog = async function() {
+  const status = document.getElementById('copyPreviousStatus');
+  const chosen = document.getElementById('logInputDate').value;
+  if (!chosen) { status.textContent = 'Chọn ngày lập trước khi sao chép.'; return; }
+  const previous = new Date(chosen + 'T12:00:00'); previous.setDate(previous.getDate() - 1);
+  const date = previous.getFullYear() + '-' + String(previous.getMonth()+1).padStart(2,'0') + '-' + String(previous.getDate()).padStart(2,'0');
+  const fields = {location:'logInputLocation',quantity:'logInputQuantity',workContent:'logInputWorkDone',workers:'logInputWorkers',equipment:'logInputEquipment',issues:'logInputIssues'};
+  try {
+    const logs = await db.dailyLogs.toArray();
+    const entry = logs.filter(log => log.date === date).sort((a,b)=>b.id-a.id)[0];
+    if (!entry) { status.textContent = 'Chưa có nhật ký ngày ' + date.split('-').reverse().join('/') + ' để sao chép.'; return; }
+    if (Object.values(fields).some(id=>document.getElementById(id).value.trim()) && !confirm('Thay nội dung đang nhập bằng nhật ký hôm trước?')) return;
+    for (const [key,id] of Object.entries(fields)) document.getElementById(id).value = entry[key] ?? '';
+    status.textContent = 'Đã sao chép bản ghi mới nhất ngày ' + date.split('-').reverse().join('/') + '. Kiểm tra lại khối lượng, nhân lực, thời tiết và nội dung trước khi lưu.';
+  } catch (error) { status.textContent = 'Chưa đọc được nhật ký hôm trước. Vui lòng thử lại.'; }
+};
