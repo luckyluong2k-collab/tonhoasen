@@ -1,5 +1,5 @@
 /**
- * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.2 PRO
+ * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.3 PRO
  * Dự án: Cải tạo & Xây mới Cửa Hàng Hoa Sen Home Phủ Lý - Hà Nam
  * Hợp đồng: 01/2026/HĐXD/HSG-HG (Giá trị HĐ: 3.854.146.466 VNĐ - Không tính VAT)
  * Ngày khởi công: 10/09/2026 (Hôm nay - Ngày 01/60)
@@ -869,6 +869,43 @@ window.hshCalcConcrete = function() {
 };
 
 // Tool 2: Thép tròn & Thép hình
+function renderSteelGeometry() {
+  const target = document.getElementById('t2_geometry');
+  if (!target) return;
+
+  const type = document.getElementById('t2_type')?.value || 'rebar';
+  const dia = parseFloat(document.getElementById('t2_dia')?.value || 16);
+  const diagrams = {
+    rebar: {
+      title: `Thép tròn thanh vằn — tiết diện Ø${dia}`,
+      formula: 'P = (d² / 162) × l × n',
+      key: `d = ${dia} mm · qØ = ${(dia * dia / 162).toFixed(3)} kg/m · l chiều dài · n số cây`,
+      svg: `<svg viewBox="0 0 120 70" role="img" aria-label="Tiết diện thép tròn"><circle class="geo-fill" cx="30" cy="35" r="16"></circle><path class="geo-accent" d="M18 28l24 14M18 42l24-14M30 19v32M14 35h32"></path><line class="geo-stroke" x1="30" y1="12" x2="30" y2="7"></line><line class="geo-stroke" x1="24" y1="7" x2="36" y2="7"></line><path class="geo-fill" d="M58 28h45v14H58z"></path><path class="geo-stroke" d="M58 28l7-6h45l-7 6M103 28l7-6v14l-7 6M58 42l7-6h45"></path><text class="geo-text" x="24" y="5">d</text><text class="geo-text" x="78" y="23">l</text></svg>`
+    },
+    i_beam: {
+      title: 'Thép hình I — I-350×175×7×11',
+      formula: 'P = qI × l × n',
+      key: 'h=350 · b=175 · tw=7 · tf=11 mm · qI=49.600 kg/m',
+      svg: `<svg viewBox="0 0 120 70" role="img" aria-label="Tiết diện thép hình I"><path class="geo-fill" d="M34 10h52v10H68v30h18v10H34V50h18V20H34z"></path><path class="geo-accent" d="M38 13h44v4H64v36h18v4H38v-4h18V17H38z"></path><path class="geo-stroke" d="M25 10v50M21 10h8M21 60h8M34 64h52M34 61v6M86 61v6"></path><text class="geo-text" x="14" y="38">h</text><text class="geo-text" x="56" y="69">b</text><text class="geo-text" x="70" y="37">tw</text><text class="geo-text" x="53" y="9">tf</text></svg>`
+    },
+    c_purlin: {
+      title: 'Xà gồ C — C125×50×20×2.0',
+      formula: 'P = qC × l × n',
+      key: 'h=125 · b=50 · c=20 · t=2.0 mm · qC=3.560 kg/m',
+      svg: `<svg viewBox="0 0 120 70" role="img" aria-label="Tiết diện xà gồ C"><path class="geo-fill" d="M38 10h62v10H50v12h38v10H50v18h50v10H38z"></path><path class="geo-accent" d="M42 14h54v3H46v47h50v3H42z"></path><path class="geo-stroke" d="M27 10v60M23 10h8M23 70h8M38 6h62M38 3v6M100 3v6"></path><text class="geo-text" x="13" y="43">h</text><text class="geo-text" x="62" y="5">b</text><text class="geo-text" x="90" y="29">c</text><text class="geo-text" x="42" y="56">t</text></svg>`
+    },
+    box_tube: {
+      title: 'Thép hộp mạ kẽm — 50×100×2.0',
+      formula: 'P = qHộp × l × n',
+      key: 'b=50 · h=100 · t=2.0 mm · qHộp=4.520 kg/m',
+      svg: `<svg viewBox="0 0 120 70" role="img" aria-label="Tiết diện thép hộp"><rect class="geo-fill" x="34" y="14" width="52" height="42" rx="2"></rect><rect class="geo-accent" x="42" y="22" width="36" height="26" rx="1"></rect><path class="geo-stroke" d="M25 14v42M21 14h8M21 56h8M34 63h52M34 60v6M86 60v6"></path><text class="geo-text" x="12" y="38">h</text><text class="geo-text" x="56" y="69">b</text><text class="geo-text" x="88" y="25">t</text></svg>`
+    }
+  };
+
+  const diagram = diagrams[type] || diagrams.rebar;
+  target.innerHTML = `${diagram.svg}<div><strong>${diagram.title}</strong><small>${diagram.formula}</small><div class="geo-key">${diagram.key}</div></div>`;
+}
+
 window.hshToggleSteelType = function() {
   const type = document.getElementById('t2_type')?.value;
   const diaWrap = document.getElementById('t2_dia_wrap');
@@ -879,6 +916,7 @@ window.hshToggleSteelType = function() {
 
 window.hshCalcSteel = function() {
   const type = document.getElementById('t2_type')?.value || 'rebar';
+  renderSteelGeometry();
   const dia = parseFloat(document.getElementById('t2_dia')?.value || 16);
   const len = parseFloat(document.getElementById('t2_len')?.value || 11.7);
   const qty = parseFloat(document.getElementById('t2_qty')?.value || 48);
@@ -1942,7 +1980,7 @@ function showToast(msg, type = 'info') {
 // 15. GLOBAL EVENT LISTENERS & APP STARTUP
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('[HoaSenHome V9.2] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
+  console.log('[HoaSenHome V9.3] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
 
   await initDatabase();
 
@@ -1994,5 +2032,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     showToast("Đã kết nối Internet thành công!", "success");
   });
 
-  console.log('[HoaSenHome V9.2] Startup complete. Single source of truth active.');
+  console.log('[HoaSenHome V9.3] Startup complete. Single source of truth active.');
 });

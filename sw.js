@@ -1,5 +1,5 @@
-// Hoa Sen Home Phủ Lý - Service Worker Cache V9.2
-const CACHE_NAME = 'hsh-phuly-v9.2';
+// Hoa Sen Home Phủ Lý - Service Worker Cache V9.3
+const CACHE_NAME = 'hsh-phuly-v9.3';
 const FULL_DRAWING_ASSETS = [
   ...Array.from({ length: 6 }, (_, index) => `./assets/hoa-sen/foundation-full-page-${index + 1}.png`),
   ...Array.from({ length: 70 }, (_, index) => `./assets/hoa-sen/design-full-page-${String(index + 1).padStart(2, '0')}.png`)
