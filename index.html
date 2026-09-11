@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#0A2C54">
+    <meta name="description" content="Hệ thống Quản lý Kỹ thuật, Thi công và Hồ sơ Dự án HOA SEN HOME Phủ Lý - Phiên bản Hiện trường v9.2">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23C8102E' rx='20'/><text y='65' x='50' text-anchor='middle' fill='%23FFF' font-size='50' font-weight='bold' font-family='sans-serif'>HS</text></svg>">
+    <title>Hoa Sen Home Phủ Lý - Chỉ huy, Kỹ thuật & Hồ sơ Công trường v9.2</title>
+    
+    <!-- Google Fonts & Font Awesome 6.4 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Core External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Custom Modern Stylesheet with Left Sidebar Layout -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-light">
+    <!-- Offline & Network Status Notification Bar -->
+    <div id="offlineNotice" class="network-banner" style="display: none;">
+        <i class="fas fa-wifi-slash"></i> <span>Đang hoạt động Chế độ Ngoại tuyến (Offline PWA) - Toàn bộ dữ liệu & bản vẽ được lưu trữ cục bộ an toàn.</span>
+    </div>
+
+    <!-- MAIN APP CONTAINER (Left Sidebar + Right Content Area) -->
+    <div class="app-container">
+        
+        <!-- LEFT VERTICAL SIDEBAR -->
+        <aside class="left-sidebar" id="leftSidebar">
+            <!-- Brand Header -->
+            <div class="sidebar-brand">
+                <div class="brand-logo-wrap">
+                    <div class="brand-badge-logo">HS</div>
+                    <div class="brand-titles">
+                        <span class="brand-company">HOA SEN GROUP</span>
+                        <h1 class="brand-project">HSH PHỦ LÝ</h1>
+                    </div>
+                </div>
+                <div class="brand-tag">GÓI THẦU XÂY LẮP & MEP</div>
+            </div>
+
+            <!-- Project Live Status Chip in Sidebar -->
+            <div class="sidebar-status-card">
+                <div class="status-row">
+                    <span class="status-label"><i class="fas fa-calendar-check"></i> Tiến độ:</span>
+                    <span class="status-val text-primary" id="sideProgressText">Ngày 01/60</span>
+                </div>
+                <div class="sidebar-mini-progress">
+                    <div class="mini-prog-fill" id="sideProgressFill" style="width: 1.5%;"></div>
+                </div>
+                <div class="status-subrow">
+                    <span>Thực tế: <strong class="text-success" id="sideActualRate">0.0%</strong></span>
+                    <span>KH: <strong class="text-muted" id="sidePlanRate">1.5%</strong></span>
+                </div>
+            </div>
+
+            <!-- Vertical Navigation Menu -->
+            <nav class="sidebar-nav" id="sidebarNav">
+                <div class="nav-section-title">HỆ THỐNG QUẢN LÝ</div>
+                
+                <a href="#dashboard" class="nav-item active" data-tab="tab-dashboard" onclick="window.hshNavigateToTab('tab-dashboard'); return false;">
+                    <i class="fas fa-chart-pie nav-icon"></i>
+                    <span class="nav-text">Tổng quan Dự án</span>
+                    <span class="nav-badge badge-red" id="sideBadgeAlerts">1</span>
+                </a>
+
+                <a href="#gallery" class="nav-item" data-tab="tab-gallery" onclick="window.hshNavigateToTab('tab-gallery'); return false;">
+                    <i class="fas fa-layer-group nav-icon"></i>
+                    <span class="nav-text">Thư viện Bản vẽ</span>
+                    <span class="nav-badge badge-blue">76</span>
+                </a>
+
+                <a href="#boq" class="nav-item" data-tab="tab-boq" onclick="window.hshNavigateToTab('tab-boq'); return false;">
+                    <i class="fas fa-file-invoice-dollar nav-icon"></i>
+                    <span class="nav-text">Dự toán & BOQ</span>
+                    <span class="nav-badge">328</span>
+                </a>
+
+                <a href="#progress" class="nav-item" data-tab="tab-progress" onclick="window.hshNavigateToTab('tab-progress'); return false;">
+                    <i class="fas fa-tasks nav-icon"></i>
+                    <span class="nav-text">Tiến độ & Nhật ký</span>
+                </a>
+
+                <a href="#qaqc" class="nav-item" data-tab="tab-qaqc" onclick="window.hshNavigateToTab('tab-qaqc'); return false;">
+                    <i class="fas fa-clipboard-check nav-icon"></i>
+                    <span class="nav-text">Nghiệm thu QA/QC</span>
+                    <span class="nav-badge badge-yellow" id="sideBadgeQc">0/16</span>
+                </a>
+
+                <a href="#dossier" class="nav-item" data-tab="tab-dossier" onclick="window.hshNavigateToTab('tab-dossier'); return false;">
+                    <i class="fas fa-folder-open nav-icon"></i>
+                    <span class="nav-text">Hồ sơ Công trình</span>
+                    <span class="nav-badge badge-red" id="sideBadgeDossier">0/20</span>
+                </a>
+
+                <div class="nav-section-title">KỸ THUẬT HIỆN TRƯỜNG</div>
+
+                <a href="#tools" class="nav-item" data-tab="tab-tools" onclick="window.hshNavigateToTab('tab-tools'); return false;">
+                    <i class="fas fa-calculator nav-icon"></i>
+                    <span class="nav-text">Máy tính Hiện trường</span>
+                    <span class="nav-badge badge-green">10 Tool</span>
+                </a>
+
+                <a href="#settings" class="nav-item" data-tab="tab-settings" onclick="window.hshNavigateToTab('tab-settings'); return false;">
+                    <i class="fas fa-sliders-h nav-icon"></i>
+                    <span class="nav-text">Cấu hình & Dữ liệu</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Controls -->
+            <div class="sidebar-footer">
+                <div class="quick-toggles">
+                    <button class="btn-side-action" id="btnSideGlareMode" title="Bật/Tắt chế độ chống chói nắng ngoài trời" onclick="window.hshToggleGlareMode()">
+                        <i class="fas fa-sun"></i> <span>Chống chói</span>
+                    </button>
+                    <button class="btn-side-action" id="btnSideBackup" title="Sao lưu nhanh dữ liệu ra file JSON" onclick="window.hshExportJSONBackup()">
+                        <i class="fas fa-download"></i> <span>Backup</span>
+                    </button>
+                </div>
+                <div class="sidebar-user-info">
+                    <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+                    <div class="user-details">
+                        <div class="user-name">Chỉ huy trưởng</div>
+                        <div class="user-role">Dự án HSH Phủ Lý v9.2</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA (Scrollable) -->
+        <main class="main-content-area" id="mainContentArea">
+            
+            <!-- TOP APP BAR -->
+            <header class="top-app-bar">
+                <div class="top-bar-left">
+                    <button class="btn-hamburger" id="btnSidebarToggle" aria-label="Mở/Đóng Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="current-page-title" id="topPageTitle">
+                        <i class="fas fa-chart-pie text-primary"></i> <span>Tổng quan Dự án</span>
+                    </div>
+                </div>
+
+                <div class="top-bar-center">
+                    <div class="quick-search-box" onclick="window.hshOpenQuickSearch()">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Tìm nhanh bản vẽ, đầu việc BOQ, tiêu chuẩn... (Ctrl + K)" readonly>
+                        <kbd>Ctrl K</kbd>
+                    </div>
+                </div>
+
+                <div class="top-bar-right">
+                    <div class="quick-status-pills">
+                        <span class="status-pill pill-contract" title="Số Hợp đồng xây lắp">
+                            <i class="fas fa-file-contract"></i> 01/2026/HĐXD/HSG-HG
+                        </span>
+                        <span class="status-pill pill-value" title="Giá trị hợp đồng">
+                            <i class="fas fa-coins"></i> 4,162 tỷ VNĐ
+                        </span>
+                    </div>
+
+                    <button class="btn-top-icon" id="btnToggleGlareTop" title="Chế độ thi công ngoài trời" onclick="window.hshToggleGlareMode()">
+                        <i class="fas fa-sun"></i>
+                    </button>
+                    <button class="btn-top-icon" id="btnOpenAiAssistant" title="Trợ lý Kỹ thuật & Tiêu chuẩn Xây dựng" onclick="window.hshOpenAiAssistant()">
+                        <i class="fas fa-robot text-primary"></i>
+                    </button>
+                    <button class="btn-top-icon" id="btnTopExport" title="Xuất Báo cáo Dự án (PDF/Excel)" onclick="window.hshOpenExportModal()">
+                        <i class="fas fa-file-export"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- TAB 1: DASHBOARD (TỔNG QUAN) -->
+            <section id="tab-dashboard" class="content-tab-view active">
+                <!-- Project Identity Banner -->
+                <div class="dashboard-hero-card">
+                    <div class="hero-left">
+                        <div class="hero-chip"><i class="fas fa-building"></i> TẬP ĐOÀN HOA SEN - DỰ ÁN NÂNG CẤP ĐẠI DIỆN 2026</div>
+                        <h2 class="hero-title">CẢI TẠO & XÂY MỚI HOA SEN HOME PHỦ LÝ</h2>
+                        <p class="hero-desc">
+                            <i class="fas fa-map-marker-alt text-danger"></i> Quốc lộ 1A, Phường Liêm Chính, TP. Phủ Lý, Hà Nam | 
+                            <strong>HĐ:</strong> 01/2026/HĐXD/HSG-HG | <strong>Thời gian:</strong> 60 ngày (10/09/2026 - 09/11/2026)
+                        </p>
+                    </div>
+                    <div class="hero-right">
+                        <div class="d-day-countdown">
+                            <div class="countdown-num">01 <span class="countdown-sub">/ 60</span></div>
+                            <div class="countdown-label">NGÀY KHỞI CÔNG (HÔM NAY)</div>
+                            <div class="countdown-remain">Còn lại: <strong>59 ngày</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 High-Impact KPI Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card metric-primary">
+                        <div class="metric-icon"><i class="fas fa-money-check-dollar"></i></div>
+                        <div class="metric-info">
+                            <div class="metric-lbl">TỔNG GIÁ TRỊ GÓI THẦU (8% VAT)</div>
+                            <div class="metric-num">4.162.478.183 <span class="metric-unit">VNĐ</span></div>
+                            <div class="metric-trend"><i class="fas fa-check-circle text-success"></i> Tạm ứng HĐ: 30% (1,248 tỷ VNĐ)</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card metric-warning">
+                        <div class="metric-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="metric-info">
+                            <div class="metric-lbl">TIẾN ĐỘ THỰC TẾ / KẾ HOẠCH</div>
+                            <div class="metric-num">0.0% <span class="metric-unit">/ 1.5%</span></div>
+                            <div class="metric-trend text-primary"><i class="fas fa-flag-checkered"></i> Khởi công hôm nay (10/09/2026)</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card metric-success">
+                        <div class="metric-icon"><i class="fas fa-clipboard-check"></i></div>
+                        <div class="metric-info">
+                            <div class="metric-lbl">NGHIỆM THU QA/QC HẠNG MỤC</div>
+                            <div class="metric-num">0 <span class="metric-unit">/ 16 hạng mục</span></div>
+                            <div class="metric-trend"><i class="fas fa-shield-alt text-success"></i> 16 Quy chuẩn TCVN kiểm soát nghiêm ngặt</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card metric-warning">
+                        <div class="metric-icon"><i class="fas fa-list-check"></i></div>
+                        <div class="metric-info">
+                            <div class="metric-lbl">CỔNG KIỂM TRA TRƯỚC NGHIỆM THU</div>
+                            <div class="metric-num">6 <span class="metric-unit">bộ kiểm tra</span></div>
+                            <div class="metric-trend text-warning"><i class="fas fa-route"></i> Bản vẽ → Vật liệu → Thi công → Hồ sơ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Major Zone Status Cards -->
+                <div class="section-heading-row">
+                    <h3><i class="fas fa-sitemap text-primary"></i> 4 Phân khu Dự án & Tiến độ Khởi công</h3>
+                    <button class="btn btn-sm btn-outline" onclick="window.hshNavigateToTab('tab-progress')">Chi tiết Tiến độ <i class="fas fa-arrow-right"></i></button>
+                </div>
+
+                <div class="zones-grid">
+                    <div class="zone-card">
+                        <div class="zone-head">
+                            <span class="zone-badge badge-blue">Khởi động 0%</span>
+                            <h4>1. Nhà Nhân Viên (D30)</h4>
+                        </div>
+                        <p class="zone-detail">Đang giác móng, định vị tim trục móng M5-M6 khu nhân viên, chuẩn bị đào đất hố móng.</p>
+                        <div class="zone-bar"><div class="zone-fill" style="width: 5%; background: #007bff;"></div></div>
+                    </div>
+
+                    <div class="zone-card">
+                        <div class="zone-head">
+                            <span class="zone-badge badge-secondary">Chuẩn bị 0%</span>
+                            <h4>2. Khung Thép & Canopy</h4>
+                        </div>
+                        <p class="zone-detail">Tập kết bu lông neo J M20 (8.8), chuẩn bị phôi thép hình I-350 và xà gồ C125 tại xưởng.</p>
+                        <div class="zone-bar"><div class="zone-fill" style="width: 2%; background: #6c757d;"></div></div>
+                    </div>
+
+                    <div class="zone-card">
+                        <div class="zone-head">
+                            <span class="zone-badge badge-secondary">Chuẩn bị 0%</span>
+                            <h4>3. Khối Nhà Hoa Sen Home</h4>
+                        </div>
+                        <p class="zone-detail">Khảo sát mặt bằng cải tạo, chuẩn bị máy cắt đục phá bê tông và mương cáp ngầm.</p>
+                        <div class="zone-bar"><div class="zone-fill" style="width: 2%; background: #6c757d;"></div></div>
+                    </div>
+
+                    <div class="zone-card">
+                        <div class="zone-head">
+                            <span class="zone-badge badge-secondary">Chuẩn bị 0%</span>
+                            <h4>4. Hệ thống MEP & PCCC</h4>
+                        </div>
+                        <p class="zone-detail">Thẩm duyệt hồ sơ thiết kế báo cháy Asenware theo TCVN 5738:2024, đặt hàng cáp Cadivi.</p>
+                        <div class="zone-bar"><div class="zone-fill" style="width: 2%; background: #6c757d;"></div></div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="charts-row">
+                    <div class="chart-card flex-2">
+                        <div class="chart-card-header">
+                            <h4><i class="fas fa-chart-area text-primary"></i> Biểu đồ Đường cong S-Curve Tiến độ 60 Ngày (10/09 - 09/11/2026)</h4>
+                            <span class="badge badge-outline">Kế hoạch vs Thực tế</span>
+                        </div>
+                        <div class="chart-canvas-wrap">
+                            <canvas id="scurveChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card flex-1">
+                        <div class="chart-card-header">
+                            <h4><i class="fas fa-chart-pie text-danger"></i> Cơ cấu Chi phí BOQ Dự toán</h4>
+                            <span class="badge badge-outline">4,162 tỷ VNĐ</span>
+                        </div>
+                        <div class="chart-canvas-wrap">
+                            <canvas id="costBreakdownChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Critical Alerts & Urgent Tasks -->
+                <div class="alerts-container">
+                    <div class="alert-box alert-danger-border">
+                        <div class="alert-icon"><i class="fas fa-triangle-exclamation"></i></div>
+                        <div class="alert-content">
+                            <h5>CẢNH BÁO TRỌNG ĐIỂM: Khảo sát địa chất hố gas cũ giáp móng M8</h5>
+                            <p>Vị trí móng M8 tiếp giáp hố gas hạ tầng cũ. Chỉ huy trưởng chỉ đạo: Sau khi đào hố móng, nếu phát hiện sạt lở hàm ếch phải tiến hành nạo vét sạch, bơm bù bê tông lót M100 đá 1x2 và cấy 4 thanh thép D18 bằng keo Ramset Epcon G5 Pro trước khi đổ móng.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: THƯ VIỆN BẢN VẼ CHUYÊN MỤC (MENU PHÂN LOẠI & HIỂN THỊ TOÀN BỘ) -->
+            <section id="tab-gallery" class="content-tab-view">
+                <!-- Drawing Header & Filter Controls -->
+                <div class="drawings-management-header">
+                    <div class="drawings-title-col">
+                        <h2><i class="fas fa-layer-group text-primary"></i> Thư viện Bản vẽ Thi công Chuyên mục</h2>
+                        <p class="text-muted">Tổng hợp đầy đủ 76 trang bản vẽ từ hồ sơ PDF gốc - Phân loại theo 4 Chuyên mục thi công</p>
+                    </div>
+                    
+                    <div class="drawings-actions-col">
+                        <!-- View Mode Selector -->
+                        <div class="view-mode-button-group">
+                            <button class="btn-view-mode active" id="btnViewGrid" onclick="window.hshSetDrawingsViewMode('grid')" title="Xem dạng lưới thẻ bản vẽ">
+                                <i class="fas fa-th-large"></i> Lưới Thẻ
+                            </button>
+                            <button class="btn-view-mode" id="btnViewContinuous" onclick="window.hshSetDrawingsViewMode('continuous')" title="Xem toàn bộ bản vẽ liên tục dạng cuốn sách">
+                                <i class="fas fa-file-alt"></i> Cuộn Liên tục (Toàn bộ)
+                            </button>
+                            <button class="btn-view-mode" id="btnViewSlider" onclick="window.hshSetDrawingsViewMode('slider')" title="Xem dạng lật trang trình chiếu">
+                                <i class="fas fa-tv"></i> Trình chiếu
+                            </button>
+                        </div>
+                        <a class="btn btn-sm btn-outline" href="./assets/hoa-sen/docs/2026.05.23_TKTC_HOME%20PHỦ%20LÝ.pdf" target="_blank" title="Mở toàn bộ hồ sơ PDF gốc 70 trang">
+                            <i class="fas fa-file-pdf text-danger"></i> PDF kiến trúc 70 trang
+                        </a>
+                        <a class="btn btn-sm btn-outline" href="./assets/hoa-sen/docs/20260908%20KC%20MÓNG%20PS.pdf" target="_blank" title="Mở hồ sơ PDF móng 6 trang">
+                            <i class="fas fa-file-pdf text-danger"></i> PDF móng 6 trang
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 4 Category Selection Menu Tabs -->
+                <div class="drawings-category-nav" id="drawingsCategoryNav">
+                    <button class="cat-nav-btn active" data-category="all" onclick="window.hshFilterDrawingsCategory('all')">
+                        <i class="fas fa-border-all"></i>
+                        <span class="cat-name">Tất cả Bản vẽ</span>
+                        <span class="cat-count">76</span>
+                    </button>
+                    <button class="cat-nav-btn" data-category="foundation" onclick="window.hshFilterDrawingsCategory('foundation')">
+                        <i class="fas fa-cubes"></i>
+                        <span class="cat-name">1. Móng & Đà Kiềng (KC)</span>
+                        <span class="cat-count">6</span>
+                    </button>
+                    <button class="cat-nav-btn" data-category="arch" onclick="window.hshFilterDrawingsCategory('arch')">
+                        <i class="fas fa-drafting-compass"></i>
+                        <span class="cat-name">2. Kiến trúc & Nhà NV (KT)</span>
+                        <span class="cat-count">24</span>
+                    </button>
+                    <button class="cat-nav-btn" data-category="canopy" onclick="window.hshFilterDrawingsCategory('canopy')">
+                        <i class="fas fa-warehouse"></i>
+                        <span class="cat-name">3. KCT Thép & Canopy</span>
+                        <span class="cat-count">17</span>
+                    </button>
+                    <button class="cat-nav-btn" data-category="mep" onclick="window.hshFilterDrawingsCategory('mep')">
+                        <i class="fas fa-bolt"></i>
+                        <span class="cat-name">4. MEP & PCCC TCVN</span>
+                        <span class="cat-count">29</span>
+                    </button>
+                </div>
+
+                <!-- Category Header Description Area -->
+                <div id="drawingsCategoryHeaderArea" class="category-info-banner"></div>
+
+                <!-- Main Display Area for Drawings (Grid / Continuous / Slider) -->
+                <div id="drawingsMainDisplayArea" class="drawings-content-container">
+                    <!-- Javascript will render drawings here dynamically -->
+                </div>
+            </section>
+
+            <!-- TAB 3: DỰ TOÁN & BOQ (328 DÒNG CHI TIẾT) -->
+            <section id="tab-boq" class="content-tab-view">
+                <div class="boq-header-card">
+                    <div class="boq-title-row">
+                        <div>
+                            <h2><i class="fas fa-file-invoice-dollar text-primary"></i> Bảng Tiên lượng Dự toán & BOQ Chi tiết</h2>
+                            <p class="text-muted">328 công tác xây lắp & cơ điện trọn gói dự án Cải tạo Hoa Sen Home Phủ Lý (HĐ: 01/2026/HĐXD/HSG-HG)</p>
+                        </div>
+                        <div class="boq-actions">
+                            <button class="btn btn-outline" onclick="window.hshExportBOQExcel()"><i class="fas fa-file-excel text-success"></i> Xuất Excel BOQ</button>
+                            <button class="btn btn-primary" onclick="window.hshOpenBOQAddModal()"><i class="fas fa-plus"></i> Thêm đầu việc phát sinh</button>
+                        </div>
+                    </div>
+
+                    <div class="boq-summary-pills">
+                        <div class="boq-pill">Tổng dự toán trước VAT: <strong>3.854.146.466 đ</strong></div>
+                        <div class="boq-pill">Thuế VAT (8%): <strong>308.331.717 đ</strong></div>
+                        <div class="boq-pill pill-highlight">Tổng cộng sau VAT: <strong>4.162.478.183 đ</strong></div>
+                    </div>
+
+                    <div class="boq-filters-bar">
+                        <div class="search-input-wrap">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="boqSearchInput" placeholder="Tìm tên công việc, mã hiệu, vật tư (bê tông, cốt thép, ramset, tôn...)" onkeyup="window.hshFilterBOQTable()">
+                        </div>
+                        <select id="boqChapterSelect" class="form-select" onchange="window.hshFilterBOQTable()">
+                            <option value="all">-- Tất cả Chương mục BOQ (328 dòng) --</option>
+                            <option value="A. CÔNG TÁC BAN ĐẦU">A. Công tác ban đầu</option>
+                            <option value="I. PHẦN KẾT CẤU TỔNG THỂ">I. Phần Kết cấu móng & đà kiềng</option>
+                            <option value="II. PHẦN HOÀN THIỆN">II. Phần Hoàn thiện & Kiến trúc</option>
+                            <option value="C. BẬC CẤP + BỒN HOA">C. Bậc cấp & Bồn hoa</option>
+                            <option value="D. BẢNG HIỆU - QUẢNG CÁO">D. Bảng hiệu & Quảng cáo</option>
+                            <option value="E. HỆ THỐNG ĐIỆN">E. Hệ thống Điện & Chiếu sáng</option>
+                            <option value="F. HỆ THỐNG CẤP THOÁT NƯỚC">F. Hệ thống Cấp thoát nước</option>
+                            <option value="G. HỆ THỐNG PCCC">G. Hệ thống PCCC Asenware</option>
+                        </select>
+                        <select id="boqStatusSelect" class="form-select" onchange="window.hshFilterBOQTable()">
+                            <option value="all">-- Tất cả trạng thái --</option>
+                            <option value="done">Đã hoàn thành</option>
+                            <option value="in_progress">Đang thi công</option>
+                            <option value="pending">Chưa triển khai</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- BOQ Table Container -->
+                <div class="table-responsive boq-table-wrap">
+                    <table class="table boq-table" id="boqMainTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">STT</th>
+                                <th style="width: 90px;">Mã Hiệu</th>
+                                <th>Nội dung Công tác Xây lắp / Vật tư</th>
+                                <th style="width: 70px;">ĐVT</th>
+                                <th style="width: 90px; text-align: right;">Khối lượng</th>
+                                <th style="width: 120px; text-align: right;">Đơn giá (VNĐ)</th>
+                                <th style="width: 140px; text-align: right;">Thành tiền (VNĐ)</th>
+                                <th style="width: 110px; text-align: center;">Tiến độ</th>
+                                <th style="width: 80px; text-align: center;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="boqTableBody">
+                            <!-- Populated dynamically by app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 4: TIẾN ĐỘ & NHẬT KÝ CÔNG TRƯỜNG -->
+            <section id="tab-progress" class="content-tab-view">
+                <div class="section-top-banner">
+                    <div>
+                        <h2><i class="fas fa-tasks text-primary"></i> Kế hoạch Tiến độ 60 Ngày (10/09 - 09/11/2026) & Nhật ký</h2>
+                        <p class="text-muted">Theo dõi đường găng tiến độ (Critical Path), nhân lực, thời tiết và nhật trình thi công hàng ngày</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="window.hshOpenDailyLogModal()"><i class="fas fa-plus"></i> Ghi Nhật ký Hôm nay</button>
+                </div>
+
+                <!-- Milestones Timeline Grid -->
+                <div class="milestones-card-grid">
+                    <div class="milestone-box in-progress">
+                        <div class="ms-head">
+                            <span class="ms-phase">GIAI ĐOẠN 1</span>
+                            <span class="ms-badge"><i class="fas fa-spinner fa-spin"></i> Đang khởi động</span>
+                        </div>
+                        <h5>Phá dỡ & Móng M1-M8</h5>
+                        <div class="ms-date">10/09 - 24/09/2026 (15 ngày)</div>
+                        <p>Định vị giác móng, đào đất hố móng, đổ BT lót M100, gia công cốt thép móng M1-M8 và đổ BT thương phẩm R28.</p>
+                    </div>
+
+                    <div class="milestone-box pending">
+                        <div class="ms-head">
+                            <span class="ms-phase">GIAI ĐOẠN 2</span>
+                            <span class="ms-badge">Sắp diễn ra</span>
+                        </div>
+                        <h5>Đà kiềng & Nhà NV & KCT Canopy</h5>
+                        <div class="ms-date">25/09 - 18/10/2026 (24 ngày)</div>
+                        <p>Đổ bê tông đà kiềng ĐK1-ĐK5, sàn tầng 1 nhà NV, lắp đặt bu lông neo và dựng kèo I-350.</p>
+                    </div>
+
+                    <div class="milestone-box pending">
+                        <div class="ms-head">
+                            <span class="ms-phase">GIAI ĐOẠN 3</span>
+                            <span class="ms-badge">Sắp diễn ra</span>
+                        </div>
+                        <h5>Lợp Tôn, Hoàn thiện & MEP</h5>
+                        <div class="ms-date">19/10 - 02/11/2026 (15 ngày)</div>
+                        <p>Lợp tôn Mag Shield, ốp tấm Alu mặt tiền, ốp lát gạch 600x600, kéo cáp điện và hệ thống PCCC.</p>
+                    </div>
+
+                    <div class="milestone-box pending">
+                        <div class="ms-head">
+                            <span class="ms-phase">GIAI ĐOẠN 4</span>
+                            <span class="ms-badge">Nghiệm thu</span>
+                        </div>
+                        <h5>Chạy thử, Sơn KCC & Bàn giao</h5>
+                        <div class="ms-date">03/11 - 09/11/2026 (6 ngày)</div>
+                        <p>Sơn phủ epoxy KCC sàn, kiểm định PCCC Công an tỉnh Hà Nam, vệ sinh công nghiệp và bàn giao.</p>
+                    </div>
+                </div>
+
+                <!-- Daily Logs History & Weather Stream -->
+                <div class="daily-logs-section">
+                    <div class="section-heading-row">
+                        <h3><i class="fas fa-history text-primary"></i> Nhật trình Thi công & Nhật ký Hiện trường</h3>
+                        <span class="badge badge-primary" id="logCountBadge">Nhật ký</span>
+                    </div>
+
+                    <div class="daily-logs-list" id="dailyLogsList">
+                        <!-- Populated dynamically by app.js -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: NGHIỆM THU QA/QC & TIÊU CHUẨN KỸ THUẬT -->
+            <section id="tab-qaqc" class="content-tab-view">
+                <div class="section-top-banner">
+                    <div>
+                        <h2><i class="fas fa-clipboard-check text-primary"></i> Nghiệm thu Kỹ thuật & Checklist QA/QC</h2>
+                        <p class="text-muted">16 Hạng mục kiểm tra nghiêm ngặt theo TCVN 4453:1995, TCVN 5574:2018, TCVN 5738:2024</p>
+                    </div>
+                    <div class="qaqc-stats-badge">
+                        <span>Đã nghiệm thu: <strong class="text-success" id="qcDoneCount">0</strong> / 16</span>
+                    </div>
+                </div>
+
+                <!-- QA/QC Checklist Cards Grid -->
+                <div class="qaqc-grid" id="qaqcCardsGrid">
+                    <!-- Populated dynamically by app.js -->
+                </div>
+            </section>
+
+            <!-- TAB 6: HỒ SƠ THI CÔNG - NGHIỆM THU - THANH QUYẾT TOÁN -->
+            <section id="tab-dossier" class="content-tab-view">
+                <div class="section-top-banner dossier-banner">
+                    <div>
+                        <h2><i class="fas fa-folder-open text-primary"></i> Hồ sơ Công trình</h2>
+                        <p class="text-muted">Checklist hồ sơ thi công, vật liệu, nghiệm thu, thanh toán và hoàn công cho Hoa Sen Home Phủ Lý – Ninh Bình</p>
+                    </div>
+                    <div class="dossier-header-actions">
+                        <button class="btn btn-outline" onclick="window.hshExportDossierChecklist()"><i class="fas fa-file-excel text-success"></i> Xuất Checklist</button>
+                        <button class="btn btn-primary" onclick="window.hshOpenDossierGuide()"><i class="fas fa-list-check"></i> Cách làm hồ sơ</button>
+                    </div>
+                </div>
+
+                <div class="dossier-kpi-grid">
+                    <div class="dossier-kpi dossier-kpi-total"><i class="fas fa-layer-group"></i><div><span>Tổng đầu việc hồ sơ</span><strong id="dossierTotalCount">20</strong></div></div>
+                    <div class="dossier-kpi dossier-kpi-done"><i class="fas fa-circle-check"></i><div><span>Đã hoàn tất</span><strong id="dossierDoneCount">0</strong></div></div>
+                    <div class="dossier-kpi dossier-kpi-progress"><i class="fas fa-spinner"></i><div><span>Đang xử lý</span><strong id="dossierProgressCount">0</strong></div></div>
+                    <div class="dossier-kpi dossier-kpi-missing"><i class="fas fa-triangle-exclamation"></i><div><span>Còn phải làm</span><strong id="dossierTodoCount">20</strong></div></div>
+                </div>
+
+                <div class="dossier-overview-grid">
+                    <div class="card dossier-guide-card">
+                        <div class="dossier-card-heading"><h4><i class="fas fa-route text-primary"></i> Trình tự 6 bước</h4><span class="badge badge-outline">Làm theo thứ tự</span></div>
+                        <div class="dossier-step-list">
+                            <div class="dossier-step"><b>01</b><span><strong>Chốt pháp lý</strong><small>Hợp đồng, bản vẽ, giấy phép, bàn giao mặt bằng</small></span></div>
+                            <div class="dossier-step"><b>02</b><span><strong>Trình biện pháp & vật liệu</strong><small>Biện pháp thi công, ITP, mẫu tôn, CO/CQ/CNXX</small></span></div>
+                            <div class="dossier-step"><b>03</b><span><strong>Ghi nhận hiện trường</strong><small>Nhật ký, báo cáo ngày, ảnh, phiếu giao vật tư</small></span></div>
+                            <div class="dossier-step"><b>04</b><span><strong>Nghiệm thu từng việc</strong><small>Nghiệm thu trước khi che khuất, nghiệm thu giai đoạn</small></span></div>
+                            <div class="dossier-step"><b>05</b><span><strong>Thanh toán theo khối lượng</strong><small>Đo bóc thực tế, xác nhận khối lượng, hồ sơ thanh toán</small></span></div>
+                            <div class="dossier-step"><b>06</b><span><strong>Hoàn công & bàn giao</strong><small>Đóng defect, hoàn công, bảo hành, quyết toán</small></span></div>
+                        </div>
+                    </div>
+
+                    <div class="card dossier-files-card">
+                        <div class="dossier-card-heading"><h4><i class="fas fa-file-circle-check text-success"></i> Tài liệu gốc đang có</h4><span class="badge badge-success">11 tài liệu</span></div>
+                        <div class="dossier-file-list">
+                            <a href="./assets/hoa-sen/docs/signed%20HDTC%20HSH%20PHU%20LY%20NINH%20BINH.pdf" target="_blank"><i class="fas fa-file-contract"></i><span><strong>Hợp đồng thi công đã ký</strong><small>signed HDTC HSH PHU LY NINH BINH.pdf</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./assets/hoa-sen/docs/2026.05.23_TKTC_HOME%20PHỦ%20LÝ.pdf" target="_blank"><i class="fas fa-drafting-compass"></i><span><strong>Hồ sơ thiết kế thi công</strong><small>TKTC HOME PHỦ LÝ.pdf · 70 trang</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./assets/hoa-sen/docs/20260908%20KC%20MÓNG%20PS.pdf" target="_blank"><i class="fas fa-cubes"></i><span><strong>Bản vẽ kết cấu móng</strong><small>KC MÓNG PS.pdf · 6 trang</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./assets/hoa-sen/docs/2026.08.06%20TMCG%20THI%20CONG%20CAI%20TAO%20CUA%20HANG%20HOA%20SEN%20HOME%20PHU%20LY%20-%20NINH%20BINH%20r1.xlsx" target="_blank"><i class="fas fa-file-invoice-dollar"></i><span><strong>Bảng khối lượng/chào giá</strong><small>BOQ 333 dòng · xây lắp, tôn, bảng hiệu, MEP, PCCC</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./assets/hoa-sen/docs/01.BAO%20CAO%20NGAY.xlsx" target="_blank"><i class="fas fa-file-excel"></i><span><strong>01. Báo cáo ngày</strong><small>01.BAO CAO NGAY.xlsx</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./assets/hoa-sen/docs/03.NHAT%20KY%20CONG%20TRINH.DOC" target="_blank"><i class="fas fa-file-word"></i><span><strong>03. Nhật ký công trình</strong><small>03.NHAT KY CONG TRINH.DOC</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./assets/hoa-sen/docs/07.BBNT%20CONG%20VIEC%20XAY%20DUNG.doc" target="_blank"><i class="fas fa-file-word"></i><span><strong>07. Biên bản nghiệm thu công việc xây dựng</strong><small>07.BBNT CONG VIEC XAY DUNG.doc</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./assets/hoa-sen/docs/09.BIEN%20BAN%20GHI%20NHAN%20DEFECT%20LIST.docx" target="_blank"><i class="fas fa-file-word"></i><span><strong>09. Biên bản ghi nhận Defect List</strong><small>09.BIEN BAN GHI NHAN DEFECT LIST.docx</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./assets/hoa-sen/docs/10.CHECKLIST%20NGHIEM%20THU%20PHAN%20XAY%20DUNG.xls" target="_blank"><i class="fas fa-file-excel"></i><span><strong>10. Checklist nghiệm thu phần xây dựng</strong><small>10.CHECKLIST NGHIEM THU PHAN XAY DUNG.xls</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./assets/hoa-sen/docs/11.CHECKLIST%20NGHIEM%20THU%20PHAN%20MEP.xls" target="_blank"><i class="fas fa-file-excel"></i><span><strong>11. Checklist nghiệm thu phần MEP</strong><small>11.CHECKLIST NGHIEM THU PHAN MEP.xls</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                            <a href="./assets/hoa-sen/docs/BM%20-%20HO%20SO%20THANH%20-%20QUYET%20TOAN.xlsx" target="_blank"><i class="fas fa-file-invoice-dollar"></i><span><strong>Biểu mẫu hồ sơ thanh - quyết toán</strong><small>BM - HO SO THANH - QUYET TOAN.xlsx</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>
+                        </div>
+                        <div class="dossier-warning"><i class="fas fa-circle-info"></i><span>Mẫu thanh quyết toán hiện có còn ghi tên công trình cũ. Hãy thay tên, số hợp đồng và địa điểm trước khi dùng.</span></div>
+                    </div>
+                </div>
+
+                <div class="card dossier-checklist-card">
+                    <div class="dossier-table-head">
+                        <div><h4><i class="fas fa-list-check text-primary"></i> Checklist hồ sơ theo công việc</h4><p class="text-muted">Bấm trạng thái để chuyển: Chưa làm → Đang làm → Hoàn tất. Dữ liệu lưu trên máy này.</p></div>
+                        <div class="dossier-filters">
+                            <select id="dossierCategoryFilter" class="form-select" onchange="window.hshRenderDossierChecklist()">
+                                <option value="all">Tất cả nhóm hồ sơ</option>
+                                <option value="Pháp lý & thiết kế">Pháp lý & thiết kế</option>
+                                <option value="Biện pháp & vật liệu">Biện pháp & vật liệu</option>
+                                <option value="Nhật ký & hiện trường">Nhật ký & hiện trường</option>
+                                <option value="Nghiệm thu QA/QC">Nghiệm thu QA/QC</option>
+                                <option value="Thanh toán & hoàn công">Thanh toán & hoàn công</option>
+                            </select>
+                            <select id="dossierStatusFilter" class="form-select" onchange="window.hshRenderDossierChecklist()">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="todo">Chưa làm</option>
+                                <option value="progress">Đang làm</option>
+                                <option value="done">Hoàn tất</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="dossier-table-wrap"><table class="dossier-table"><thead><tr><th>STT</th><th>Nhóm</th><th>Hồ sơ cần lập</th><th>Đầu ra / giấy tờ kèm theo</th><th>Ưu tiên</th><th>Trạng thái</th></tr></thead><tbody id="dossierChecklistBody"></tbody></table></div>
+                </div>
+
+                <div class="dossier-note-grid">
+                    <div class="dossier-note dossier-note-blue"><i class="fas fa-trowel-bricks"></i><div><strong>Riêng phần tôn Hoa Sen</strong><p>Kiểm tra loại sóng, màu, độ dày, dòng in/mã cuộn, phiếu giao hàng, CO/CQ/CNXX, khung xà gồ trước khi ốp, vít/ron, chồng mí, diềm, máng xối và thử chống dột.</p></div></div>
+                    <div class="dossier-note dossier-note-red"><i class="fas fa-ban"></i><div><strong>Nguyên tắc hồ sơ</strong><p>Không lùi ngày, không ký thay. Việc đã thi công nhưng thiếu nghiệm thu phải xác nhận hiện trạng và kiểm tra bổ sung theo yêu cầu của chủ đầu tư/tư vấn giám sát.</p></div></div>
+                </div>
+            </section>
+
+            <!-- TAB 7: MÁY TÍNH KỸ THUẬT HIỆN TRƯỜNG (10 CÔNG CỤ THỰC TẾ) -->
+            <section id="tab-tools" class="content-tab-view">
+                <div class="tools-hero-header">
+                    <div>
+                        <h2><i class="fas fa-calculator text-primary"></i> Bộ Máy tính Hiện trường Kỹ sư Xây dựng (10 Tool)</h2>
+                        <p class="text-muted">Tính toán nhanh khối lượng, định mức vật tư, thủy lực thoát nước, phụ tải điện và pháp lý HĐ tại công trường Hoa Sen Home</p>
+                    </div>
+                    <div class="tools-tag"><i class="fas fa-bolt text-warning"></i> TIÊU CHUẨN XÂY DỰNG VIỆT NAM (TCVN)</div>
+                </div>
+
+                <!-- 10 Field Tools Interactive Grid -->
+                <div class="field-tools-grid">
+                    
+                    <!-- TOOL 1: BÊ TÔNG & CẤP PHỐI -->
+                    <div class="tool-card">
+                        <div class="tool-card-head">
+                            <div class="tool-badge"><i class="fas fa-cube"></i> TOOL 01</div>
+                            <h4>Tính Thể tích Bê tông & Cấp phối Vật tư</h4>
+                        </div>
+                        <p class="tool-desc">Tính khối lượng móng, dầm đà kiềng, cột, sàn và định mức xi măng, cát vàng, đá 1x2, nước theo mác M150 - M350.</p>
+                        <div id="t1_geometry" class="tool-geometry" aria-label="Sơ đồ cấu kiện bê tông"></div>
+                        <div class="tool-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Cấu kiện:</label>
+                                    <select id="t1_struct" class="form-control" onchange="window.hshCalcConcrete()">
+                                        <option value="footing">Móng đơn</option>
+                                        <option value="strip_footing">Móng băng</option>
+                                        <option value="beam">Dầm / Đà kiềng (ĐK)</option>
+                                        <option value="column">Cột bê tông</option>
+                                        <option value="slab">Sàn bê tông</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Mác bê tông:</label>
+                                    <select id="t1_grade" class="form-control" onchange="window.hshCalcConcrete()">
+                                        <option value="M250">M250 (Xi măng PCB40) - Tiêu chuẩn dầm móng</option>
+                                        <option value="M100">M100 (Xi măng PCB30) - Lót móng</option>
+                                        <option value="M200">M200 (Xi măng PCB40) - Nhà NV</option>
+                                        <option value="M300">M300 (Xi măng PCB40) - Cột chịu lực</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row-3">
+                                <div class="form-group">
+                                    <label>Dài L (m):</label>
+                                    <input type="number" id="t1_len" class="form-control" value="2.2" step="0.1" oninput="window.hshCalcConcrete()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Rộng B (m):</label>
+                                    <input type="number" id="t1_wid" class="form-control" value="2.0" step="0.1" oninput="window.hshCalcConcrete()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Cao/Dày H (m):</label>
+                                    <input type="number" id="t1_hgt" class="form-control" value="0.7" step="0.05" oninput="window.hshCalcConcrete()">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Số lượng cấu kiện (cái/hố):</label>
+                                <input type="number" id="t1_qty" class="form-control" value="8" step="1" oninput="window.hshCalcConcrete()">
+                            </div>
+                        </div>
+                        <div class="tool-result-box" id="t1_result">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TOOL 2: CỐT THÉP & THÉP HÌNH -->
+                    <div class="tool-card">
+                        <div class="tool-card-head">
+                            <div class="tool-badge"><i class="fas fa-bars"></i> TOOL 02</div>
+                            <h4>Tra Cứu Trọng lượng Thép Tròn & Thép Hình</h4>
+                        </div>
+                        <p class="tool-desc">Tính trọng lượng cốt thép xây dựng phi 6-32 và thép hình kết cấu kèo I-350, xà gồ C125 Hoa Sen.</p>
+                        <div class="tool-geometry" aria-label="Sơ đồ tính trọng lượng thép">
+                            <svg viewBox="0 0 120 70" role="img"><line class="geo-stroke" x1="18" y1="35" x2="100" y2="35"></line><circle class="geo-accent" cx="18" cy="35" r="7"></circle><path class="geo-stroke" d="M25 20v30M93 20v30M25 25h68M25 45h68"></path><text class="geo-text" x="46" y="17">Ø</text><text class="geo-text" x="56" y="63">l</text><text class="geo-text" x="103" y="33">n</text></svg>
+                            <div><strong>Thanh thép / thép hình</strong><small>P = qØ × l × n</small><div class="geo-key">qØ kg/m · l chiều dài · n số thanh/cấu kiện</div></div>
+                        </div>
+                        <div class="tool-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Loại thép:</label>
+                                    <select id="t2_type" class="form-control" onchange="window.hshToggleSteelType(); window.hshCalcSteel();">
+                                        <option value="rebar">Thép tròn thanh vằn (Phi 6 - Phi 32)</option>
+                                        <option value="i_beam">Thép hình I-350x175x7x11 (Kèo Canopy)</option>
+                                        <option value="c_purlin">Xà gồ C125x50x20x2.0 (Hoa Sen)</option>
+                                        <option value="box_tube">Thép hộp mạ kẽm 50x100x2.0</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="t2_dia_wrap">
+                                    <label>Đường kính (Phi):</label>
+                                    <select id="t2_dia" class="form-control" onchange="window.hshCalcSteel()">
+                                        <option value="6">Phi 6 (0.222 kg/m)</option>
+                                        <option value="8">Phi 8 (0.395 kg/m)</option>
+                                        <option value="10">Phi 10 (0.617 kg/m)</option>
+                                        <option value="12">Phi 12 (0.888 kg/m)</option>
+                                        <option value="14">Phi 14 (1.210 kg/m)</option>
+                                        <option value="16" selected>Phi 16 (1.580 kg/m) - Thép dầm ĐK</option>
+                                        <option value="18">Phi 18 (2.000 kg/m) - Thép móng M</option>
+                                        <option value="20">Phi 20 (2.470 kg/m) - Bu lông neo J</option>
+                                        <option value="22">Phi 22 (2.980 kg/m)</option>
+                                        <option value="25">Phi 25 (3.850 kg/m)</option>
+                                        <option value="28">Phi 28 (4.830 kg/m)</option>
+                                        <option value="32">Phi 32 (6.310 kg/m)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Chiều dài mỗi thanh (m):</label>
+                                    <input type="number" id="t2_len" class="form-control" value="11.7" step="0.1" oninput="window.hshCalcSteel()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Tổng số thanh (cây):</label>
+                                    <input type="number" id="t2_qty" class="form-control" value="48" step="1" oninput="window.hshCalcSteel()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-result-box" id="t2_result">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TOOL 3: SIKA GROUT & RAMSET CẤY THÉP -->
+                    <div class="tool-card">
+                        <div class="tool-card-head">
+                            <div class="tool-badge"><i class="fas fa-vial"></i> TOOL 03</div>
+                            <h4>Tính Sika Grout 214-11 & Ramset Cấy Thép</h4>
+                        </div>
+                        <p class="tool-desc">Tính lượng vữa tự rót không co ngót chèn chân cột KCT và số tuýp keo cấy thép Ramset Epcon G5 / Hilti RE500-V3.</p>
+                        <div class="tool-geometry" aria-label="Sơ đồ khe grout và lỗ khoan cấy thép">
+                            <svg viewBox="0 0 120 70" role="img"><rect class="geo-fill" x="16" y="18" width="72" height="35" rx="2"></rect><rect class="geo-accent" x="27" y="42" width="50" height="9"></rect><path class="geo-stroke" d="M92 20v32M95 20h12M95 52h12"></path><text class="geo-text" x="43" y="38">h</text><text class="geo-text" x="99" y="38">H</text><circle class="geo-accent" cx="106" cy="12" r="5"></circle><text class="geo-text" x="4" y="65">A = D×R</text></svg>
+                            <div><strong>Khe rót / lỗ neo</strong><small>V = D × R × h × n · keo: n lỗ / tuýp</small><div class="geo-key">D×R bản mã · h khe rót · n vị trí/lỗ khoan</div></div>
+                        </div>
+                        <div class="tool-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Chế độ tính:</label>
+                                    <select id="t3_mode" class="form-control" onchange="window.hshToggleSikaMode(); window.hshCalcSika();">
+                                        <option value="sika">Sika Grout 214-11 (Rót chân cột & móng)</option>
+                                        <option value="ramset">Keo cấy thép Ramset G5 Pro (Tuýp 600ml)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="t3_sika_param1">
+                                    <label>Độ dày khe rót (mm):</label>
+                                    <input type="number" id="t3_thick" class="form-control" value="50" step="5" oninput="window.hshCalcSika()">
+                                </div>
+                            </div>
+                            <div class="form-row-2" id="t3_sika_dims">
+                                <div class="form-group">
+                                    <label>Kích thước bản mã (DxR mm):</label>
+                                    <input type="text" id="t3_baseplate" class="form-control" value="450x300" oninput="window.hshCalcSika()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Số lượng vị trí chân cột:</label>
+                                    <input type="number" id="t3_col_qty" class="form-control" value="8" step="1" oninput="window.hshCalcSika()">
+                                </div>
+                            </div>
+                            <div class="form-row-2" id="t3_ramset_dims" style="display: none;">
+                                <div class="form-group">
+                                    <label>Đường kính thép cấy:</label>
+                                    <select id="t3_rebar_size" class="form-control" onchange="window.hshCalcSika()">
+                                        <option value="16">D16 (Khoan lỗ d20, sâu 160mm)</option>
+                                        <option value="18">D18 (Khoan lỗ d22, sâu 180mm)</option>
+                                        <option value="20">D20 (Khoan lỗ d25, sâu 200mm)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Số lỗ khoan cấy:</label>
+                                    <input type="number" id="t3_hole_qty" class="form-control" value="32" step="1" oninput="window.hshCalcSika()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-result-box" id="t3_result">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TOOL 4: GẠCH XÂY & VỮA XÂY TRÁT M75 -->
+                    <div class="tool-card">
+                        <div class="tool-card-head">
+                            <div class="tool-badge"><i class="fas fa-th"></i> TOOL 04</div>
+                            <h4>Tính Gạch Xây Tường 200/100 & Vữa Xây Trát</h4>
+                        </div>
+                        <p class="tool-desc">Định mức gạch Tuynel 8x8x19cm, cát và xi măng xây trát mác M75 theo định mức xây dựng Việt Nam.</p>
+                        <div class="tool-geometry" aria-label="Sơ đồ tính diện tích tường xây">
+                            <svg viewBox="0 0 120 70" role="img"><rect class="geo-fill" x="30" y="12" width="58" height="45"></rect><path class="geo-stroke" d="M30 27h58M30 42h58M49 12v15M69 27v15M49 42v15M30 12h58"></path><text class="geo-text" x="55" y="9">L</text><text class="geo-text" x="92" y="38">H</text><text class="geo-text" x="40" y="67">A = L×H − A cửa</text></svg>
+                            <div><strong>Mặt đứng tường</strong><small>A net = L × H − A cửa</small><div class="geo-key">L dài tường · H cao tường · A cửa diện tích lỗ mở</div></div>
+                        </div>
+                        <div class="tool-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Loại tường xây:</label>
+                                    <select id="t4_wall_type" class="form-control" onchange="window.hshCalcBrick()">
+                                        <option value="wall200">Tường đôi 200mm (Nhà NV & tường biên)</option>
+                                        <option value="wall100">Tường đơn 100mm (Ngăn phòng WC)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Mác vữa:</label>
+                                    <select id="t4_mortar_grade" class="form-control" onchange="window.hshCalcBrick()">
+                                        <option value="M75">Vữa M75 (Xi măng PCB30)</option>
+                                        <option value="M50">Vữa M50</option>
+                                        <option value="M100">Vữa M100</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row-3">
+                                <div class="form-group">
+                                    <label>Chiều dài tường (m):</label>
+                                    <input type="number" id="t4_len" class="form-control" value="28.5" step="0.5" oninput="window.hshCalcBrick()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Chiều cao tường (m):</label>
+                                    <input type="number" id="t4_hgt" class="form-control" value="3.6" step="0.1" oninput="window.hshCalcBrick()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Trừ cửa (m2):</label>
+                                    <input type="number" id="t4_minus" class="form-control" value="12.0" step="0.5" oninput="window.hshCalcBrick()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-result-box" id="t4_result">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TOOL 5: GẠCH ỐP LÁT & KEO DÁN GẠCH -->
+                    <div class="tool-card">
+                        <div class="tool-card-head">
+                            <div class="tool-badge"><i class="fas fa-border-all"></i> TOOL 05</div>
+                            <h4>Tính Gạch Ốp Lát 600x600 & Keo Dán Gạch</h4>
+                        </div>
+                        <p class="tool-desc">Tính số thùng gạch Granite 600x600, hao hụt cắt cạnh 5%, số bao keo dán gạch Weber/SikaCeram và keo chà ron.</p>
+                        <div class="tool-geometry" aria-label="Sơ đồ chia ô gạch lát">
+                            <svg viewBox="0 0 120 70" role="img"><rect class="geo-fill" x="23" y="10" width="58" height="50"></rect><path class="geo-stroke" d="M52 10v50M23 35h58"></path><path class="geo-accent" d="M85 22h22M85 48h22M96 22v26"></path><text class="geo-text" x="35" y="68">A × (1+w)</text><text class="geo-text" x="91" y="18">thùng</text></svg>
+                            <div><strong>Mặt bằng chia ô</strong><small>N thùng = ⌈A × (1 + hao hụt) / A thùng⌉</small><div class="geo-key">A diện tích · w hao hụt · A thùng theo quy cách</div></div>
+                        </div>
+                        <div class="tool-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Quy cách gạch:</label>
+                                    <select id="t5_tile_size" class="form-control" onchange="window.hshCalcTile()">
+                                        <option value="600x600">600x600 mm (1.44 m2/thùng 4 viên) - Hoa Sen Home</option>
+                                        <option value="300x600">300x600 mm (1.44 m2/thùng 8 viên) - Ốp tường WC</option>
+                                        <option value="800x800">800x800 mm (1.92 m2/thùng 3 viên)</option>
+                                        <option value="300x300">300x300 mm (0.99 m2/thùng 11 viên) - Lát chống trơn</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Diện tích ốp lát (m2):</label>
+                                    <input type="number" id="t5_area" class="form-control" value="185" step="5" oninput="window.hshCalcTile()">
+                                </div>
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Tỷ lệ hao hụt cắt (%):</label>
+                                    <input type="number" id="t5_waste" class="form-control" value="5" step="1" oninput="window.hshCalcTile()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Loại chất kết dính:</label>
+                                    <select id="t5_adhesive" class="form-control" onchange="window.hshCalcTile()">
+                                        <option value="glue">Keo dán gạch cao cấp (5 kg/m2 - Bao 25kg)</option>
+                                        <option value="cement">Hồ dầu xi măng truyền thống</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-result-box" id="t5_result">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TOOL 6: SƠN KCC PURIST GREY & BỘT BẢ -->
+                    <div class="tool-card">
+                        <div class="tool-card-head">
+                            <div class="tool-badge"><i class="fas fa-paint-roller"></i> TOOL 06</div>
+                            <h4>Tính Sơn KCC Epoxy & Bột Bả Tường Ngoài/Trong</h4>
+                        </div>
+                        <p class="tool-desc">Định mức sơn hoàn thiện KCC Purist Grey chuẩn nhận diện Hoa Sen Home (1 lót + 2 phủ) và sơn sàn epoxy.</p>
+                        <div class="tool-geometry" aria-label="Sơ đồ các lớp sơn">
+                            <svg viewBox="0 0 120 70" role="img"><rect class="geo-stroke" x="22" y="12" width="15" height="47"></rect><rect class="geo-fill" x="37" y="12" width="18" height="47"></rect><rect class="geo-accent" x="55" y="12" width="18" height="47"></rect><rect fill="#FDE68A" stroke="#153E73" stroke-width="2" x="73" y="12" width="18" height="47"></rect><text class="geo-text" x="17" y="68">nền</text><text class="geo-text" x="39" y="9">lót</text><text class="geo-text" x="54" y="9">phủ 1</text><text class="geo-text" x="72" y="9">phủ 2</text></svg>
+                            <div><strong>Mặt cắt lớp hoàn thiện</strong><small>Vật tư = A × định mức phủ / độ phủ</small><div class="geo-key">A diện tích · lót 1 lớp · phủ 2 lớp · kiểm tra nền</div></div>
+                        </div>
+                        <div class="tool-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Hạng mục sơn:</label>
+                                    <select id="t6_paint_type" class="form-control" onchange="window.hshCalcPaint()">
+                                        <option value="wall_ext">Sơn nước ngoại thất KCC (1 lót + 2 phủ)</option>
+                                        <option value="wall_int">Sơn nước nội thất Nhà NV (1 lót + 2 phủ)</option>
+                                        <option value="floor_epoxy">Sơn sàn Epoxy KCC (1 lót + 2 phủ chịu tải)</option>
+                                        <option value="steel_alkyd">Sơn chống rỉ & hoàn thiện KCT Thép</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tổng diện tích bề mặt (m2):</label>
+                                    <input type="number" id="t6_area" class="form-control" value="450" step="10" oninput="window.hshCalcPaint()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-result-box" id="t6_result">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TOOL 7: TÔN LỢP MAG SHIELD & THỦY LỰC THOÁT NƯỚC MƯA TCVN 4474 -->
+                    <div class="tool-card">
+                        <div class="tool-card-head">
+                            <div class="tool-badge"><i class="fas fa-cloud-showers-heavy"></i> TOOL 07</div>
+                            <h4>Tính Tôn Mag Shield & Thủy Lực Thoát Nước Mưa</h4>
+                        </div>
+                        <p class="tool-desc">Tính diện tích tôn Hoa Sen Mag Shield dày 0.50mm, kích thước máng xối Inox 304 và số ống thoát D110/D140 theo TCVN 4474.</p>
+                        <div class="tool-geometry" aria-label="Sơ đồ mái dốc và thoát nước mưa">
+                            <svg viewBox="0 0 120 70" role="img"><path class="geo-fill" d="M15 52L54 18l48 34z"></path><path class="geo-stroke" d="M15 52h87M54 18v34M54 30l15 0M69 30l-3 -3M69 30l-3 3"></path><text class="geo-text" x="52" y="15">i%</text><text class="geo-text" x="30" y="64">A chiếu bằng</text><circle class="geo-accent" cx="91" cy="48" r="5"></circle><text class="geo-text" x="94" y="41">D</text></svg>
+                            <div><strong>Mái dốc → máng → ống đứng</strong><small>Q = q × A / 10.000 · A mái thực = A / cos(arctan i)</small><div class="geo-key">i độ dốc · q cường độ mưa · D đường kính ống</div></div>
+                        </div>
+                        <div class="tool-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Diện tích hình chiếu mái (m2):</label>
+                                    <input type="number" id="t7_roof_area" class="form-control" value="380" step="10" oninput="window.hshCalcRoofHydraulics()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Độ dốc mái i (%):</label>
+                                    <input type="number" id="t7_slope" class="form-control" value="15" step="1" oninput="window.hshCalcRoofHydraulics()">
+                                </div>
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Cường độ mưa tính toán (l/s.ha Hà Nam):</label>
+                                    <input type="number" id="t7_rain_intensity" class="form-control" value="420" step="10" oninput="window.hshCalcRoofHydraulics()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Đường kính ống thu đứng:</label>
+                                    <select id="t7_pipe_dia" class="form-control" onchange="window.hshCalcRoofHydraulics()">
+                                        <option value="110">Ống PVC D110 (Thoát ~180 m2 mái/ống)</option>
+                                        <option value="140">Ống PVC D140 (Thoát ~320 m2 mái/ống)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-result-box" id="t7_result">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TOOL 8: CHIẾU SÁNG LED RẠNG ĐÔNG & PHỤ TẢI ĐIỆN 3 PHA -->
+                    <div class="tool-card">
+                        <div class="tool-card-head">
+                            <div class="tool-badge"><i class="fas fa-bolt"></i> TOOL 08</div>
+                            <h4>Tính Chiếu Sáng LED & Phụ Tải Điện 3 Pha</h4>
+                        </div>
+                        <p class="tool-desc">Tính số lượng đèn LED Rạng Đông đạt chuẩn quang thông Lux TCVN 7114 và tính dòng điện định mức chọn Aptomat/Cáp Cadivi.</p>
+                        <div class="tool-geometry" aria-label="Sơ đồ tính chiếu sáng và điện ba pha">
+                            <svg viewBox="0 0 120 70" role="img"><rect class="geo-fill" x="23" y="14" width="70" height="42"></rect><circle class="geo-accent" cx="41" cy="28" r="5"></circle><circle class="geo-accent" cx="75" cy="28" r="5"></circle><circle class="geo-accent" cx="41" cy="45" r="5"></circle><circle class="geo-accent" cx="75" cy="45" r="5"></circle><text class="geo-text" x="49" y="10">E×A</text><text class="geo-text" x="96" y="38">P</text><text class="geo-text" x="5" y="65">Φ·lamp</text></svg>
+                            <div><strong>Phòng + điểm đèn</strong><small>n = E × A / (Φ × UF × MF)</small><div class="geo-key">E Lux · A m² · Φ quang thông · UF/MF hệ số</div></div>
+                        </div>
+                        <div class="tool-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Khu vực chiếu sáng:</label>
+                                    <select id="t8_room_type" class="form-control" onchange="window.hshCalcLightingAndPower()">
+                                        <option value="showroom">Showroom Trưng bày HSH (Yêu cầu: 500 Lux)</option>
+                                        <option value="office">Nhà Nhân Viên / Văn phòng (Yêu cầu: 300 Lux)</option>
+                                        <option value="warehouse">Kho hàng & Xưởng Canopy (Yêu cầu: 150 Lux)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Diện tích sàn (m2):</label>
+                                    <input type="number" id="t8_area" class="form-control" value="320" step="10" oninput="window.hshCalcLightingAndPower()">
+                                </div>
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Loại đèn LED dự kiến:</label>
+                                    <select id="t8_lamp_type" class="form-control" onchange="window.hshCalcLightingAndPower()">
+                                        <option value="highbay50">LED Highbay Rạng Đông 50W (5.000 lm)</option>
+                                        <option value="highbay100">LED Highbay Rạng Đông 100W (10.500 lm)</option>
+                                        <option value="panel40">LED Panel Rạng Đông 600x600 40W (3.600 lm)</option>
+                                        <option value="tube20">LED Tube T8 1.2m 20W (2.200 lm)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tổng công suất phụ tải cơ điện P (kW):</label>
+                                    <input type="number" id="t8_total_kw" class="form-control" value="35" step="5" oninput="window.hshCalcLightingAndPower()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-result-box" id="t8_result">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TOOL 9: BÁO CHÁY TỰ ĐỘNG & BÌNH CHỮA CHÁY PCCC TCVN 3890 -->
+                    <div class="tool-card">
+                        <div class="tool-card-head">
+                            <div class="tool-badge"><i class="fas fa-fire-extinguisher"></i> TOOL 09</div>
+                            <h4>Tính Đầu Báo Cháy Asenware & Bình PCCC</h4>
+                        </div>
+                        <p class="tool-desc">Tính toán số lượng đầu báo khói quang, nút ấn khẩn cấp và bình chữa cháy xách tay theo TCVN 5738:2024 & TCVN 3890:2023.</p>
+                        <div class="tool-geometry" aria-label="Sơ đồ bố trí đầu báo cháy và bình chữa cháy">
+                            <svg viewBox="0 0 120 70" role="img"><rect class="geo-fill" x="22" y="12" width="72" height="46"></rect><path class="geo-stroke" d="M58 12v46M22 35h72"></path><circle class="geo-accent" cx="40" cy="24" r="5"></circle><circle class="geo-accent" cx="76" cy="24" r="5"></circle><circle class="geo-accent" cx="40" cy="47" r="5"></circle><circle class="geo-accent" cx="76" cy="47" r="5"></circle><text class="geo-text" x="49" y="9">A/S</text><text class="geo-text" x="97" y="38">H</text></svg>
+                            <div><strong>Mặt bằng vùng bảo vệ</strong><small>n báo = ⌈A / S⌉ · n bình = ⌈A / diện tích/bình⌉</small><div class="geo-key">A diện tích · S vùng/đầu báo · H cao trần</div></div>
+                        </div>
+                        <div class="tool-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Chiều cao trần H (m):</label>
+                                    <input type="number" id="t9_ceiling_hgt" class="form-control" value="4.5" step="0.5" oninput="window.hshCalcPCCC()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Diện tích mặt bằng bảo vệ (m2):</label>
+                                    <input type="number" id="t9_area" class="form-control" value="650" step="50" oninput="window.hshCalcPCCC()">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Mức độ nguy hiểm cháy nổ:</label>
+                                <select id="t9_hazard" class="form-control" onchange="window.hshCalcPCCC()">
+                                    <option value="medium">Nguy cơ cháy trung bình (Showroom & Nhà NV - 1 bình/75m2)</option>
+                                    <option value="high">Nguy cơ cháy cao (Kho sơn, tôn cuộn, hóa chất - 1 bình/50m2)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="tool-result-box" id="t9_result">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TOOL 10: KIỂM TRA TRƯỚC NGHIỆM THU & BÀN GIAO -->
+                    <div class="tool-card tool-card-fieldgate">
+                        <div class="tool-card-head">
+                            <div class="tool-badge"><i class="fas fa-list-check"></i> TOOL 10</div>
+                            <h4>Kiểm Tra Trước Nghiệm Thu & Bàn Giao</h4>
+                        </div>
+                        <p class="tool-desc">Chọn đúng nhóm công việc để nhận checklist ngắn, điểm dừng kiểm tra và các liên kết sang bản vẽ, QA/QC, BOQ và hồ sơ dự án.</p>
+                        <div class="tool-geometry" aria-label="Chuỗi kiểm tra trước nghiệm thu">
+                            <svg viewBox="0 0 120 70" role="img"><path class="geo-stroke" d="M16 35h88M29 35l10-12M52 35l10-12M75 35l10-12"></path><circle class="geo-fill" cx="16" cy="35" r="8"></circle><circle class="geo-fill" cx="39" cy="35" r="8"></circle><circle class="geo-fill" cx="62" cy="35" r="8"></circle><circle class="geo-accent" cx="85" cy="35" r="8"></circle><text class="geo-text" x="13" y="38">1</text><text class="geo-text" x="36" y="38">2</text><text class="geo-text" x="59" y="38">3</text><text class="geo-text" x="82" y="38">4</text><text class="geo-text" x="12" y="61">BV</text><text class="geo-text" x="35" y="61">VL</text><text class="geo-text" x="58" y="61">TC</text><text class="geo-text" x="81" y="61">HS</text></svg>
+                            <div><strong>4 cổng kiểm soát</strong><small>Bản vẽ → vật liệu → thi công → hồ sơ</small><div class="geo-key">Chỉ nghiệm thu khi đủ bằng chứng và điểm dừng</div></div>
+                        </div>
+                        <div class="tool-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Nhóm công việc:</label>
+                                    <select id="t10_gate_type" class="form-control" onchange="window.hshRenderFieldGate()">
+                                        <option value="foundation">Móng, đà kiềng & bê tông</option>
+                                        <option value="steel">Khung thép, bu lông & mối hàn</option>
+                                        <option value="roof">Mái, vách tôn & máng xối</option>
+                                        <option value="waterproofing">Bể tự hoại & chống thấm</option>
+                                        <option value="mep">MEP: điện, nước & tiếp địa</option>
+                                        <option value="pccc">PCCC & chạy thử liên động</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Vị trí / khu vực:</label>
+                                    <input type="text" id="t10_gate_location" class="form-control" placeholder="VD: M1-M8 / Nhà NV D30" oninput="window.hshRenderFieldGate()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-result-box" id="t10_result">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TAB 8: CẤU HÌNH DỰ ÁN & QUẢN TRỊ DỮ LIỆU -->
+            <section id="tab-settings" class="content-tab-view">
+                <div class="section-top-banner">
+                    <div>
+                        <h2><i class="fas fa-sliders-h text-primary"></i> Cấu hình Dự án & Quản trị Bộ nhớ Cục bộ</h2>
+                        <p class="text-muted">Đồng bộ duy nhất thông số tiến độ D60, IndexedDB v2, sao lưu và khôi phục dữ liệu</p>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Project Unified Parameters Form -->
+                    <div class="card p-4">
+                        <h4><i class="fas fa-project-diagram text-primary"></i> Thông số Dự án Duy nhất (Single Source of Truth)</h4>
+                        <div class="form-group mt-3">
+                            <label>Tên Dự án:</label>
+                            <input type="text" id="cfgProjectName" class="form-control" value="CẢI TẠO HOA SEN HOME PHỦ LÝ">
+                        </div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>Mã Hợp đồng:</label>
+                                <input type="text" id="cfgContractNo" class="form-control" value="01/2026/HĐXD/HSG-HG">
+                            </div>
+                            <div class="form-group">
+                                <label>Tổng giá trị (gồm 8% VAT):</label>
+                                <input type="text" id="cfgContractVal" class="form-control" value="4.162.478.183 VNĐ">
+                            </div>
+                        </div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>Ngày Khởi công:</label>
+                                <input type="date" id="cfgStartDate" class="form-control" value="2026-09-10">
+                            </div>
+                            <div class="form-group">
+                                <label>Tổng thời gian HĐ (Ngày):</label>
+                                <input type="number" id="cfgTotalDays" class="form-control" value="60" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>Tiến độ Kế hoạch (%):</label>
+                                <input type="number" id="cfgPlanRate" class="form-control" value="1.5" step="0.5">
+                            </div>
+                            <div class="form-group">
+                                <label>Tiến độ Thực tế (%):</label>
+                                <input type="number" id="cfgActualRate" class="form-control" value="0.0" step="0.5">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mt-2" onclick="window.hshSaveProjectConfig()"><i class="fas fa-save"></i> Lưu & Đồng bộ Toàn hệ thống</button>
+                    </div>
+
+                    <!-- Database & Cache Controls -->
+                    <div class="card p-4">
+                        <h4><i class="fas fa-database text-success"></i> Quản trị Dữ liệu Dexie IndexedDB & Offline</h4>
+                        <p class="text-muted">Cơ sở dữ liệu cục bộ tốc độ cao, hoạt động 100% không phụ thuộc Internet.</p>
+                        
+                        <div class="db-action-list mt-3">
+                            <div class="db-action-item">
+                                <div>
+                                    <strong>Sao lưu Toàn bộ Hệ thống (JSON Backup)</strong>
+                                    <p class="text-muted text-xs">Xuất toàn bộ 328 dòng BOQ, 76 trang bản vẽ, nhật ký, QA/QC và checklist hồ sơ ra 1 file duy nhất.</p>
+                                </div>
+                                <button class="btn btn-sm btn-outline" onclick="window.hshExportJSONBackup()"><i class="fas fa-file-export"></i> Xuất File</button>
+                            </div>
+
+                            <div class="db-action-item">
+                                <div>
+                                    <strong>Khôi phục Dữ liệu từ JSON Backup</strong>
+                                    <p class="text-muted text-xs">Nhập lại dữ liệu từ file backup đã lưu trước đó.</p>
+                                </div>
+                                <label class="btn btn-sm btn-outline" style="cursor: pointer;">
+                                    <i class="fas fa-file-import"></i> Chọn File
+                                    <input type="file" id="jsonImportFileInput" accept=".json" style="display: none;" onchange="window.hshImportJSONBackup(event)">
+                                </label>
+                            </div>
+
+                            <div class="db-action-item">
+                                <div>
+                                    <strong>Làm mới Cache PWA ServiceWorker</strong>
+                                    <p class="text-muted text-xs">Cập nhật cache offline phiên bản mới nhất.</p>
+                                </div>
+                                <button class="btn btn-sm btn-warning" onclick="window.hshClearServiceWorkerCache()"><i class="fas fa-sync"></i> Refresh Cache</button>
+                            </div>
+
+                            <div class="db-action-item">
+                                <div>
+                                    <strong class="text-danger">Khôi phục Dữ liệu Mặc định (Factory Reset)</strong>
+                                    <p class="text-muted text-xs">Nạp lại dữ liệu gốc chuẩn từ Tập đoàn Hoa Sen.</p>
+                                </div>
+                                <button class="btn btn-sm btn-danger" onclick="window.hshResetDefaultData()"><i class="fas fa-trash-restore"></i> Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ENHANCED CAD LIGHTBOX MODAL WITH ROTATE, CAD DARK MODE & ZOOM -->
+    <div id="enhancedCadLightboxModal" class="lightbox-modal">
+        <div class="lightbox-topbar">
+            <div class="lightbox-title-area">
+                <div class="lightbox-code-badge" id="lbDrawingCode">KT-01</div>
+                <div class="lightbox-title-text" id="lbDrawingTitle">Mặt bằng Bố trí Cải tạo Tổng thể</div>
+            </div>
+            
+            <!-- Lightbox Toolbar -->
+            <div class="lightbox-controls">
+                <button class="lb-btn" id="lbBtnZoomIn" title="Phóng to (+)" onclick="window.hshLightboxZoom(0.25)"><i class="fas fa-search-plus"></i></button>
+                <button class="lb-btn" id="lbBtnZoomOut" title="Thu nhỏ (-)" onclick="window.hshLightboxZoom(-0.25)"><i class="fas fa-search-minus"></i></button>
+                <button class="lb-btn" id="lbBtnResetZoom" title="Đặt lại phóng to 100%" onclick="window.hshLightboxResetZoom()"><i class="fas fa-compress-arrows-alt"></i></button>
+                <button class="lb-btn" id="lbBtnRotate" title="Xoay bản vẽ 90 độ" onclick="window.hshLightboxRotate()"><i class="fas fa-redo"></i> Xoay 90°</button>
+                <button class="lb-btn" id="lbBtnCadInvert" title="Chế độ CAD nền đen (Invert Colors)" onclick="window.hshLightboxCadInvert()"><i class="fas fa-adjust"></i> CAD Mode</button>
+                <button class="lb-btn" id="lbBtnDownload" title="Tải file bản vẽ HD" onclick="window.hshLightboxDownload()"><i class="fas fa-download"></i></button>
+                <button class="lb-btn lb-btn-close" id="lbBtnClose" title="Đóng Lightbox (Esc)" onclick="window.hshLightboxClose()"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <div class="lightbox-viewport" id="lbViewport">
+            <div class="lightbox-img-wrapper" id="lbImgWrapper">
+                <img src="" alt="Bản vẽ Kỹ thuật Hoa Sen Home" id="lbImage" class="lightbox-img">
+            </div>
+        </div>
+
+        <div class="lightbox-bottombar">
+            <div class="lb-nav-buttons">
+                <button class="btn btn-sm btn-outline-light" id="lbBtnPrev" onclick="window.hshLightboxPrev()"><i class="fas fa-chevron-left"></i> Bản vẽ Trước</button>
+                <span class="lb-index-indicator" id="lbIndexText">1 / 76</span>
+                <button class="btn btn-sm btn-outline-light" id="lbBtnNext" onclick="window.hshLightboxNext()">Bản vẽ Sau <i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="lb-meta-info" id="lbMetaInfo">
+                <span><i class="fas fa-stamp"></i> Đã duyệt thi công</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK SEARCH MODAL (Ctrl + K) -->
+    <div id="quickSearchModal" class="search-modal-overlay">
+        <div class="search-modal-box">
+            <div class="search-modal-header">
+                <i class="fas fa-search"></i>
+                <input type="text" id="quickSearchModalInput" placeholder="Tìm bản vẽ, BOQ 328 dòng, QA/QC, tiêu chuẩn TCVN..." oninput="window.hshExecuteQuickSearch()">
+                <kbd onclick="window.hshCloseQuickSearch()">Esc</kbd>
+            </div>
+            <div class="search-results-list" id="quickSearchResultsList">
+                <div class="search-empty-prompt">Nhập từ khóa để tra cứu siêu tốc trong toàn bộ dự án Hoa Sen Home...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI TECHNICAL ASSISTANT MODAL -->
+    <div id="aiAssistantModal" class="custom-modal-overlay">
+        <div class="custom-modal-card">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-robot text-primary"></i> Trợ lý Kỹ thuật & Pháp lý Xây dựng Hoa Sen</div>
+                <button class="btn-close-modal" onclick="window.hshCloseAiAssistant()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body ai-chat-body" id="aiChatBody">
+                <div class="ai-msg ai-msg-bot">
+                    <div class="ai-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="ai-text">
+                        Xin chào Chỉ huy trưởng! Tôi là Trợ lý Kỹ thuật & Pháp lý của dự án Hoa Sen Home Phủ Lý. Tôi tra cứu theo hồ sơ 76 trang, BOQ 328 dòng, 16 QA/QC và checklist hồ sơ 20 mục:
+                        <ul>
+                            <li>Chốt việc cần làm, hồ sơ phải lập, điểm dừng nghiệm thu và người cần duyệt.</li>
+                            <li>Đối chiếu móng M1-M8, khung thép/canopy, tôn - máng xối, MEP/PCCC.</li>
+                            <li>Điều hướng trực tiếp sang bản vẽ, BOQ, QA/QC và Hồ sơ Công trình.</li>
+                        </ul>
+                        <div class="ai-safety-note"><i class="fas fa-shield-halved"></i> Trợ lý hỗ trợ kiểm tra và chuẩn bị hồ sơ; thay đổi kết cấu, PCCC hoặc điều khoản hợp đồng vẫn phải được kỹ sư/TVGS/CĐT phê duyệt.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="ai-prompt-strip" aria-label="Câu hỏi gợi ý">
+                <button class="ai-prompt-chip" onclick="window.hshAskAiPreset('Móng M8 giáp hố gas cần làm gì trước khi đổ bê tông?')">Móng M8</button>
+                <button class="ai-prompt-chip" onclick="window.hshAskAiPreset('Bể phốt KC-49 làm thế nào để nghiệm thu?')">Bể phốt KC-49</button>
+                <button class="ai-prompt-chip" onclick="window.hshAskAiPreset('Checklist nghiệm thu lợp tôn và máng xối Hoa Sen')">Nghiệm thu tôn</button>
+                <button class="ai-prompt-chip" onclick="window.hshAskAiPreset('Hồ sơ cần lập cho một đợt thanh toán')">Hồ sơ thanh toán</button>
+                <button class="ai-prompt-chip" onclick="window.hshAskAiPreset('Tra cứu tiêu chuẩn đang dùng cho bê tông, thép và PCCC')">Tra tiêu chuẩn</button>
+            </div>
+            <div class="modal-footer ai-chat-footer">
+                <input type="text" id="aiUserInput" placeholder="Nhập tình huống, mã bản vẽ, mã BOQ hoặc câu hỏi hồ sơ..." onkeydown="if(event.key==='Enter') window.hshSendAiMessage()">
+                <button class="btn btn-primary" onclick="window.hshSendAiMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DAILY LOG ENTRY MODAL -->
+    <div id="dailyLogModal" class="custom-modal-overlay">
+        <div class="custom-modal-card">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-edit text-primary"></i> Ghi Nhật ký Thi công Ngày Hôm nay</div>
+                <button class="btn-close-modal" onclick="window.hshCloseDailyLogModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Ngày ghi nhật ký:</label>
+                        <input type="date" id="logInputDate" class="form-control" value="2026-09-10">
+                    </div>
+                    <div class="form-group">
+                        <label>Thời tiết:</label>
+                        <select id="logInputWeather" class="form-control">
+                            <option value="Nắng ráo, nhiệt độ 31°C, độ ẩm 68%">Nắng ráo (Thuận lợi)</option>
+                            <option value="Mưa rào nhẹ buổi chiều, thi công trong nhà">Mưa rào nhẹ</option>
+                            <option value="Nhiều mây, gió nhẹ, thời tiết mát mẻ">Nhiều mây</option>
+                            <option value="Mưa lớn ngập cục bộ, tạm dừng ngoài trời">Mưa lớn</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Tổng quân số nhân lực (người):</label>
+                        <input type="number" id="logInputWorkers" class="form-control" value="18" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Máy móc thiết bị hoạt động:</label>
+                        <input type="text" id="logInputEquipment" class="form-control" value="01 Máy xúc Kobelco 0.3m3, 01 máy kinh vĩ định vị, 02 xe tải chở vật tư">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nội dung công việc thực hiện:</label>
+                    <textarea id="logInputWorkDone" class="form-control" rows="3" placeholder="Chi tiết các vị trí thi công...">KHỞI CÔNG DỰ ÁN: Bàn giao mặt bằng từ Ban QLDA Tập đoàn Hoa Sen; Định vị tim trục móng M1-M8; Lắp dựng hàng rào tôn bảo vệ an toàn công trường; Tập kết máy móc, lán trại điều hành.</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Vấn đề phát sinh & Chỉ đạo hiện trường:</label>
+                    <textarea id="logInputIssues" class="form-control" rows="2" placeholder="Ghi nhận tồn tại, cảnh báo an toàn lao động, chỉ đạo xử lý...">Mặt bằng tiếp giáp đường Quốc lộ 1A có mật độ giao thông cao, đã bố trí biển cảnh báo và cử người trực điều tiết giao thông.</textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="window.hshCloseDailyLogModal()">Hủy</button>
+                <button class="btn btn-primary" onclick="window.hshSaveDailyLog()"><i class="fas fa-save"></i> Lưu Nhật Ký</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXPORT REPORT MODAL -->
+    <div id="exportModal" class="custom-modal-overlay">
+        <div class="custom-modal-card">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-file-export text-primary"></i> Xuất Báo Cáo Dự Án Hoa Sen Home</div>
+                <button class="btn-close-modal" onclick="window.hshCloseExportModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Chọn định dạng và nội dung báo cáo cần kết xuất:</p>
+                <div class="export-options-grid">
+                    <div class="export-opt-card" onclick="window.hshExportBOQExcel()">
+                        <i class="fas fa-file-excel text-success"></i>
+                        <h5>Bảng BOQ Dự toán 328 Dòng</h5>
+                        <span>Định dạng Microsoft Excel (.xlsx) đầy đủ công thức và thành tiền</span>
+                    </div>
+                    <div class="export-opt-card" onclick="window.hshExportProgressPDF()">
+                        <i class="fas fa-file-pdf text-danger"></i>
+                        <h5>Báo cáo Tiến độ & S-Curve</h5>
+                        <span>Định dạng PDF sẵn sàng in ấn nộp Ban Quản lý Dự án Tập đoàn Hoa Sen</span>
+                    </div>
+                    <div class="export-opt-card" onclick="window.hshExportJSONBackup()">
+                        <i class="fas fa-database text-primary"></i>
+                        <h5>Sao lưu Toàn bộ Database</h5>
+                        <span>Định dạng JSON chứa toàn bộ dữ liệu dự án, nhật ký, QA/QC</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING TOAST NOTIFICATION -->
+    <div id="toastNotification" class="toast-popup">
+        <i class="fas fa-info-circle toast-icon"></i>
+        <span class="toast-msg">Thông báo</span>
+    </div>
+
+    <!-- Core Application Logic -->
+    <script src="app.js?v=9.2"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js?v=9.2')
+                    .then(reg => console.log('Hoa Sen Home PWA SW registered successfully:', reg.scope))
+                    .catch(err => console.log('SW registration error:', err));
+            });
+        }
+    </script>
+</body>
+</html>

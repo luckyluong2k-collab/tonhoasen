@@ -1,0 +1,22 @@
+{
+  "name": "Hoa Sen Home Phủ Lý - Field Control",
+  "short_name": "HSH Phủ Lý",
+  "description": "Quản lý hiện trường, QA/QC, BOQ và bản vẽ CAD Dự án Hoa Sen Home Phủ Lý",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0A2C54",
+  "theme_color": "#C8102E",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./assets/hoa-sen/design-page-1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./assets/hoa-sen/design-page-1.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
