@@ -66,6 +66,26 @@ const DOSSIER_ITEMS = [
   { id: 20, category: "Thanh toán & hoàn công", title: "Bàn giao, bảo hành và quyết toán", output: "Biên bản bàn giao, bảo hành, hướng dẫn vận hành, quyết toán A-B", priority: "critical" }
 ];
 
+// Contract lookup is intentionally a curated navigation index. The signed PDF is a scan,
+// so the UI searches this structured summary and always links back to the source page.
+const CONTRACT_LOOKUP_ITEMS = [
+  { id: "overview", filter: "overview", group: "Thông tin chung", page: 1, title: "Số hợp đồng, các bên và tên gói thầu", summary: "Hợp đồng 01/2026/HĐXD/HSG-HG giữa Tập đoàn Hoa Sen và Công ty TNHH TM Hoàng Giang cho gói cải tạo, xây mới Hoa Sen Home Phủ Lý.", keywords: "hợp đồng số bên chủ đầu tư nhà thầu gói thầu phủ lý" },
+  { id: "scope", filter: "delivery", group: "Phạm vi & tiến độ", page: 3, title: "Phạm vi công việc và hồ sơ kèm theo", summary: "Tra cứu phần việc xây dựng, cải tạo và MEP/PCCC; khi có thay đổi phạm vi, đối chiếu phụ lục, bản vẽ được duyệt và xác nhận phát sinh.", keywords: "phạm vi công việc phụ lục bản vẽ mep pccc phát sinh" },
+  { id: "quality", filter: "quality", group: "Chất lượng", page: 4, title: "Yêu cầu chất lượng và căn cứ nghiệm thu", summary: "Công việc phải bám thiết kế, chỉ dẫn kỹ thuật, tiêu chuẩn áp dụng và hồ sơ kiểm tra chất lượng trước khi chuyển bước.", keywords: "chất lượng nghiệm thu tiêu chuẩn thiết kế chỉ dẫn kỹ thuật" },
+  { id: "schedule", filter: "delivery", group: "Phạm vi & tiến độ", page: 5, title: "Thời gian thực hiện và mốc hoàn thành", summary: "Thời hạn thực hiện của gói thầu là 60 ngày, từ 10/09/2026 đến 09/11/2026; dùng mục này để đối chiếu tiến độ và các mốc bàn giao.", keywords: "thời gian tiến độ 60 ngày khởi công hoàn thành bàn giao" },
+  { id: "value", filter: "money", group: "Giá trị & thanh toán", page: 5, title: "Giá trị hợp đồng và nguyên tắc giá", summary: "Giá trị đang được hệ thống quản lý ở mức 3.854.146.466 VNĐ trước VAT; dashboard hiển thị thêm tổng sau VAT để theo dõi ngân sách.", keywords: "giá trị hợp đồng giá tiền vat ngân sách đơn giá" },
+  { id: "payment", filter: "money", group: "Giá trị & thanh toán", page: 6, title: "Tạm ứng, thanh toán theo đợt và hồ sơ cần nộp", summary: "Mở trang nguồn để đối chiếu điều kiện tạm ứng, giá trị được thanh toán, thành phần hồ sơ và thời điểm thanh toán từng đợt.", keywords: "thanh toán tạm ứng đợt hồ sơ đề nghị thanh toán giá trị" },
+  { id: "settlement", filter: "money", group: "Giá trị & thanh toán", page: 7, title: "Quyết toán và xác nhận khối lượng", summary: "Kết quả nghiệm thu, xác nhận khối lượng thực tế và hồ sơ hoàn thành là căn cứ để lập thanh toán cuối kỳ/quyết toán.", keywords: "quyết toán khối lượng thực tế nghiệm thu hồ sơ hoàn thành" },
+  { id: "guarantee", filter: "risk", group: "Bảo đảm & rủi ro", page: 8, title: "Bảo lãnh tạm ứng và bảo lãnh thực hiện", summary: "Theo dõi các bảo lãnh, giá trị, thời hạn hiệu lực và điều kiện phải nộp trước khi giải ngân hoặc chuyển bước.", keywords: "bảo lãnh tạm ứng thực hiện hiệu lực ngân hàng bảo đảm" },
+  { id: "duties", filter: "overview", group: "Trách nhiệm các bên", page: 9, title: "Quyền, nghĩa vụ và phối hợp tại công trường", summary: "Dùng để xác định đầu mối cung cấp hồ sơ, phối hợp mặt bằng, thông tin kỹ thuật và trách nhiệm phản hồi khi có vướng mắc.", keywords: "quyền nghĩa vụ trách nhiệm phối hợp chủ đầu tư nhà thầu công trường" },
+  { id: "safety", filter: "quality", group: "An toàn & môi trường", page: 10, title: "An toàn lao động, môi trường và bảo vệ công trường", summary: "Các yêu cầu về tổ chức thi công an toàn, vệ sinh môi trường, bảo vệ người và tài sản phải được kiểm soát trong nhật ký và hồ sơ hiện trường.", keywords: "an toàn lao động môi trường vệ sinh bảo vệ công trường" },
+  { id: "suspension", filter: "risk", group: "Xử lý vi phạm", page: 12, title: "Tạm dừng, chấm dứt và xử lý khi không đáp ứng", summary: "Mở nguồn để đối chiếu điều kiện tạm dừng/chấm dứt, thông báo, khắc phục và trách nhiệm của các bên.", keywords: "tạm dừng chấm dứt vi phạm thông báo khắc phục" },
+  { id: "warranty", filter: "risk", group: "Bảo hành & bảo hiểm", page: 14, title: "Bảo hành, bảo hiểm và khắc phục khiếm khuyết", summary: "Tra cứu thời hạn, phạm vi bảo hành và yêu cầu xử lý khiếm khuyết sau nghiệm thu bàn giao.", keywords: "bảo hành bảo hiểm khiếm khuyết sửa chữa bàn giao" },
+  { id: "penalty", filter: "risk", group: "Bảo đảm & rủi ro", page: 15, title: "Phạt, bồi thường và thiệt hại", summary: "Tìm nhóm quy định về chậm tiến độ, vi phạm nghĩa vụ, chi phí phát sinh và bồi thường để chuyển đúng người phê duyệt.", keywords: "phạt bồi thường thiệt hại chậm tiến độ chi phí phát sinh" },
+  { id: "dispute", filter: "overview", group: "Điều khoản chung", page: 17, title: "Thông báo, giải quyết tranh chấp và hiệu lực", summary: "Trang cuối của phần hợp đồng quy định cách trao đổi, giải quyết bất đồng và hiệu lực chữ ký của các bên.", keywords: "tranh chấp thông báo hiệu lực chữ ký điều khoản chung" },
+  { id: "boq", filter: "money", group: "Phụ lục khối lượng", page: 20, title: "Phụ lục BOQ và bảng khối lượng", summary: "Phần phụ lục từ trang 20 đến 52 dùng để đối chiếu khối lượng, đơn vị tính, đơn giá và các ghi chú thương mại.", keywords: "boq phụ lục khối lượng đơn vị tính đơn giá vật tư" }
+];
+
 function buildCompleteDrawings() {
   const curated = new Map(DRAWINGS.map(drawing => [drawing.id, drawing]));
   const drawings = [];
@@ -193,6 +213,7 @@ db.version(2).stores({
 
 // State variables
 let activeTab = 'tab-dashboard';
+let contractLookupFilter = 'all';
 let currentDrawingCategory = 'all';
 let currentDrawingViewMode = 'grid'; // 'grid' | 'continuous' | 'slider'
 let currentSliderIndex = 0;
@@ -271,6 +292,7 @@ function switchTab(tabId) {
     'tab-dashboard': '<i class="fas fa-chart-pie text-primary"></i> <span>Tổng quan Dự án</span>',
     'tab-gallery': '<i class="fas fa-layer-group text-primary"></i> <span>Thư viện Bản vẽ Chuyên mục</span>',
     'tab-boq': '<i class="fas fa-file-invoice-dollar text-primary"></i> <span>Dự toán & BOQ Chi tiết (328 Dòng)</span>',
+    'tab-contract': '<i class="fas fa-file-signature text-primary"></i> <span>Tra cứu Hợp đồng 01/2026</span>',
     'tab-progress': '<i class="fas fa-tasks text-primary"></i> <span>Tiến độ 60 Ngày & Nhật ký</span>',
     'tab-qaqc': '<i class="fas fa-clipboard-check text-primary"></i> <span>Nghiệm thu Kỹ thuật QA/QC</span>',
     'tab-dossier': '<i class="fas fa-folder-open text-primary"></i> <span>Hồ sơ Công trình</span>',
@@ -289,6 +311,8 @@ function switchTab(tabId) {
     renderDrawings();
   } else if (tabId === 'tab-boq') {
     renderBOQTable();
+  } else if (tabId === 'tab-contract') {
+    renderContractResults();
   } else if (tabId === 'tab-progress') {
     renderDailyLogs();
   } else if (tabId === 'tab-qaqc') {
@@ -2006,6 +2030,104 @@ window.hshOpenDossierSource = function(itemId) {
   showToast(`Đã mở nguồn Hồ sơ mục ${String(itemId).padStart(2, '0')}.`, 'info');
 };
 
+function getContractSearchItems() {
+  const input = document.getElementById('contractSearchInput');
+  const query = aiNormalize(input?.value || '').trim();
+  const terms = query.split(/\s+/).filter(term => term.length > 1);
+  return CONTRACT_LOOKUP_ITEMS.filter(item => {
+    if (contractLookupFilter !== 'all' && item.filter !== contractLookupFilter) return false;
+    if (!terms.length) return true;
+    const haystack = aiNormalize([item.group, item.title, item.summary, item.keywords].join(' '));
+    return terms.every(term => haystack.includes(term));
+  });
+}
+
+function renderContractResults() {
+  const list = document.getElementById('contractSearchResults');
+  const count = document.getElementById('contractResultsCount');
+  const title = document.getElementById('contractResultsTitle');
+  if (!list) return;
+
+  const input = document.getElementById('contractSearchInput');
+  const query = (input?.value || '').trim();
+  const items = getContractSearchItems();
+  if (count) count.textContent = `${items.length} mục`;
+  if (title) title.textContent = query ? `Kết quả cho “${query}”` : 'Các điểm cần biết trước khi triển khai';
+
+  if (!items.length) {
+    list.innerHTML = `<div class="contract-empty-state"><i class="fas fa-magnifying-glass"></i><strong>Chưa có kết quả phù hợp</strong><span>Thử từ khóa ngắn hơn như “thanh toán”, “bảo hành” hoặc “tiến độ”.</span></div>`;
+    return;
+  }
+
+  const source = './assets/hoa-sen/docs/signed%20HDTC%20HSH%20PHU%20LY%20NINH%20BINH.pdf';
+  list.innerHTML = items.map(item => `
+    <article class="contract-result-item" id="contract-result-${item.id}">
+      <div class="contract-result-index">${String(item.page).padStart(2, '0')}</div>
+      <div class="contract-result-copy">
+        <div class="contract-result-meta"><span>${aiEscape(item.group)}</span><span>Trang ${item.page}</span></div>
+        <h4>${aiEscape(item.title)}</h4>
+        <p>${aiEscape(item.summary)}</p>
+        <div class="contract-result-actions">
+          <a href="${source}#page=${item.page}" target="_blank" rel="noopener"><i class="fas fa-file-pdf"></i> Mở PDF trang ${item.page}</a>
+          <button type="button" onclick="window.hshOpenContractItem('${item.id}')"><i class="fas fa-crosshairs"></i> Giữ mục này</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+window.hshRunContractSearch = function() {
+  renderContractResults();
+};
+
+window.hshSetContractFilter = function(filter) {
+  contractLookupFilter = filter || 'all';
+  document.querySelectorAll('[data-contract-filter]').forEach(button => {
+    button.classList.toggle('active', button.getAttribute('data-contract-filter') === contractLookupFilter);
+  });
+  renderContractResults();
+};
+
+window.hshSetContractQuery = function(query) {
+  const input = document.getElementById('contractSearchInput');
+  if (input) input.value = query || '';
+  window.hshRunContractSearch();
+  if (input) input.focus();
+};
+
+window.hshClearContractSearch = function() {
+  window.hshSetContractQuery('');
+};
+
+window.hshOpenContractLookup = function(query = '') {
+  switchTab('tab-contract');
+  setTimeout(() => {
+    window.hshSetContractQuery(query);
+    document.getElementById('contractSearchInput')?.focus();
+  }, 180);
+};
+
+window.hshOpenContractItem = function(itemId) {
+  const item = CONTRACT_LOOKUP_ITEMS.find(entry => entry.id === itemId);
+  if (!item) return;
+  switchTab('tab-contract');
+  setTimeout(() => {
+    contractLookupFilter = item.filter;
+    document.querySelectorAll('[data-contract-filter]').forEach(button => {
+      button.classList.toggle('active', button.getAttribute('data-contract-filter') === contractLookupFilter);
+    });
+    const input = document.getElementById('contractSearchInput');
+    if (input) input.value = '';
+    renderContractResults();
+    const card = document.getElementById(`contract-result-${item.id}`);
+    if (card) {
+      card.classList.add('contract-source-highlight');
+      card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      setTimeout(() => card.classList.remove('contract-source-highlight'), 2800);
+    }
+  }, 220);
+};
+
 window.hshOpenQuickSearch = function() {
   const modal = document.getElementById('quickSearchModal');
   const input = document.getElementById('quickSearchModalInput');
@@ -2022,7 +2144,7 @@ window.hshCloseQuickSearch = function() {
 };
 
 window.hshExecuteQuickSearch = function() {
-  const kw = (document.getElementById('quickSearchModalInput')?.value || '').toLowerCase().trim();
+  const kw = aiNormalize(document.getElementById('quickSearchModalInput')?.value || '').trim();
   const listEl = document.getElementById('quickSearchResultsList');
   if (!listEl) return;
 
@@ -2033,8 +2155,21 @@ window.hshExecuteQuickSearch = function() {
 
   let results = [];
 
+  CONTRACT_LOOKUP_ITEMS.forEach(item => {
+    const haystack = aiNormalize([item.group, item.title, item.summary, item.keywords].join(' '));
+    if (haystack.includes(kw)) {
+      results.push({
+        type: "Hợp đồng",
+        icon: "fa-file-signature text-primary",
+        title: item.title,
+        sub: `${item.group} • Trang ${item.page} • ${item.summary}`,
+        action: () => { window.hshCloseQuickSearch(); window.hshOpenContractItem(item.id); }
+      });
+    }
+  });
+
   DOSSIER_ITEMS.forEach(item => {
-    if (item.title.toLowerCase().includes(kw) || item.category.toLowerCase().includes(kw) || item.output.toLowerCase().includes(kw)) {
+    if (aiNormalize([item.title, item.category, item.output].join(' ')).includes(kw)) {
       results.push({
         type: "Hồ sơ",
         icon: "fa-folder-open text-danger",
@@ -2046,7 +2181,7 @@ window.hshExecuteQuickSearch = function() {
   });
 
   COMPLETE_DRAWINGS.forEach(d => {
-    if (d.title.toLowerCase().includes(kw) || d.desc.toLowerCase().includes(kw) || d.id.toLowerCase().includes(kw)) {
+    if (aiNormalize([d.title, d.desc, d.id].join(' ')).includes(kw)) {
       results.push({
         type: "Bản vẽ",
         icon: "fa-layer-group text-primary",
@@ -2058,7 +2193,7 @@ window.hshExecuteQuickSearch = function() {
   });
 
   RAW_BOQ.slice(0, 100).forEach(b => {
-    if (b.content.toLowerCase().includes(kw) || b.code.toLowerCase().includes(kw) || (b.brand && b.brand.toLowerCase().includes(kw))) {
+    if (aiNormalize([b.content, b.code, b.brand].join(' ')).includes(kw)) {
       results.push({
         type: "BOQ Dự toán",
         icon: "fa-file-invoice-dollar text-success",

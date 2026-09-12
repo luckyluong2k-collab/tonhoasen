@@ -86,6 +86,12 @@
                     <span class="nav-badge">328</span>
                 </a>
 
+                <a href="#contract" class="nav-item" data-tab="tab-contract" onclick="window.hshNavigateToTab('tab-contract'); return false;">
+                    <i class="fas fa-file-signature nav-icon"></i>
+                    <span class="nav-text">Tra cứu Hợp đồng</span>
+                    <span class="nav-badge badge-gold">15 mục</span>
+                </a>
+
                 <a href="#progress" class="nav-item" data-tab="tab-progress" onclick="window.hshNavigateToTab('tab-progress'); return false;">
                     <i class="fas fa-tasks nav-icon"></i>
                     <span class="nav-text">Tiến độ & Nhật ký</span>
@@ -160,7 +166,7 @@
                 <div class="top-bar-center">
                     <div class="quick-search-box" onclick="window.hshOpenQuickSearch()">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Tìm nhanh bản vẽ, đầu việc BOQ, tiêu chuẩn... (Ctrl + K)" readonly>
+                        <input type="text" placeholder="Tra cứu hợp đồng, bản vẽ, BOQ... (Ctrl + K)" readonly>
                         <kbd>Ctrl K</kbd>
                     </div>
                 </div>
@@ -194,6 +200,7 @@
                     <button class="field-action primary" onclick="window.hshOpenDailyLogModal()"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span><strong>Ghi nhật ký thi công</strong><small>Nhập công việc, nhân lực, phát sinh</small></span><b aria-hidden="true">＋</b></button>
                     <a class="field-action" href="./dossier-editor.html?type=acceptance"><i class="fas fa-file-signature" aria-hidden="true"></i><span><strong>Lập biên bản nghiệm thu</strong><small>Mở mẫu để điền hồ sơ</small></span><b aria-hidden="true">→</b></a>
                     <button class="field-action" onclick="window.hshNavigateToTab('tab-qaqc')"><i class="fas fa-clipboard-check" aria-hidden="true"></i><span><strong>Kiểm tra QA/QC</strong><small>Mở checklist nghiệm thu</small></span><b aria-hidden="true">→</b></button>
+                    <button class="field-action contract-action" onclick="window.hshOpenContractLookup()"><i class="fas fa-file-signature" aria-hidden="true"></i><span><strong>Tra cứu hợp đồng</strong><small>Tìm thanh toán, tiến độ, bảo hành</small></span><b aria-hidden="true">⌕</b></button>
                 </div>
 
                 <!-- Project Identity Banner -->
@@ -213,6 +220,25 @@
                             <div class="countdown-remain">Còn lại: <strong>59 ngày</strong></div>
                         </div>
                     </div>
+                </div>
+
+                <!-- User-provided project perspective / front elevation -->
+                <div class="dashboard-perspective-card">
+                    <div class="perspective-copy">
+                        <div class="eyebrow-label"><i class="fas fa-panorama"></i> Phối cảnh công trình</div>
+                        <h3>Phối cảnh mặt đứng Hoa Sen Home</h3>
+                        <p>Ảnh tham chiếu mặt tiền, bảng hiệu và các nhịp cửa cuốn theo hồ sơ thiết kế. Dùng để nhận diện nhanh hiện trạng và đối chiếu khi đi công trường.</p>
+                        <div class="perspective-tags" aria-label="Nội dung trong phối cảnh">
+                            <span><i class="fas fa-ruler-combined"></i> Mặt đứng chính</span>
+                            <span><i class="fas fa-sign"></i> Bảng hiệu Hoa Sen Home</span>
+                            <span><i class="fas fa-door-closed"></i> Cửa cuốn & canopy</span>
+                        </div>
+                        <a class="btn btn-outline perspective-open" href="./assets/hoa-sen/phoi-canh-mat-dung-hoa-sen-home.png" target="_blank" rel="noopener"><i class="fas fa-expand"></i> Mở ảnh kích thước lớn</a>
+                    </div>
+                    <a class="perspective-image-link" href="./assets/hoa-sen/phoi-canh-mat-dung-hoa-sen-home.png" target="_blank" rel="noopener" aria-label="Mở lớn phối cảnh mặt đứng Hoa Sen Home">
+                        <img src="./assets/hoa-sen/phoi-canh-mat-dung-hoa-sen-home.png" alt="Phối cảnh mặt đứng cửa hàng Hoa Sen Home với bảng hiệu, cửa cuốn và canopy" loading="eager">
+                        <span class="perspective-image-hint"><i class="fas fa-expand"></i> Bấm để xem lớn</span>
+                    </a>
                 </div>
 
                 <!-- 4 High-Impact KPI Metrics -->
@@ -333,7 +359,75 @@
                 </div>
             </section>
 
-            <!-- TAB 2: THƯ VIỆN BẢN VẼ CHUYÊN MỤC (MENU PHÂN LOẠI & HIỂN THỊ TOÀN BỘ) -->
+            <!-- TAB 2: TRA CỨU HỢP ĐỒNG -->
+            <section id="tab-contract" class="content-tab-view">
+                <div class="contract-lookup-shell">
+                    <div class="section-top-banner contract-banner">
+                        <div>
+                            <div class="eyebrow-label"><i class="fas fa-file-signature"></i> Căn cứ hợp đồng</div>
+                            <h2><i class="fas fa-magnifying-glass text-primary"></i> Tra cứu Hợp đồng 01/2026</h2>
+                            <p class="text-muted">Tìm theo nội dung, nhóm việc hoặc số trang. Kết quả là bản tóm tắt để điều hướng; khi cần chốt, mở PDF đã ký để đối chiếu.</p>
+                        </div>
+                        <div class="contract-banner-actions">
+                            <span class="contract-index-status"><i class="fas fa-circle-check"></i> Đã lập chỉ mục 15 mục</span>
+                            <a class="btn btn-outline" href="./assets/hoa-sen/docs/signed%20HDTC%20HSH%20PHU%20LY%20NINH%20BINH.pdf" target="_blank" rel="noopener"><i class="fas fa-file-pdf text-danger"></i> Mở PDF gốc</a>
+                        </div>
+                    </div>
+
+                    <div class="contract-search-panel">
+                        <label class="contract-search-label" for="contractSearchInput">Bạn muốn tìm nội dung nào?</label>
+                        <div class="contract-search-line">
+                            <div class="search-input-wrap contract-search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="search" id="contractSearchInput" placeholder="Ví dụ: thanh toán, tạm ứng, bảo hành, tiến độ, nghiệm thu..." oninput="window.hshRunContractSearch()" autocomplete="off">
+                                <button class="contract-clear-btn" type="button" onclick="window.hshClearContractSearch()" aria-label="Xóa nội dung tìm kiếm"><i class="fas fa-times"></i></button>
+                            </div>
+                            <button class="btn btn-primary contract-search-submit" type="button" onclick="window.hshRunContractSearch()"><i class="fas fa-search"></i> Tra cứu</button>
+                        </div>
+                        <div class="contract-filter-row" role="toolbar" aria-label="Lọc nhóm nội dung hợp đồng">
+                            <button class="contract-filter-btn active" type="button" data-contract-filter="all" onclick="window.hshSetContractFilter('all')">Tất cả</button>
+                            <button class="contract-filter-btn" type="button" data-contract-filter="overview" onclick="window.hshSetContractFilter('overview')">Thông tin chung</button>
+                            <button class="contract-filter-btn" type="button" data-contract-filter="money" onclick="window.hshSetContractFilter('money')">Giá trị & thanh toán</button>
+                            <button class="contract-filter-btn" type="button" data-contract-filter="delivery" onclick="window.hshSetContractFilter('delivery')">Tiến độ & phạm vi</button>
+                            <button class="contract-filter-btn" type="button" data-contract-filter="quality" onclick="window.hshSetContractFilter('quality')">Nghiệm thu & chất lượng</button>
+                            <button class="contract-filter-btn" type="button" data-contract-filter="risk" onclick="window.hshSetContractFilter('risk')">Bảo hành & rủi ro</button>
+                        </div>
+                        <div class="contract-suggestion-row" aria-label="Từ khóa gợi ý">
+                            <span>Tìm nhanh:</span>
+                            <button type="button" onclick="window.hshSetContractQuery('thanh toán')">Thanh toán</button>
+                            <button type="button" onclick="window.hshSetContractQuery('tạm ứng')">Tạm ứng</button>
+                            <button type="button" onclick="window.hshSetContractQuery('bảo hành')">Bảo hành</button>
+                            <button type="button" onclick="window.hshSetContractQuery('tiến độ')">Tiến độ</button>
+                            <button type="button" onclick="window.hshSetContractQuery('nghiệm thu')">Nghiệm thu</button>
+                        </div>
+                    </div>
+
+                    <div class="contract-lookup-grid">
+                        <div class="contract-results-card">
+                            <div class="contract-results-head">
+                                <div><span class="eyebrow-label">Kết quả tra cứu</span><h3 id="contractResultsTitle">Các điểm cần biết trước khi triển khai</h3></div>
+                                <span class="contract-results-count" id="contractResultsCount">15 mục</span>
+                            </div>
+                            <div class="contract-results-list" id="contractSearchResults" aria-live="polite"></div>
+                        </div>
+
+                        <aside class="contract-facts-card">
+                            <div class="contract-facts-top"><span class="contract-doc-icon"><i class="fas fa-file-contract"></i></span><div><span class="eyebrow-label">Hồ sơ đang tra cứu</span><h3>HĐ 01/2026/HĐXD/HSG-HG</h3></div></div>
+                            <dl class="contract-facts-list">
+                                <div><dt>Chủ đầu tư</dt><dd>Tập đoàn Hoa Sen</dd></div>
+                                <div><dt>Nhà thầu</dt><dd>Công ty TNHH TM Hoàng Giang</dd></div>
+                                <div><dt>Thời gian</dt><dd>60 ngày · 10/09–09/11/2026</dd></div>
+                                <div><dt>Giá trị trong HĐ</dt><dd>3.854.146.466 VNĐ trước VAT</dd></div>
+                                <div><dt>Tệp nguồn</dt><dd>PDF scan · 52 trang</dd></div>
+                            </dl>
+                            <div class="contract-facts-note"><i class="fas fa-circle-info"></i><span>PDF là bản scan nên không tìm chữ trực tiếp. Bảng này dùng chỉ mục nội bộ theo nhóm nội dung và số trang để mở đúng vị trí.</span></div>
+                            <a class="contract-open-source" href="./assets/hoa-sen/docs/signed%20HDTC%20HSH%20PHU%20LY%20NINH%20BINH.pdf" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Mở bản hợp đồng đã ký</a>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: THƯ VIỆN BẢN VẼ CHUYÊN MỤC (MENU PHÂN LOẠI & HIỂN THỊ TOÀN BỘ) -->
             <section id="tab-gallery" class="content-tab-view">
                 <!-- Drawing Header & Filter Controls -->
                 <div class="drawings-management-header">
