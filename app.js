@@ -89,9 +89,37 @@ const CONTRACT_LOOKUP_ITEMS = [
 function buildCompleteDrawings() {
   const curated = new Map(DRAWINGS.map(drawing => [drawing.id, drawing]));
   const drawings = [];
+  const structurePageTitles = {
+    23: "Bìa phần Kết cấu",
+    24: "Danh mục bản vẽ Kết cấu",
+    25: "Ghi chú chung cho Kết cấu thép",
+    26: "Mặt bằng Móng nâng cấp (TL 1/100)",
+    27: "Chi tiết Kết cấu Móng M1–M3 (TL 1/25)",
+    28: "Chi tiết Kết cấu Móng M4–M6 (TL 1/25)",
+    29: "Mặt bằng & Chi tiết Đà kiềng (TL 1/100, 1/25)",
+    30: "Mặt bằng Sân nền (TL 1/100)",
+    31: "Mặt cắt Sân nền N1–N4",
+    32: "Mặt bằng Bổ trụ & Giằng tường (TL 1/100)",
+    33: "Mặt bằng Định vị Bu lông (TL 1/100)",
+    34: "Mặt bằng Cột thép (TL 1/100)",
+    35: "Mặt bằng Vì kèo & Dầm thép nâng cấp (TL 1/100)",
+    36: "Mặt bằng Xà gồ (TL 1/100)",
+    37: "Mặt bằng Tổng thể mái & Chi tiết Máng xối",
+    38: "Mặt đứng Kết cấu trục 1–4 (TL 1/100)",
+    39: "Mặt cắt & Chi tiết Nâng cấp gian Home",
+    40: "Bổ trụ & Giằng tường khu nâng cấp",
+    41: "Mặt bằng Khung treo trần (TL 1/100)",
+    42: "Mặt cắt Khung thép 1–1 & Chi tiết G1–G2",
+    43: "Mặt đứng Kết cấu nâng cấp",
+    44: "Khung xương Bảng hiệu chính",
+    45: "Mặt cắt & Chi tiết liên kết A–B",
+    46: "Chi tiết liên kết Kết cấu 4–5–C",
+    47: "Chi tiết Xà gồ & Diềm Bảng hiệu",
+    48: "Chi tiết Bể tự hoại KC-49"
+  };
   const categoryForDesignPage = page => {
-    if (page <= 23 || page === 30) return ["arch", "Kiến Trúc & Nhà Nhân Viên"];
-    if (page <= 41) return ["canopy", "KCT Thép & Canopy"];
+    if (page <= 22) return ["arch", "Kiến Trúc & Hoàn Thiện"];
+    if (page <= 48) return ["structure", "Kết Cấu & Canopy"];
     return ["mep", "MEP & PCCC TCVN"];
   };
 
@@ -114,10 +142,10 @@ function buildCompleteDrawings() {
   for (let page = 1; page <= 70; page++) {
     const id = `design-${page}`;
     const [category, categoryName] = categoryForDesignPage(page);
-    drawings.push(curated.get(id) || {
+    const curatedDrawing = curated.get(id);
+    const normalizedDrawing = {
+      ...(curatedDrawing || {
       id,
-      category,
-      categoryName,
       pageNumber: page,
       title: `Hồ sơ thiết kế thi công - trang ${page}`,
       file: `./assets/hoa-sen/design-full-page-${String(page).padStart(2, "0")}.png`,
@@ -125,7 +153,16 @@ function buildCompleteDrawings() {
       tags: [categoryName, `Trang ${page}`, "TKTC"],
       revision: "Theo PDF nguồn",
       scale: "Xem trên bản vẽ"
-    });
+      }),
+      category,
+      categoryName
+    };
+    if (category === "structure") {
+      normalizedDrawing.title = structurePageTitles[page] || normalizedDrawing.title;
+      normalizedDrawing.desc = `Trang ${page} thuộc phần Kết cấu của hồ sơ TKTC tổng hợp; đã phân loại theo tiêu đề và nội dung trên bản vẽ gốc.`;
+      normalizedDrawing.tags = ["Kết cấu", `Trang ${page}`, page >= 33 && page <= 47 ? "Khung thép / Canopy" : "BTCT / Hạ tầng"];
+    }
+    drawings.push(normalizedDrawing);
   }
 
   return drawings.sort((a, b) => {
@@ -364,16 +401,16 @@ function renderDrawings() {
       desc: "Chi tiết móng M1-M8, đà kiềng ĐK1-ĐK5, bể tự hoại KC-49, mương thoát nước và giải pháp xử lý sạt lở hàm ếch móng M8."
     },
     arch: {
-      title: "2. Chuyên mục Kiến trúc & Nhà Nhân Viên (KT - 24 Trang)",
-      desc: "Các trang kiến trúc, mặt bằng, mái tôn, mặt đứng, nhà nhân viên, cửa và hoàn thiện."
+      title: "2. Chuyên mục Kiến trúc & Hoàn thiện (KT - 22 Trang)",
+      desc: "Trang 01–22: hồ sơ chung, hiện trạng, mặt bằng, mái, mặt đứng–mặt cắt, alu, cửa kính, nhà nhân viên và hoàn thiện."
     },
-    canopy: {
-      title: "3. Chuyên mục Kết Cấu Thép & Mái Canopy (17 Trang)",
-      desc: "Các trang kết cấu thép, kèo, xà gồ, canopy và chi tiết liên kết tôn."
+    structure: {
+      title: "3. Chuyên mục Kết cấu & Canopy (KC - 26 Trang)",
+      desc: "Trang 23–48: chỉ dẫn kết cấu, móng–đà kiềng trong bộ TKTC, sân nền, bổ trụ, khung thép, canopy, bảng hiệu và bể tự hoại."
     },
     mep: {
-      title: "4. Chuyên mục Hệ thống MEP & PCCC TCVN (29 Trang)",
-      desc: "Các trang điện, cấp thoát nước, điều hòa, chống sét, báo cháy và PCCC."
+      title: "4. Chuyên mục Hệ thống MEP & PCCC (22 Trang)",
+      desc: "Trang 49–70: danh mục và ký hiệu MEP, điện, cấp thoát nước, điều hòa, chống sét, chữa cháy và báo cháy."
     }
   };
 
