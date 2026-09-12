@@ -21,6 +21,7 @@
       .chain{fill:none;stroke:#0a2c54;stroke-width:2}
       .chaintext{font:700 13px Arial,sans-serif;fill:#0a2c54;text-anchor:middle}
       .level{font:700 13px Arial,sans-serif;fill:#fff;text-anchor:end}
+      .dimlabel{font:800 14px Arial,sans-serif;fill:#ffd21f;text-anchor:middle;paint-order:stroke;stroke:#111827;stroke-width:5;stroke-linejoin:round}
     </style>
   </defs>
 
@@ -69,13 +70,32 @@
   </g>
 
   <g filter="url(#shadow)">
-    <rect class="panel" x="1518" y="212" width="196" height="126" rx="10"/>
-    <text class="level" x="1692" y="242">ĐỈNH +10.800</text>
-    <line class="guide" x1="1518" y1="248" x2="1440" y2="248"/>
-    <text class="level" x="1692" y="280">CANOPY +5.000</text>
-    <line class="guide" x1="1518" y1="286" x2="1440" y2="366"/>
-    <text class="level" x="1692" y="318">NỀN ±0.000</text>
-    <line class="guide" x1="1518" y1="324" x2="1518" y2="680"/>
+    <line class="dim" x1="1694" y1="245" x2="1694" y2="792"/>
+    <text class="dimlabel" x="1680" y="520" transform="rotate(-90 1680 520)">CAO TỔNG THỂ 10.800</text>
+    <line class="guide" x1="1645" y1="245" x2="1714" y2="245"/>
+    <line class="guide" x1="1645" y1="792" x2="1714" y2="792"/>
+
+    <line class="dim" x1="1638" y1="505" x2="1638" y2="792"/>
+    <text class="dimlabel" x="1624" y="648" transform="rotate(-90 1624 648)">CAO CANOPY 5.000</text>
+    <line class="guide" x1="1598" y1="505" x2="1658" y2="505"/>
+
+    <line class="dim" x1="363" y1="389" x2="260" y2="492"/>
+    <text class="dimlabel" x="281" y="415" transform="rotate(-45 281 415)">MÁI ĐUA 7.000</text>
+
+    <line class="dim" x1="1080" y1="725" x2="1338" y2="790"/>
+    <text class="dimlabel" x="1209" y="740" transform="rotate(14 1209 740)">NHÀ → TIM CỘT 6.000</text>
+    <line class="dim" x1="1338" y1="790" x2="1432" y2="814"/>
+    <text class="dimlabel" x="1387" y="790" transform="rotate(14 1387 790)">1.000</text>
+    <text class="dimlabel" x="1256" y="812">TỔNG MÁI 7.000</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <line class="dim" x1="1060" y1="695" x2="1285" y2="695"/>
+    <text class="dimlabel" x="1172" y="686">C–D 7.000</text>
+    <line class="dim" x1="1285" y1="695" x2="1490" y2="695"/>
+    <text class="dimlabel" x="1387" y="686">D–E 5.000</text>
+    <line class="dim" x1="1490" y1="695" x2="1604" y2="695"/>
+    <text class="dimlabel" x="1547" y="686">E–E’ 2.278</text>
   </g>
 
   <rect x="0" y="900" width="1748" height="120" fill="#f8fafc"/>

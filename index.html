@@ -22,7 +22,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <!-- Custom Modern Stylesheet with Left Sidebar Layout -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=10.1">
     <link rel="stylesheet" href="responsive.css?v=10.8">
 </head>
 <body class="theme-light">
@@ -235,13 +235,13 @@
                             <span><i class="fas fa-seedling"></i> Bồn hoa B1/B2</span>
                         </div>
                         <div class="perspective-actions">
-                            <a class="btn btn-outline perspective-open" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v5-dim-hd.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D + dim — Bản duyệt TKTC'); return false;"><i class="fas fa-expand"></i> Mở phối cảnh 3D + dim</a>
+                            <a class="btn btn-outline perspective-open" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v6-dim-hd.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D + dim — Bản duyệt TKTC'); return false;"><i class="fas fa-expand"></i> Mở phối cảnh 3D + dim</a>
                             <a class="btn btn-ghost perspective-source" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v3.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D — Ảnh không dim'); return false;"><i class="fas fa-image"></i> Ảnh 3D không dim</a>
                             <a class="btn btn-ghost perspective-source" href="./assets/hoa-sen/phoi-canh-mat-dung-hoa-sen-home.png" target="_blank" rel="noopener"><i class="fas fa-drafting-compass"></i> Đối chiếu mặt đứng KT</a>
                         </div>
                     </div>
-                    <a class="perspective-image-link" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v5-dim-hd.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D + dim — Bản duyệt TKTC'); return false;" aria-label="Mở trình xem phối cảnh 3D tại trang, có phóng to và kéo ảnh">
-                        <img src="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v5-dim.png" alt="Phối cảnh 3D cửa hàng Hoa Sen Home Phủ Lý đã duyệt, có chuỗi dim kích thước chính" loading="eager">
+                    <a class="perspective-image-link" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v6-dim-hd.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D + dim — Bản duyệt TKTC'); return false;" aria-label="Mở trình xem phối cảnh 3D tại trang, có phóng to và kéo ảnh">
+                        <img src="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v6-dim.png" alt="Phối cảnh 3D cửa hàng Hoa Sen Home Phủ Lý đã duyệt, có dim trực tiếp trên ảnh" loading="eager">
                         <span class="perspective-image-badge"><i class="fas fa-check-circle"></i> Đã đối chiếu hồ sơ KT</span>
                         <span class="perspective-image-hint"><i class="fas fa-expand"></i> Bấm để xem lớn</span>
                     </a>
@@ -1351,6 +1351,9 @@
                 <button class="lb-btn lb-btn-close" id="lbBtnClose" title="Đóng Lightbox (Esc)" onclick="window.hshLightboxClose()"><i class="fas fa-times"></i></button>
             </div>
         </div>
+        <button class="lightbox-mobile-close" type="button" aria-label="Đóng ảnh mô phỏng" title="Đóng ảnh" onclick="window.hshLightboxClose()">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
 
         <div class="lightbox-viewport" id="lbViewport">
             <div class="lightbox-img-wrapper" id="lbImgWrapper">
