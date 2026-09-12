@@ -1809,6 +1809,24 @@ body {
   display: flex;
 }
 
+body.lightbox-open {
+  overflow: hidden;
+}
+
+.lightbox-modal.perspective-mode .lb-nav-buttons {
+  display: none;
+}
+
+.lightbox-modal.perspective-mode .lightbox-img {
+  max-width: 96vw;
+  max-height: 86vh;
+}
+
+.lightbox-modal.perspective-mode #lbBtnRotate,
+.lightbox-modal.perspective-mode #lbBtnCadInvert {
+  display: none;
+}
+
 .lightbox-topbar {
   height: 60px;
   background: rgba(15, 23, 42, 0.85);

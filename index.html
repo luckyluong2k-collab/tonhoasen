@@ -235,13 +235,13 @@
                             <span><i class="fas fa-seedling"></i> Bồn hoa B1/B2</span>
                         </div>
                         <div class="perspective-actions">
-                            <a class="btn btn-outline perspective-open" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v4-dim.png" target="_blank" rel="noopener"><i class="fas fa-expand"></i> Mở phối cảnh 3D + dim</a>
-                            <a class="btn btn-ghost perspective-source" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v3.png" target="_blank" rel="noopener"><i class="fas fa-image"></i> Ảnh 3D không dim</a>
+                            <a class="btn btn-outline perspective-open" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v5-dim-hd.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D + dim — Bản duyệt TKTC'); return false;"><i class="fas fa-expand"></i> Mở phối cảnh 3D + dim</a>
+                            <a class="btn btn-ghost perspective-source" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v3.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D — Ảnh không dim'); return false;"><i class="fas fa-image"></i> Ảnh 3D không dim</a>
                             <a class="btn btn-ghost perspective-source" href="./assets/hoa-sen/phoi-canh-mat-dung-hoa-sen-home.png" target="_blank" rel="noopener"><i class="fas fa-drafting-compass"></i> Đối chiếu mặt đứng KT</a>
                         </div>
                     </div>
-                    <a class="perspective-image-link" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v4-dim.png" target="_blank" rel="noopener" aria-label="Mở lớn phối cảnh 3D cửa hàng Hoa Sen Home Phủ Lý đã duyệt, có kích thước đối chiếu">
-                        <img src="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v4-dim.png" alt="Phối cảnh 3D cửa hàng Hoa Sen Home Phủ Lý đã duyệt, có dim kích thước chính" loading="eager">
+                    <a class="perspective-image-link" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v5-dim-hd.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D + dim — Bản duyệt TKTC'); return false;" aria-label="Mở trình xem phối cảnh 3D tại trang, có phóng to và kéo ảnh">
+                        <img src="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v5-dim.png" alt="Phối cảnh 3D cửa hàng Hoa Sen Home Phủ Lý đã duyệt, có chuỗi dim kích thước chính" loading="eager">
                         <span class="perspective-image-badge"><i class="fas fa-check-circle"></i> Đã đối chiếu hồ sơ KT</span>
                         <span class="perspective-image-hint"><i class="fas fa-expand"></i> Bấm để xem lớn</span>
                     </a>
@@ -1344,6 +1344,7 @@
                 <span class="lb-zoom-readout" id="lbZoomText" aria-live="polite">100%</span>
                 <input class="lb-zoom-range" id="lbZoomRange" type="range" min="50" max="500" step="25" value="100" aria-label="Mức phóng bản vẽ" title="Kéo để chỉnh mức phóng" oninput="window.hshLightboxSetZoom(this.value)">
                 <button class="lb-btn" id="lbBtnResetZoom" title="Đặt lại phóng to 100%" onclick="window.hshLightboxResetZoom()"><i class="fas fa-compress-arrows-alt"></i></button>
+                <button class="lb-btn" id="lbBtnFullscreen" title="Toàn màn hình" onclick="window.hshLightboxFullscreen()"><i class="fas fa-expand"></i></button>
                 <button class="lb-btn" id="lbBtnRotate" title="Xoay bản vẽ 90 độ" onclick="window.hshLightboxRotate()"><i class="fas fa-redo"></i> Xoay 90°</button>
                 <button class="lb-btn" id="lbBtnCadInvert" title="Chế độ CAD nền đen (Invert Colors)" onclick="window.hshLightboxCadInvert()"><i class="fas fa-adjust"></i> CAD Mode</button>
                 <button class="lb-btn" id="lbBtnDownload" title="Tải file bản vẽ HD" onclick="window.hshLightboxDownload()"><i class="fas fa-download"></i></button>
@@ -1534,7 +1535,7 @@
     </nav>
     <!-- Core Application Logic -->
     <script src="assets/hoa-sen/project-document-index.js"></script>
-    <script src="app.js?v=10.8"></script>
+    <script src="app.js?v=10.9"></script>
     <script src="responsive.js?v=10.5"></script>
     <script src="construction-processes.js?v=10.8"></script>
 

@@ -223,6 +223,7 @@ let currentLightboxRotation = 0;
 let isCADInverted = false;
 let currentLightboxPan = { x: 0, y: 0 };
 let lightboxPointerDrag = null;
+let customLightboxItem = null;
 let chartInstances = {};
 
 // Formatting Helpers
@@ -520,6 +521,7 @@ window.hshSliderPrev = function() {
 // 7. ENHANCED CAD LIGHTBOX ENGINE (ROTATE, CAD INVERT, ZOOM 500%)
 // ==========================================================================
 window.hshLightboxOpen = function(drawingId) {
+  customLightboxItem = null;
   const idx = COMPLETE_DRAWINGS.findIndex(d => d.id === drawingId);
   currentLightboxIndex = idx >= 0 ? idx : 0;
   currentLightboxZoom = 1;
@@ -529,12 +531,63 @@ window.hshLightboxOpen = function(drawingId) {
 
   updateLightboxUI();
   const modal = document.getElementById('enhancedCadLightboxModal');
-  if (modal) modal.classList.add('active');
+  if (modal) {
+    modal.classList.remove('perspective-mode');
+    modal.classList.add('active');
+  }
+  document.body.classList.add('lightbox-open');
+};
+
+window.hshPerspectiveOpen = function(file, title = 'Phối cảnh 3D Hoa Sen Home Phủ Lý') {
+  customLightboxItem = {
+    id: '3D + DIM',
+    title,
+    file,
+    revision: 'Bản duyệt đối chiếu TKTC',
+    scale: 'Ảnh HD 3496 × 2040 px'
+  };
+  currentLightboxZoom = 1;
+  currentLightboxRotation = 0;
+  currentLightboxPan = { x: 0, y: 0 };
+  isCADInverted = false;
+
+  const modal = document.getElementById('enhancedCadLightboxModal');
+  const codeBadge = document.getElementById('lbDrawingCode');
+  const titleText = document.getElementById('lbDrawingTitle');
+  const imgEl = document.getElementById('lbImage');
+  const indexText = document.getElementById('lbIndexText');
+  const metaInfo = document.getElementById('lbMetaInfo');
+  const wrapper = document.getElementById('lbImgWrapper');
+
+  if (codeBadge) codeBadge.innerText = customLightboxItem.id;
+  if (titleText) titleText.innerText = customLightboxItem.title;
+  if (imgEl) {
+    imgEl.src = customLightboxItem.file;
+    imgEl.alt = customLightboxItem.title;
+  }
+  if (indexText) indexText.innerText = 'Cuộn chuột hoặc dùng thanh Zoom · kéo ảnh khi đã phóng';
+  if (metaInfo) metaInfo.innerHTML = `<span><i class="fas fa-ruler-combined text-success"></i> ${customLightboxItem.revision} · ${customLightboxItem.scale}</span>`;
+  wrapper?.classList.remove('cad-invert-active');
+  modal?.classList.add('active', 'perspective-mode');
+  document.body.classList.add('lightbox-open');
+  applyLightboxTransform();
 };
 
 window.hshLightboxClose = function() {
   const modal = document.getElementById('enhancedCadLightboxModal');
-  if (modal) modal.classList.remove('active');
+  if (modal) modal.classList.remove('active', 'perspective-mode');
+  customLightboxItem = null;
+  document.body.classList.remove('lightbox-open');
+};
+
+window.hshLightboxFullscreen = function() {
+  const modal = document.getElementById('enhancedCadLightboxModal');
+  if (!modal) return;
+  if (!document.fullscreenElement) {
+    modal.requestFullscreen?.().catch(() => {});
+  } else {
+    document.exitFullscreen?.();
+  }
 };
 
 window.hshLightboxRotate = function() {
@@ -576,17 +629,19 @@ window.hshLightboxResetZoom = function() {
 };
 
 window.hshLightboxNext = function() {
+  if (customLightboxItem) return;
   currentLightboxIndex = (currentLightboxIndex + 1) % COMPLETE_DRAWINGS.length;
   updateLightboxUI();
 };
 
 window.hshLightboxPrev = function() {
+  if (customLightboxItem) return;
   currentLightboxIndex = (currentLightboxIndex - 1 + COMPLETE_DRAWINGS.length) % COMPLETE_DRAWINGS.length;
   updateLightboxUI();
 };
 
 window.hshLightboxDownload = function() {
-  const d = COMPLETE_DRAWINGS[currentLightboxIndex];
+  const d = customLightboxItem || COMPLETE_DRAWINGS[currentLightboxIndex];
   if (!d) return;
   const a = document.createElement('a');
   a.href = d.file;
