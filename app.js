@@ -44,26 +44,26 @@ const INITIAL_QAQC = [{"id": 1, "code": "QC-01", "title": "Nghiệm thu hố mó
 const INITIAL_LOGS = [{"id": 1, "date": "2026-09-10", "dateDisplay": "10/09/2026 (Ngày 01/60)", "weather": "Nắng ráo, nhiệt độ 31°C, độ ẩm 68%", "workers": 18, "equipment": "01 Máy xúc Kobelco 0.3m³, 01 máy kinh vĩ định vị, 02 xe tải chở vật tư", "workContent": "KHỞI CÔNG DỰ ÁN: Bàn giao mặt bằng từ Ban QLDA Tập đoàn Hoa Sen; Định vị tim trục móng M1-M8; Lắp dựng hàng rào tôn bảo vệ an toàn công trường; Tập kết máy móc, lán trại điều hành.", "issues": "Mặt bằng tiếp giáp đường Quốc lộ 1A có mật độ giao thông cao, đã bố trí biển cảnh báo và cử người trực điều tiết giao thông."}];
 
 const DOSSIER_ITEMS = [
-  { id: 1, category: "Pháp lý & thiết kế", title: "Hợp đồng thi công và phụ lục", output: "Hợp đồng đã ký, phụ lục/phát sinh được phê duyệt", priority: "critical" },
-  { id: 2, category: "Pháp lý & thiết kế", title: "Hồ sơ thiết kế thi công được duyệt", output: "Bản vẽ TKTC, chỉ dẫn kỹ thuật, danh mục bản vẽ", priority: "critical" },
-  { id: 3, category: "Pháp lý & thiết kế", title: "Giấy phép và bàn giao mặt bằng", output: "Giấy phép xây dựng/PCCC nếu áp dụng, biên bản bàn giao", priority: "critical" },
-  { id: 4, category: "Biện pháp & vật liệu", title: "Biện pháp thi công và tổ chức công trường", output: "Biện pháp, tiến độ, sơ đồ tổ chức, an toàn và môi trường", priority: "critical" },
-  { id: 5, category: "Biện pháp & vật liệu", title: "Kế hoạch kiểm tra và nghiệm thu ITP", output: "Điểm dừng kiểm tra, checklist, người phụ trách", priority: "high" },
-  { id: 6, category: "Biện pháp & vật liệu", title: "Trình duyệt tôn, thép và vật liệu hoàn thiện", output: "Mẫu, catalogue, thông số kỹ thuật, phê duyệt vật liệu", priority: "critical" },
-  { id: 7, category: "Biện pháp & vật liệu", title: "Nghiệm thu vật liệu đầu vào", output: "CO/CQ/CNXX, hóa đơn, phiếu giao hàng, biên bản và ảnh", priority: "critical" },
-  { id: 8, category: "Nhật ký & hiện trường", title: "Nhật ký công trình và báo cáo ngày", output: "Nhật ký, nhân lực, thiết bị, thời tiết, công việc, vướng mắc", priority: "high" },
-  { id: 9, category: "Nhật ký & hiện trường", title: "Ảnh hiện trường theo giai đoạn", output: "Ảnh trước, trong và sau thi công có ngày/vị trí", priority: "high" },
-  { id: 10, category: "Nghiệm thu QA/QC", title: "Móng, đà kiềng, cốt thép và bê tông", output: "Nghiệm thu hố móng, cốt thép, ván khuôn, độ sụt/mẫu bê tông", priority: "critical" },
-  { id: 11, category: "Nghiệm thu QA/QC", title: "Khung thép, bu lông và mối hàn", output: "Nghiệm thu gia công/lắp dựng, kích thước, liên kết, sơn bảo vệ", priority: "critical" },
-  { id: 12, category: "Nghiệm thu QA/QC", title: "Mái, vách tôn và máng xối Hoa Sen", output: "Độ dày/màu/sóng, vít/ron, chồng mí, diềm, độ dốc, thử chống dột", priority: "critical" },
-  { id: 13, category: "Nghiệm thu QA/QC", title: "Bảng hiệu, alu, cửa và hoàn thiện", output: "Nghiệm thu kích thước, màu sắc, liên kết, điện chiếu sáng bảng hiệu", priority: "high" },
-  { id: 14, category: "Nghiệm thu QA/QC", title: "MEP: điện, nước, điều hòa và chống sét", output: "Nghiệm thu âm tường, thử điện, thử kín, thoát nước, tiếp địa", priority: "critical" },
-  { id: 15, category: "Nghiệm thu QA/QC", title: "PCCC và chạy thử liên động", output: "Biên bản thử hệ thống, hồ sơ PCCC và văn bản chấp thuận nếu áp dụng", priority: "critical" },
-  { id: 16, category: "Nhật ký & hiện trường", title: "Defect list và đóng lỗi", output: "Danh sách tồn tại, ảnh khắc phục, xác nhận đóng lỗi", priority: "high" },
-  { id: 17, category: "Thanh toán & hoàn công", title: "Đo bóc và xác nhận khối lượng thực tế", output: "Bảng đo bóc, bản vẽ/biên bản xác nhận khối lượng", priority: "critical" },
-  { id: 18, category: "Thanh toán & hoàn công", title: "Hồ sơ thanh toán từng đợt", output: "Đề nghị thanh toán, biên bản nghiệm thu, bảng giá trị, hóa đơn", priority: "critical" },
-  { id: 19, category: "Thanh toán & hoàn công", title: "Bản vẽ hoàn công và hồ sơ hoàn thành", output: "Bản vẽ hoàn công, kết quả thí nghiệm, tài liệu kỹ thuật", priority: "critical" },
-  { id: 20, category: "Thanh toán & hoàn công", title: "Bàn giao, bảo hành và quyết toán", output: "Biên bản bàn giao, bảo hành, hướng dẫn vận hành, quyết toán A-B", priority: "critical" }
+  { id: 1, category: "Pháp lý & Hợp đồng", title: "Hợp đồng thi công số 01/2026/HĐXD/HSG-HG", output: "Hợp đồng đã ký, phụ lục điều khoản thương mại, bảo lãnh thực hiện HĐ", priority: "critical", boqRef: "HĐTC" },
+  { id: 2, category: "Pháp lý & Hợp đồng", title: "Giấy phép xây dựng, PCCC & Bàn giao mặt bằng", output: "Giấy phép xây dựng, thẩm duyệt PCCC, biên bản bàn giao mặt bằng thi công", priority: "critical", boqRef: "Mục A (Dòng 6-10)" },
+  { id: 3, category: "Dự toán & BOQ", title: "Bảng Tiên lượng chào giá BOQ 333 dòng gốc", output: "File Excel 2026.08.06 TMCG... chi tiết 328 công tác + bảng tổng hợp giá trị", priority: "critical", boqRef: "Toàn bộ BOQ" },
+  { id: 4, category: "Dự toán & BOQ", title: "Xác nhận khối lượng phát sinh kết cấu móng", output: "Bản vẽ phát sinh 20260908 KC MÓNG PS, bảng tính khối lượng M5-M6, ĐK1-ĐK5", priority: "critical", boqRef: "Mục B.I & Phát sinh" },
+  { id: 5, category: "Bản vẽ & Thiết kế", title: "Hồ sơ thiết kế thi công 70 trang được duyệt", output: "Bản vẽ 2026.05.23_TKTC_HOME PHỦ LÝ (Kiến trúc KT, Kết cấu KC, MEP M)", priority: "critical", boqRef: "TKTC 70 trang" },
+  { id: 6, category: "Bản vẽ & Thiết kế", title: "Phối cảnh 3D mặt trước & Mặt đứng A'-E' (30.089m)", output: "Bản vẽ 07, ảnh phối cảnh thực tế 7 cột ốp Alu (Alu Đỏ 800mm, Alu Bạc 600/500mm)", priority: "high", boqRef: "Mục B.II & D" },
+  { id: 7, category: "Nghiệm thu Kết cấu & Móng", title: "Nghiệm thu hố móng, đà kiềng & bê tông lót (QC-01 -> QC-04)", output: "Biên bản NT hố móng, ván khuôn, cốt thép móng M1-M8, đà kiềng, kết quả nén mẫu R28", priority: "critical", boqRef: "Mục B.I (Dòng 12-30)" },
+  { id: 8, category: "Nghiệm thu Kết cấu & Móng", title: "Nghiệm thu khung thép cột SS400, vì kèo & xà gồ mái", output: "CO/CQ thép hình I-350, chứng chỉ bu lông neo M20, biên bản nghiệm thu mối hàn", priority: "critical", boqRef: "Mục B.I (Dòng 31-59)" },
+  { id: 9, category: "Nghiệm thu Hoàn thiện & Alu Tôn", title: "Nghiệm thu ốp tấm Alu Alcorest EV3010/EV3001 mặt tiền & cột", output: "Mẫu Alu đỏ 800mm, Alu bạc 600/500mm, khung xương, keo silicon chống dột", priority: "critical", boqRef: "Mục B.II (Dòng 69-70)" },
+  { id: 10, category: "Nghiệm thu Hoàn thiện & Alu Tôn", title: "Nghiệm thu tôn vách 11/13 sóng & tôn mái Hoa Sen Mag Shield", output: "Chứng chỉ xuất xưởng tôn Hoa Sen, phiếu giao hàng, kiểm tra vít bắn, chồng mí, máng xối", priority: "critical", boqRef: "Mục B.II (Dòng 71-90)" },
+  { id: 11, category: "Nghiệm thu Hoàn thiện & Alu Tôn", title: "Nghiệm thu ốp lát gạch nền Showroom 800x800, nhà NV 600x600", output: "CO/CQ gạch Lustra/Lustile, vữa XM M100, độ phẳng, ron gạch, chống trơn WC", priority: "high", boqRef: "Mục B.II (Dòng 61-68)" },
+  { id: 12, category: "Nghiệm thu Hoàn thiện & Alu Tôn", title: "Nghiệm thu cửa cuốn Fucodoor, cửa đi & vách nhôm kính Xingfa", output: "Biên bản vận hành motor cửa cuốn, kính dán an toàn 8.38mm/12mm, phụ kiện Hafele", priority: "critical", boqRef: "Mục B.II (Dòng 74-86)" },
+  { id: 13, category: "Nghiệm thu Hoàn thiện & Alu Tôn", title: "Nghiệm thu Bậc tam cấp đá Granite đỏ & Bồn hoa B1-B2", output: "Đá Granite đỏ Bình Định, gạch bồn hoa, đất hữu cơ và cây xanh chuỗi ngọc", priority: "high", boqRef: "Mục C (Dòng 92-104)" },
+  { id: 14, category: "Nghiệm thu Hoàn thiện & Alu Tôn", title: "Nghiệm thu Khung giàn Bảng hiệu Fascia 5.8m & chữ LED Hoa Sen", output: "Kết cấu thép hộp bảng hiệu, tấm Alu vàng, chữ nổi mica LED, giấy phép quảng cáo", priority: "critical", boqRef: "Mục D (Dòng 105-124)" },
+  { id: 15, category: "Nghiệm thu Cơ điện & PCCC", title: "Nghiệm thu Hệ thống Điện động lực & Chiếu sáng Nhà xưởng", output: "Cáp Cadivi, tủ điện DB, ống luồn dây sino, đèn led highbay 100W, ổ cắm 3 pha công nghiệp", priority: "critical", boqRef: "Mục F.I (Dòng 125-167)" },
+  { id: 16, category: "Nghiệm thu Cơ điện & PCCC", title: "Nghiệm thu Chiếu sáng Showroom Home & Điều hòa không khí", output: "Đèn led rọi ray, panel âm trần, máy lạnh cassette Daikin, tủ điện trung tâm", priority: "critical", boqRef: "Mục F.II (Dòng 168-204)" },
+  { id: 17, category: "Nghiệm thu Cơ điện & PCCC", title: "Nghiệm thu Cấp thoát nước, Thiết bị vệ sinh, Chống sét & PCCC", output: "Ống nhựa Tiền Phong, bồn nước, TBVS Inax/Viglacera, kim thu sét Cirprotec, báo cháy Asenware", priority: "critical", boqRef: "Mục F.III, IV, V (Dòng 205-328)" },
+  { id: 18, category: "Nhật ký & Hiện trường", title: "Nhật ký công trình (Mẫu 03) & Báo cáo ngày (Mẫu 01)", output: "Sổ nhật ký đóng dấu giáp lai, báo cáo nhân lực, thiết bị, thời tiết, khối lượng ngày", priority: "high", boqRef: "Hiện trường" },
+  { id: 19, category: "Nhật ký & Hiện trường", title: "Biên bản ghi nhận Defect List (Mẫu 09) & Đóng tồn tại", output: "Biên bản kiểm tra lỗi defect, ảnh chụp khắc phục trước và sau, xác nhận của CĐT", priority: "high", boqRef: "Chất lượng" },
+  { id: 20, category: "Thanh toán & Hoàn công", title: "Hồ sơ đo bóc khối lượng, Thanh toán từng đợt & Quyết toán A-B", output: "Bảng xác nhận khối lượng theo BOQ, biểu mẫu thanh quyết toán, bản vẽ hoàn công, biên bản bàn giao", priority: "critical", boqRef: "Tài chính & Quyết toán" }
 ];
 
 // Contract lookup is intentionally a curated navigation index. The signed PDF is a scan,
@@ -797,7 +797,41 @@ async function renderBOQTable() {
       if (!matchText.includes(searchKeyword)) return false;
     }
     if (chapterFilter !== 'all') {
-      if (!it.sec.includes(chapterFilter) && !it.subsec.includes(chapterFilter)) return false;
+      const sec = it.sec || '';
+      const subsec = it.subsec || '';
+      const content = (it.content || '').toLowerCase();
+      
+      if (chapterFilter === 'A. CÔNG TÁC BAN ĐẦU') {
+        if (!sec.includes('A. CÔNG TÁC BAN ĐẦU')) return false;
+      } else if (chapterFilter === 'I. PHẦN KẾT CẤU TỔNG THỂ' || chapterFilter.includes('KẾT CẤU')) {
+        if (!subsec.includes('PHẦN KẾT CẤU TỔNG THỂ') && !sec.includes('KẾT CẤU')) return false;
+      } else if (chapterFilter === 'II. PHẦN HOÀN THIỆN' || chapterFilter.includes('HOÀN THIỆN')) {
+        if (!subsec.includes('PHẦN HOÀN THIỆN') && !sec.includes('HOÀN THIỆN')) return false;
+      } else if (chapterFilter === 'C. BẬC CẤP + BỒN HOA' || chapterFilter.includes('BẬC CẤP')) {
+        if (!sec.includes('BẬC CẤP')) return false;
+      } else if (chapterFilter === 'D. BẢNG HIỆU - QUẢNG CÁO' || chapterFilter.includes('BẢNG HIỆU')) {
+        if (!sec.includes('BẢNG HIỆU')) return false;
+      } else if (chapterFilter === 'F. PHẦN MEP') {
+        if (!sec.includes('MEP')) return false;
+      } else if (chapterFilter === 'MEP_XUONG' || (chapterFilter.includes('NHÀ XƯỞNG') && !chapterFilter.includes('VĂN PHÒNG'))) {
+        if (!sec.includes('MEP') || !subsec.includes('NHÀ XƯỞNG')) return false;
+      } else if (chapterFilter === 'MEP_HOME' || chapterFilter.includes('HOA SEN HOME')) {
+        if (!sec.includes('MEP') || !subsec.includes('HOA SEN HOME')) return false;
+      } else if (chapterFilter === 'MEP_NV' || chapterFilter.includes('NHÂN VIÊN')) {
+        if (!sec.includes('MEP') || !subsec.includes('NHÂN VIÊN')) return false;
+      } else if (chapterFilter === 'MEP_CHONG_SET' || chapterFilter.includes('CHỐNG SÉT')) {
+        if (!sec.includes('MEP') || !subsec.includes('CHỐNG SÉT')) return false;
+      } else if (chapterFilter === 'MEP_PCCC' || chapterFilter.includes('PCCC') || chapterFilter.includes('BÁO CHÁY')) {
+        if (!sec.includes('MEP') || (!subsec.includes('BÁO CHÁY') && !content.includes('asenware') && !content.includes('pccc') && !content.includes('cháy'))) return false;
+      } else if (chapterFilter === 'MEP_BANG_HIEU' || chapterFilter.includes('CHIẾU SÁNG BẢNG HIỆU')) {
+        if (!sec.includes('MEP') || !subsec.includes('CHIẾU SÁNG BẢNG HIỆU')) return false;
+      } else if (chapterFilter.includes('ĐIỆN')) {
+        if (!sec.includes('MEP')) return false;
+      } else if (chapterFilter.includes('NƯỚC')) {
+        if (!sec.includes('MEP') || (!content.includes('nước') && !content.includes('ống') && !content.includes('lavabo') && !content.includes('cầu'))) return false;
+      } else {
+        if (!sec.includes(chapterFilter) && !subsec.includes(chapterFilter)) return false;
+      }
     }
     if (statusFilter !== 'all') {
       if (it.status !== statusFilter) return false;
@@ -1897,7 +1931,10 @@ function renderDossierChecklist() {
       <tr class="dossier-row-${status}" id="dossier-item-${item.id}">
         <td class="dossier-stt">${String(item.id).padStart(2, '0')}</td>
         <td><span class="dossier-category">${escapeDossierHtml(item.category)}</span></td>
-        <td><strong>${escapeDossierHtml(item.title)}</strong></td>
+        <td>
+          <strong>${escapeDossierHtml(item.title)}</strong>
+          ${item.boqRef ? `<div style="margin-top: 4px;"><span class="badge-boq-tag" style="display:inline-flex; align-items:center; gap:4px; font-size: 11px; padding: 2px 7px; border-radius: 4px; background: #e0f2fe; color: #0369a1; font-weight: 600; border: 1px solid #bae6fd; cursor: pointer;" onclick="event.stopPropagation(); window.hshOpenBOQRelation('${escapeDossierHtml(item.boqRef)}')"><i class="fas fa-link"></i> BOQ: ${escapeDossierHtml(item.boqRef)}</span></div>` : ''}
+        </td>
         <td class="dossier-output">${escapeDossierHtml(item.output)}</td>
         <td><span class="dossier-priority dossier-priority-${item.priority}">${priorityLabel[item.priority]}</span></td>
         <td><button class="dossier-status dossier-status-${status}" onclick="window.hshCycleDossierStatus(${item.id})" title="Bấm để đổi trạng thái">${DOSSIER_STATUS_LABELS[status]}</button></td>
@@ -1918,6 +1955,23 @@ function renderDossierChecklist() {
 }
 
 window.hshRenderDossierChecklist = renderDossierChecklist;
+
+window.hshOpenBOQRelation = function(boqRef) {
+  if (window.hshNavigateToTab) window.hshNavigateToTab('tab-boq');
+  const chapterSelect = document.getElementById('boqChapterSelect');
+  if (chapterSelect) {
+    if (boqRef.includes('Mục A')) chapterSelect.value = 'A. CÔNG TÁC BAN ĐẦU';
+    else if (boqRef.includes('Mục B.I')) chapterSelect.value = 'I. PHẦN KẾT CẤU TỔNG THỂ';
+    else if (boqRef.includes('Mục B.II')) chapterSelect.value = 'II. PHẦN HOÀN THIỆN';
+    else if (boqRef.includes('Mục C')) chapterSelect.value = 'C. BẬC CẤP + BỒN HOA';
+    else if (boqRef.includes('Mục D')) chapterSelect.value = 'D. BẢNG HIỆU - QUẢNG CÁO';
+    else if (boqRef.includes('Mục F.I')) chapterSelect.value = 'MEP_XUONG';
+    else if (boqRef.includes('Mục F.II')) chapterSelect.value = 'MEP_HOME';
+    else if (boqRef.includes('Mục F')) chapterSelect.value = 'F. PHẦN MEP';
+    else chapterSelect.value = 'all';
+  }
+  if (window.hshFilterBOQTable) window.hshFilterBOQTable();
+};
 
 window.hshCycleDossierStatus = function(itemId) {
   const state = getDossierState();

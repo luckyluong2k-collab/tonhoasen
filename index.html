@@ -507,8 +507,8 @@
                 <div class="boq-header-card">
                     <div class="boq-title-row">
                         <div>
-                            <h2><i class="fas fa-file-invoice-dollar text-primary"></i> Bảng Tiên lượng Dự toán & BOQ Chi tiết</h2>
-                            <p class="text-muted">328 công tác xây lắp & cơ điện trọn gói dự án Cải tạo Hoa Sen Home Phủ Lý (HĐ: 01/2026/HĐXD/HSG-HG)</p>
+                            <h2><i class="fas fa-file-invoice-dollar text-primary"></i> Bảng Tiên lượng Dự toán &amp; BOQ Chi tiết</h2>
+                            <p class="text-muted">328 công tác xây lắp &amp; cơ điện trọn gói dự án Cải tạo Hoa Sen Home Phủ Lý (HĐ: 01/2026/HĐXD/HSG-HG)</p>
                         </div>
                         <div class="boq-actions">
                             <button class="btn btn-outline" onclick="window.hshExportBOQExcel()"><i class="fas fa-file-excel text-success"></i> Xuất Excel BOQ</button>
@@ -529,14 +529,22 @@
                         </div>
                         <select id="boqChapterSelect" class="form-select" onchange="window.hshFilterBOQTable()">
                             <option value="all">-- Tất cả Chương mục BOQ (328 dòng) --</option>
-                            <option value="A. CÔNG TÁC BAN ĐẦU">A. Công tác ban đầu</option>
-                            <option value="I. PHẦN KẾT CẤU TỔNG THỂ">I. Phần Kết cấu móng & đà kiềng</option>
-                            <option value="II. PHẦN HOÀN THIỆN">II. Phần Hoàn thiện & Kiến trúc</option>
-                            <option value="C. BẬC CẤP + BỒN HOA">C. Bậc cấp & Bồn hoa</option>
-                            <option value="D. BẢNG HIỆU - QUẢNG CÁO">D. Bảng hiệu & Quảng cáo</option>
-                            <option value="E. HỆ THỐNG ĐIỆN">E. Hệ thống Điện & Chiếu sáng</option>
-                            <option value="F. HỆ THỐNG CẤP THOÁT NƯỚC">F. Hệ thống Cấp thoát nước</option>
-                            <option value="G. HỆ THỐNG PCCC">G. Hệ thống PCCC Asenware</option>
+                            <optgroup label="1. CÔNG TÁC BAN ĐẦU &amp; KHỐI XÂY LẮP (119 dòng)">
+                                <option value="A. CÔNG TÁC BAN ĐẦU">A. Công tác ban đầu (5 dòng - GPXD, PCCC, Tháo dỡ, Vệ sinh)</option>
+                                <option value="I. PHẦN KẾT CẤU TỔNG THỂ">B.I. Phần Kết cấu tổng thể (48 dòng - Móng, Bê tông, Cốt thép, Khung thép)</option>
+                                <option value="II. PHẦN HOÀN THIỆN">B.II. Phần Hoàn thiện &amp; Kiến trúc (32 dòng - Ốp lát, Alu, Tôn vách, Cửa)</option>
+                                <option value="C. BẬC CẤP + BỒN HOA">C. Bậc cấp &amp; Bồn hoa (13 dòng - Tam cấp, Đá Granite, Cây xanh)</option>
+                                <option value="D. BẢNG HIỆU - QUẢNG CÁO">D. Bảng hiệu &amp; Quảng cáo (20 dòng - Giấy phép &amp; Khung giàn Alu)</option>
+                            </optgroup>
+                            <optgroup label="2. HỆ THỐNG CƠ ĐIỆN (MEP) &amp; PCCC (209 dòng)">
+                                <option value="F. PHẦN MEP">F. Toàn bộ Hệ thống MEP &amp; PCCC (209 dòng)</option>
+                                <option value="MEP_XUONG">F.I. MEP Nhà xưởng (43 dòng - Điện động lực, Ổ cắm công nghiệp)</option>
+                                <option value="MEP_HOME">F.II. MEP Hoa Sen Home (37 dòng - Chiếu sáng showroom, Điều hòa, Tủ điện)</option>
+                                <option value="MEP_NV">F.III. MEP Nhà nhân viên &amp; Vệ sinh (71 dòng - Cấp thoát nước, TBVS)</option>
+                                <option value="MEP_CHONG_SET">F.IV. Chống sét &amp; Tiếp địa an toàn (13 dòng)</option>
+                                <option value="MEP_PCCC">F.V. Hệ thống PCCC &amp; Báo cháy Asenware (11 dòng)</option>
+                                <option value="MEP_BANG_HIEU">F.VI. Chiếu sáng Bảng hiệu LED (18 dòng)</option>
+                            </optgroup>
                         </select>
                         <select id="boqStatusSelect" class="form-select" onchange="window.hshFilterBOQTable()">
                             <option value="all">-- Tất cả trạng thái --</option>
@@ -574,7 +582,7 @@
             <section id="tab-progress" class="content-tab-view">
                 <div class="section-top-banner">
                     <div>
-                        <h2><i class="fas fa-tasks text-primary"></i> Kế hoạch Tiến độ 60 Ngày (10/09 - 09/11/2026) & Nhật ký</h2>
+                        <h2><i class="fas fa-tasks text-primary"></i> Kế hoạch Tiến độ 60 Ngày (10/09 - 09/11/2026) &amp; Nhật ký</h2>
                         <p class="text-muted">Theo dõi đường găng tiến độ (Critical Path), nhân lực, thời tiết và nhật trình thi công hàng ngày</p>
                     </div>
                     <button class="btn btn-primary" onclick="window.hshOpenDailyLogModal()"><i class="fas fa-plus"></i> Ghi nhật ký thi công</button>
@@ -718,12 +726,15 @@
                         <div><h4><i class="fas fa-list-check text-primary"></i> Checklist hồ sơ theo công việc</h4><p class="text-muted">Bấm trạng thái để chuyển: Chưa làm → Đang làm → Hoàn tất. Dữ liệu lưu trên máy này.</p></div>
                         <div class="dossier-filters">
                             <select id="dossierCategoryFilter" class="form-select" onchange="window.hshRenderDossierChecklist()">
-                                <option value="all">Tất cả nhóm hồ sơ</option>
-                                <option value="Pháp lý & thiết kế">Pháp lý & thiết kế</option>
-                                <option value="Biện pháp & vật liệu">Biện pháp & vật liệu</option>
-                                <option value="Nhật ký & hiện trường">Nhật ký & hiện trường</option>
-                                <option value="Nghiệm thu QA/QC">Nghiệm thu QA/QC</option>
-                                <option value="Thanh toán & hoàn công">Thanh toán & hoàn công</option>
+                                <option value="all">-- Tất cả 8 nhóm hồ sơ BOQ &amp; Quản lý (20 mục) --</option>
+                                <option value="Pháp lý &amp; Hợp đồng">1. Pháp lý &amp; Hợp đồng (Mục A BOQ)</option>
+                                <option value="Dự toán &amp; BOQ">2. Dự toán &amp; Khối lượng BOQ (File chào giá gốc)</option>
+                                <option value="Bản vẽ &amp; Thiết kế">3. Bản vẽ &amp; Thiết kế (TKTC 70 trang &amp; Móng PS)</option>
+                                <option value="Nghiệm thu Kết cấu &amp; Móng">4. Nghiệm thu Kết cấu &amp; Móng (Mục B.I BOQ)</option>
+                                <option value="Nghiệm thu Hoàn thiện &amp; Alu Tôn">5. Nghiệm thu Hoàn thiện &amp; Alu Tôn (Mục B.II &amp; D BOQ)</option>
+                                <option value="Nghiệm thu Cơ điện &amp; PCCC">6. Nghiệm thu Cơ điện MEP &amp; PCCC Asenware (Mục F BOQ)</option>
+                                <option value="Nhật ký &amp; Hiện trường">7. Nhật ký &amp; Hiện trường (Nhật ký 03, Báo cáo 01, Defect 09)</option>
+                                <option value="Thanh toán &amp; Hoàn công">8. Thanh toán theo BOQ &amp; Hoàn công (Mẫu TT-QT)</option>
                             </select>
                             <select id="dossierStatusFilter" class="form-select" onchange="window.hshRenderDossierChecklist()">
                                 <option value="all">Tất cả trạng thái</option>
