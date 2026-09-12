@@ -3900,6 +3900,25 @@ body {
   background: #fff;
 }
 
+.perspective-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.perspective-source {
+  color: #526176;
+  border: 1px solid #d4e1ee;
+  background: #f7faff;
+}
+
+.perspective-source:hover {
+  color: #0a4d87;
+  border-color: #9ebbd7;
+  background: #fff;
+}
+
 .perspective-image-link {
   display: block;
   position: relative;
@@ -3940,4 +3959,20 @@ body {
   color: #fff;
   font-size: 11px;
   font-weight: 750;
+}
+
+.perspective-image-badge {
+  display: inline-flex;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid #bde3cb;
+  border-radius: 999px;
+  background: #effbf3eF;
+  color: #177245;
+  font-size: 11px;
+  font-weight: 800;
 }
