@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1748 900" role="img" aria-labelledby="title desc">
+  <title id="title">Phối cảnh Hoa Sen Home - canopy 7 m và dim sát cấu kiện</title>
+  <desc id="desc">Phối cảnh có ba cửa cuốn, hai cửa nhà nhân viên và mái canopy sâu 7 m; chuỗi kích thước được dóng trực tiếp, song song với cấu kiện.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity=".75"/>
+    </filter>
+    <marker id="arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse">
+      <path d="M0,0 L7,3.5 L0,7 Z" fill="#ffd21f"/>
+    </marker>
+    <style>
+      .dim{fill:none;stroke:#ffd21f;stroke-width:2.6;marker-start:url(#arrow);marker-end:url(#arrow)}
+      .ext{fill:none;stroke:#ffd21f;stroke-width:1.5;stroke-dasharray:5 5}
+      .tick{stroke:#ffd21f;stroke-width:2.2}
+      .label{font:800 14px Arial,sans-serif;fill:#ffd21f;text-anchor:middle;paint-order:stroke;stroke:#111827;stroke-width:5;stroke-linejoin:round}
+      .small{font:800 12px Arial,sans-serif;fill:#ffd21f;text-anchor:middle;paint-order:stroke;stroke:#111827;stroke-width:4;stroke-linejoin:round}
+      .note{font:800 13px Arial,sans-serif;fill:#fff;text-anchor:middle}
+      .badge{fill:#111827;fill-opacity:.90;stroke:#ffd21f;stroke-width:1.5}
+    </style>
+  </defs>
+
+  <image x="0" y="0" width="1748" height="900" xlink:href="./phoi-canh-3d-bam-ban-ve-duyet-v7-canopy7m.png"/>
+
+  <!-- Chuỗi dim cửa cuốn: chân dóng chạm đúng mép các trụ/mép cửa -->
+  <g filter="url(#shadow)">
+    <line class="ext" x1="289" y1="646" x2="289" y2="723"/>
+    <line class="ext" x1="405" y1="646" x2="405" y2="723"/>
+    <line class="ext" x1="414" y1="646" x2="414" y2="723"/>
+    <line class="ext" x1="701" y1="646" x2="701" y2="723"/>
+    <line class="ext" x1="710" y1="646" x2="710" y2="723"/>
+    <line class="ext" x1="1034" y1="646" x2="1034" y2="723"/>
+
+    <line class="dim" x1="289" y1="711" x2="405" y2="711"/>
+    <text class="small" x="347" y="702">CỬA CUỐN 2.211</text>
+    <line class="dim" x1="414" y1="711" x2="701" y2="711"/>
+    <text class="label" x="558" y="702">CỬA CUỐN 5.950</text>
+    <line class="dim" x1="710" y1="711" x2="1034" y2="711"/>
+    <text class="label" x="872" y="702">CỬA CUỐN 5.350</text>
+  </g>
+
+  <!-- Chuỗi dim cụm kính C-D-E-E': đặt sát chân kính, song song mặt tiền -->
+  <g filter="url(#shadow)">
+    <line class="ext" x1="1043" y1="650" x2="1043" y2="748"/>
+    <line class="ext" x1="1265" y1="650" x2="1265" y2="748"/>
+    <line class="ext" x1="1492" y1="650" x2="1492" y2="748"/>
+    <line class="ext" x1="1607" y1="650" x2="1607" y2="748"/>
+
+    <line class="dim" x1="1043" y1="735" x2="1265" y2="735"/>
+    <text class="label" x="1154" y="726">C-D 7.000</text>
+    <line class="dim" x1="1265" y1="735" x2="1492" y2="735"/>
+    <text class="label" x="1378" y="726">D-E 5.000</text>
+    <line class="dim" x1="1492" y1="735" x2="1607" y2="735"/>
+    <text class="small" x="1549" y="726">E-E' 2.278</text>
+  </g>
+
+  <!-- Dim chiều sâu canopy: song song đúng cạnh hông mái nhìn thấy -->
+  <g filter="url(#shadow)">
+    <!-- Đường dóng từ cạnh mái thật sang chuỗi dim song song -->
+    <line class="ext" x1="451" y1="258" x2="451" y2="226"/>
+    <line class="ext" x1="203" y1="413" x2="203" y2="381"/>
+    <line class="ext" x1="162" y1="439" x2="162" y2="407"/>
+
+    <!-- 6/7 chiều dài đến tim cột, 1/7 còn lại đến mép mái -->
+    <line class="dim" x1="451" y1="226" x2="203" y2="381"/>
+    <text class="label" x="330" y="286" transform="rotate(-32 330 286)">NHÀ → TIM HÀNG CỘT 6.000</text>
+    <line class="dim" x1="203" y1="381" x2="162" y2="407"/>
+    <text class="small" x="176" y="365" transform="rotate(-32 176 365)">1.000</text>
+    <text class="small" x="304" y="407" transform="rotate(-32 304 407)">TỔNG MÁI CANOPY 7.000</text>
+  </g>
+
+  <!-- Dim cao độ: đặt ngay cạnh phải công trình -->
+  <g filter="url(#shadow)">
+    <line class="ext" x1="1608" y1="679" x2="1699" y2="679"/>
+    <line class="ext" x1="1608" y1="454" x2="1661" y2="454"/>
+    <line class="ext" x1="1608" y1="57" x2="1716" y2="57"/>
+
+    <line class="dim" x1="1650" y1="454" x2="1650" y2="679"/>
+    <text class="label" x="1636" y="566" transform="rotate(-90 1636 566)">CAO CANOPY 5.000</text>
+    <line class="dim" x1="1698" y1="57" x2="1698" y2="679"/>
+    <text class="label" x="1684" y="368" transform="rotate(-90 1684 368)">CAO TỔNG THỂ 10.800</text>
+  </g>
+
+</svg>

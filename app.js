@@ -581,7 +581,7 @@ window.hshPerspectiveOpen = function(file, title = 'Phối cảnh 3D Hoa Sen Hom
     title,
     file,
     revision: 'Bản duyệt đối chiếu TKTC',
-    scale: 'Ảnh HD 3496 × 2040 px'
+    scale: 'Ảnh HD 3496 × 1800 px'
   };
   currentLightboxZoom = 1;
   currentLightboxRotation = 0;

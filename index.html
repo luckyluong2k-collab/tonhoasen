@@ -227,7 +227,7 @@
                     <div class="perspective-copy">
                         <div class="eyebrow-label"><i class="fas fa-cubes"></i> Phối cảnh 3D bám hồ sơ KT</div>
                         <h3>Cửa hàng Hoa Sen Home Phủ Lý</h3>
-                        <p>Phối cảnh phối hợp kiến trúc được dựng từ bộ bản vẽ KT: mặt bằng, mái, mặt đứng–mặt cắt chính, canopy và chi tiết bồn hoa. Dùng để hình dung không gian; kích thước thi công vẫn lấy theo bản vẽ gốc.</p>
+                        <p>Phối cảnh phối hợp kiến trúc được dựng từ bộ bản vẽ KT: ba cửa cuốn, cụm kính, mặt bằng mái, mặt đứng–mặt cắt chính và canopy sâu 7 m (từ nhà đến tim hàng cột 6 m, mái vượt cột 1 m). Dùng để hình dung không gian; kích thước thi công vẫn lấy theo bản vẽ gốc.</p>
                         <div class="perspective-tags" aria-label="Nội dung trong phối cảnh">
                             <span><i class="fas fa-ruler-combined"></i> Mặt đứng +10,8 m</span>
                             <span><i class="fas fa-sign"></i> Bảng hiệu chính 5 m</span>
@@ -235,13 +235,13 @@
                             <span><i class="fas fa-seedling"></i> Bồn hoa B1/B2</span>
                         </div>
                         <div class="perspective-actions">
-                            <a class="btn btn-outline perspective-open" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v6-dim-hd.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D + dim — Bản duyệt TKTC'); return false;"><i class="fas fa-expand"></i> Mở phối cảnh 3D + dim</a>
-                            <a class="btn btn-ghost perspective-source" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v3.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D — Ảnh không dim'); return false;"><i class="fas fa-image"></i> Ảnh 3D không dim</a>
+                            <a class="btn btn-outline perspective-open" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v7-canopy7m-dim-hd.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D + dim — Canopy 6 m + 1 m'); return false;"><i class="fas fa-expand"></i> Mở phối cảnh 3D + dim</a>
+                            <a class="btn btn-ghost perspective-source" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v7-canopy7m.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D — Canopy sâu 7 m'); return false;"><i class="fas fa-image"></i> Ảnh 3D không dim</a>
                             <a class="btn btn-ghost perspective-source" href="./assets/hoa-sen/phoi-canh-mat-dung-hoa-sen-home.png" target="_blank" rel="noopener"><i class="fas fa-drafting-compass"></i> Đối chiếu mặt đứng KT</a>
                         </div>
                     </div>
-                    <a class="perspective-image-link" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v6-dim-hd.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D + dim — Bản duyệt TKTC'); return false;" aria-label="Mở trình xem phối cảnh 3D tại trang, có phóng to và kéo ảnh">
-                        <img src="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v6-dim.png" alt="Phối cảnh 3D cửa hàng Hoa Sen Home Phủ Lý đã duyệt, có dim trực tiếp trên ảnh" loading="eager">
+                    <a class="perspective-image-link" href="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v7-canopy7m-dim-hd.png" onclick="window.hshPerspectiveOpen(this.href, 'Phối cảnh 3D + dim — Canopy 6 m + 1 m'); return false;" aria-label="Mở trình xem phối cảnh 3D tại trang, có phóng to và kéo ảnh">
+                        <img src="./assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v7-canopy7m-dim.png" alt="Phối cảnh 3D Hoa Sen Home Phủ Lý với canopy sâu 7 m và dim song song cấu kiện" loading="eager">
                         <span class="perspective-image-badge"><i class="fas fa-check-circle"></i> Đã đối chiếu hồ sơ KT</span>
                         <span class="perspective-image-hint"><i class="fas fa-expand"></i> Bấm để xem lớn</span>
                     </a>
@@ -1557,7 +1557,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=10.9')
+        navigator.serviceWorker.register('./sw.js?v=10.12')
                     .then(reg => console.log('Hoa Sen Home PWA SW registered successfully:', reg.scope))
                     .catch(err => console.log('SW registration error:', err));
             });
