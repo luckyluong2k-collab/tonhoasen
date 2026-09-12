@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1748 900" role="img" aria-labelledby="title desc">
+  <title id="title">Phối cảnh 3D Hoa Sen Home Phủ Lý đã duyệt, có kích thước đối chiếu</title>
+  <desc id="desc">Phối cảnh bám bản vẽ kỹ thuật với hai cửa cuốn, cụm kính mặt tiền, cột ốp alu đỏ và bạc, cửa hông, mái canopy và các kích thước chính.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity=".35"/>
+    </filter>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#ffd21f"/>
+    </marker>
+    <style>
+      .panel{fill:#111827;fill-opacity:.88;stroke:#ffd21f;stroke-width:2}
+      .title{font:700 22px Arial,sans-serif;fill:#fff}
+      .txt{font:600 15px Arial,sans-serif;fill:#fff}
+      .sub{font:500 13px Arial,sans-serif;fill:#dbeafe}
+      .dim{fill:none;stroke:#ffd21f;stroke-width:2.5;marker-start:url(#arrow);marker-end:url(#arrow)}
+      .guide{fill:none;stroke:#ffd21f;stroke-width:1.5;stroke-dasharray:7 6}
+      .tag{fill:#b91c1c;stroke:#fff;stroke-width:1.5}
+      .tagtext{font:700 13px Arial,sans-serif;fill:#fff;text-anchor:middle}
+    </style>
+  </defs>
+
+  <image x="0" y="0" width="1748" height="900" xlink:href="./phoi-canh-3d-bam-ban-ve-duyet-v3.png"/>
+
+  <g filter="url(#shadow)">
+    <rect class="panel" x="34" y="28" width="500" height="112" rx="10"/>
+    <text class="title" x="56" y="59">PHỐI CẢNH 3D — BẢN DUYỆT</text>
+    <text class="txt" x="56" y="87">Mặt tiền ≈ 30.089 mm · cao đỉnh +10.800</text>
+    <text class="sub" x="56" y="112">Đối chiếu TKTC: mặt bằng · mặt đứng · mặt cắt</text>
+    <text class="sub" x="56" y="132">Kích thước thi công lấy theo hồ sơ bản vẽ gốc.</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="panel" x="1290" y="28" width="424" height="150" rx="10"/>
+    <text class="title" x="1312" y="59">KÍCH THƯỚC CHÍNH</text>
+    <text class="txt" x="1312" y="87">Canopy: cột cách nhà 6.000 mm</text>
+    <text class="txt" x="1312" y="112">Mái đua tổng 7.000 mm</text>
+    <text class="txt" x="1312" y="137">Mái vượt tim cột 1.000 mm</text>
+    <text class="sub" x="1312" y="160">VK1: 13.078 × 3.900 mm</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <path class="guide" d="M154 594 L238 594 L272 650"/>
+    <rect class="tag" x="42" y="566" width="180" height="36" rx="18"/>
+    <text class="tagtext" x="132" y="589">CỬA HÔNG D2</text>
+
+    <path class="guide" d="M692 512 L692 468"/>
+    <rect class="tag" x="601" y="432" width="182" height="36" rx="18"/>
+    <text class="tagtext" x="692" y="455">02 CỬA CUỐN</text>
+
+    <path class="guide" d="M1043 510 L1043 453"/>
+    <rect class="tag" x="943" y="417" width="200" height="36" rx="18"/>
+    <text class="tagtext" x="1043" y="440">CỘT ALU ĐỎ — C</text>
+
+    <path class="guide" d="M1341 565 L1390 491"/>
+    <rect class="tag" x="1213" y="565" width="256" height="36" rx="18"/>
+    <text class="tagtext" x="1341" y="588">CỤM KÍNH C–D–E–E’</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="panel" x="382" y="790" width="984" height="78" rx="10"/>
+    <line class="dim" x1="420" y1="822" x2="1328" y2="822"/>
+    <text class="txt" x="874" y="814" text-anchor="middle">C–D 7.000 · D–E 5.000 · E–E’ 2.278 mm</text>
+    <text class="sub" x="874" y="850" text-anchor="middle">Cột biên kính: C đỏ · D/E/E’ bạc — giữ đủ nhịp và cột theo TKTC</text>
+  </g>
+</svg>
