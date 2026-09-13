@@ -1,55 +1,769 @@
 (() => {
-'use strict';
-const $=id=>document.getElementById(id), L=window.HSH_TEMPLATE_LAYOUT, storage='hsh-dossier-editor-v1';
-const titles={diary:'03. Nhật ký công trình',acceptance:'07. Nghiệm thu công việc',defect:'09. Defect List'};
-const files={diary:'03.NHAT KY CONG TRINH.DOC',acceptance:'07.BBNT CONG VIEC XAY DUNG.doc',defect:'09.BIEN BAN GHI NHAN DEFECT LIST.docx'};
-const labels={name:'Dự án / Công trình',package:'Gói thầu',address:'Địa điểm',owner:'Chủ đầu tư',contractor:'Đơn vị thi công',contract:'Hợp đồng số'};
-const defaults={name:'CẢI TẠO & XÂY MỚI HOA SEN HOME PHỦ LÝ',package:'Thi công cải tạo và xây mới cửa hàng Hoa Sen Home Phủ Lý',address:'Phủ Lý – Ninh Bình',owner:'TẬP ĐOÀN HOA SEN (HSG)',contractor:'CÔNG TY TNHH TM HOÀNG GIANG',contract:'01/2026/HĐXD/HSG-HG'};
-let state={project:{...defaults},records:[]},active,plans=[],epoch=0,busy=false;
-try{const data=JSON.parse(localStorage.getItem(storage));if(data?.project&&Array.isArray(data.records))state=data;}catch(e){$('status').textContent='Không đọc được dữ liệu đã lưu.';}
-const effectiveProject=()=>active?.projectOverride||state.project;
-const measure=document.createElement('canvas').getContext('2d'),images=new Map();
-const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
-const dateText=context=>{const [y,m,d]=(context?.record||active).date.split('-');return `ngày ${d} tháng ${m} năm ${y}`;};
-function save(){state.lastRecordId=active?.id;try{localStorage.setItem(storage,JSON.stringify(state));$('status').textContent='Đã lưu trên máy này';}catch(e){$('status').textContent='Chưa lưu được trên máy. Hãy tải bản sao dữ liệu để tránh mất nội dung.';}}
-function migrate(r){if(r.layout===2)return;r.photos??={};r.fields??={};if(r.type==='defect')r.count=Math.max(5,r.count||1);r.layout=2;}
-function create(type){active={id:crypto.randomUUID(),type,date:today(),fields:{},photos:{},count:type==='defect'?5:1,layout:2};state.records.push(active);save();render();}
-function font(f){return `${f.italic?'italic ':''}${f.bold?'bold ':''}${f.size}px "Times New Roman"`;}
-function value(f,context){const record=context?.record||active;if(f.key.startsWith('common:'))return (context?.project||effectiveProject())[f.key.slice(7)]||'';if(Object.hasOwn(record.fields,f.key))return record.fields[f.key];if(f.auto==='year')return record.date.slice(0,4);if(f.auto==='pageCount')return String(3+record.count);if(f.auto==='firstPage')return '1';if(f.auto==='date')return dateText(context);if(f.auto==='meeting')return `Hôm nay, vào lúc … giờ … phút, ${dateText(context)}, các bên liên quan gồm có:`;return f.default||'';}
-function wrap(text,f){measure.font=font(f);let lines=[];for(const paragraph of String(text).replace(/\r/g,'').split('\n')){if(!paragraph){lines.push('');continue;}let line='';for(const word of paragraph.split(/\s+/)){if(measure.measureText(line?(line+' '+word):word).width<=f.w){line=line?line+' '+word:word;}else{if(line)lines.push(line);line='';for(const char of word){if(measure.measureText(line+char).width>f.w&&line){lines.push(line);line='';}line+=char;}}}lines.push(line);}return lines;}
-function overflow(f){if(f.photo)return false;const text=value(f);return !!text&&((wrap(text,f).length-1)*f.line+f.size*1.107>f.h+.4);}
-function getImage(src){if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('Không đọc được mẫu hoặc hình ảnh.'));im.src=src;}));return images.get(src);}
-function base(source,fields,extra={}){return {source,fields:fields.map(f=>({...f})),...extra};}
-function build(){if(active.type==='diary'){const p=L.diary.slice(0,3).map(t=>base(t.source,t.fields));for(let i=0;i<active.count;i++)p.push(base('03-4',L.diary[3].fields.map(f=>({...f,key:f.key.includes('sig')?'day'+i+f.key:f.key+i}))));return p;}
-if(active.type==='acceptance'){const p=[];for(let i=0;i<active.count;i++)L.acceptance.forEach(t=>p.push(base(t.source,t.fields.map(f=>({...f,key:i&&!f.key.startsWith('common:')?f.key+'_set'+i:f.key})))));return p;}
-const x=[56.88,90.38,162.98,212.69,283.49,361.51,407.11,452.62,531.70,566.76],rows=[];
-for(let i=0;i<active.count;i++){const cols=[['issue',1,'Nội dung lỗi'],['location',2,'Vị trí / khu vực'],['before',3,'Ảnh minh họa'],['fix',4,'Biện pháp khắc phục'],['from',5,'Bắt đầu'],['to',6,'Kết thúc'],['after',7,'Ảnh sau khắc phục'],['note',8,'Ghi chú']];const fs=cols.map(([key,c,label])=>L.slot(key+i,`${label} — dòng ${i+1}`,x[c]+5.5,0,x[c+1]-x[c]-11,12,10,{photo:key==='before'||key==='after',row:i}));let h=14.31;for(const f of fs){if(f.photo){if(active.photos[f.key])h=Math.max(h,65);}else if(value(f))h=Math.max(h,wrap(value(f),f).length*11.5+2.5);}rows.push({i,h,fields:fs});}
-const groups=[];let group=[],height=0;for(const row of rows){if(group.length&&height+row.h>130){groups.push(group);group=[];height=0;}group.push(row);height+=row.h;}if(group.length)groups.push(group);
-return groups.map((rows,index)=>{let y=517.75;const fields=L.defect.fields.filter(f=>!f.bottom).map(f=>({...f}));for(const row of rows){row.y=y;for(const f of row.fields)fields.push({...f,y:y+.45,h:row.h-1.2});y+=row.h;}const delta=y-589.3;fields.push(...L.defect.fields.filter(f=>f.bottom).map(f=>({...f,y:f.y+delta})));return base('09-1',fields,{rows,delta,x,page:index+1,total:groups.length,tooTall:y>648});});}
-async function draw(plan,canvas,scale=1.5,blank=false,context){canvas.width=Math.round(L.width*scale);canvas.height=Math.round(L.height*scale);const c=canvas.getContext('2d');c.scale(scale,scale);c.fillStyle='white';c.fillRect(0,0,L.width,L.height);const im=await getImage('assets/hoa-sen/templates/'+plan.source+'.svg');c.drawImage(im,0,0,L.width,L.height);
-if(plan.rows&&!blank&&(plan.rows.length!==5||plan.rows[0].i!==0||plan.rows.some(r=>r.h!==14.31))){c.fillStyle='white';c.fillRect(55.9,517.75,513,240);c.save();c.beginPath();c.rect(55.9,589.3+plan.delta,513,148);c.clip();c.drawImage(im,0,plan.delta,L.width,L.height);c.restore();c.fillStyle='#666';for(const row of plan.rows){for(const x of plan.x)c.fillRect(x-.24,row.y,.48,row.h);c.fillRect(plan.x[0],row.y+row.h-.24,plan.x.at(-1)-plan.x[0],.48);c.fillStyle='#000';c.font='10px "Times New Roman"';c.fillText(String(row.i+1),71.2,row.y+9.35);c.fillStyle='#666';}c.fillStyle='white';c.fillRect(516,786,57,15);c.fillStyle='black';c.font='12px "Times New Roman"';c.textAlign='right';c.fillText(`Trang ${plan.page}/${plan.total}`,567,797.3);c.textAlign='left';}
-if(blank)return;
-for(const f of plan.fields){if(f.photo){const src=(context?.record||active).photos[f.key];if(!src)continue;const photo=await getImage(src),ratio=Math.min(f.w/photo.width,(f.h-2)/photo.height);c.drawImage(photo,f.x+(f.w-photo.width*ratio)/2,f.y+1,photo.width*ratio,photo.height*ratio);continue;}const text=value(f,context);if(!text)continue;c.fillStyle='white';c.fillRect(f.x,f.y,f.w,f.h);for(const m of f.mask||[])c.fillRect(...m);c.save();c.beginPath();c.rect(f.x,f.y,f.w,f.h);c.clip();c.font=font(f);c.fillStyle='black';c.textBaseline='alphabetic';c.textAlign=f.align||'left';let y=f.y+f.size*.891;for(const line of wrap(text,f)){c.fillText(line,f.align==='center'?f.x+f.w/2:f.x,y);y+=f.line;}c.restore();}}
-function write(f,text){if(f.key.startsWith('common:')){effectiveProject()[f.key.slice(7)]=text;const input=$('project').querySelector(`[data-common="${f.key.slice(7)}"]`);if(input)input.value=text;}else active.fields[f.key]=text;save();}
-function validate(){const bad=plans.flatMap(p=>p.fields.filter(overflow)),tall=plans.some(p=>p.tooTall);$('warnings').textContent=bad.length?`Có ${bad.length} ô vượt chỗ trống của mẫu: ${[...new Set(bad.map(f=>f.label))].join(', ')}. Hãy rút gọn hoặc chuyển phần tiếp sang trang mới; cỡ chữ được giữ nguyên.`:tall?'Một dòng Defect quá dài cho một trang. Hãy tách nội dung sang dòng tiếp theo.':'';document.querySelectorAll('.slot').forEach(el=>{const f=plans[+el.dataset.page]?.fields[+el.dataset.field];el.classList.toggle('overflow',f&&!f.photo&&overflow(f));});return !bad.length&&!tall;}
-function showLegacy(){const used=new Set(plans.flatMap(p=>p.fields.map(f=>f.key)));const extra=Object.entries(active.fields).filter(([k,v])=>v&&!used.has(k));$('legacy').hidden=!extra.length;$('legacyContent').replaceChildren();for(const [k,v] of extra){const p=document.createElement('p');p.textContent=({basis:'Tài liệu làm căn cứ',staff:'Danh sách cán bộ',register:'Thông tin đánh số trang',time:'Thời gian',participant0:'Phòng ĐTXDCB',participant1:'Cửa hàng trưởng / Trưởng kho',participant2:'Phòng kiểm soát',participant3:'Đơn vị thi công'}[k]||'Nội dung đã lưu')+': '+v;$('legacyContent').append(p);}}
-async function render(){HSHArchive.setType(active.type);const run=++epoch;migrate(active);save();plans=build();document.querySelectorAll('[data-common]').forEach(el=>el.value=effectiveProject()[el.dataset.common]||'');$('snapshotNotice').hidden=!active.projectOverride;$('snapshotNotice').textContent=active.projectOverride?'Bản sao từ lịch sử: thông tin công trình được giữ riêng cho bản này.':'';$('type').value=active.type;$('date').value=active.date;$('original').href='assets/hoa-sen/docs/'+encodeURIComponent(files[active.type]);$('records').replaceChildren();for(const r of state.records.filter(r=>r.type===active.type)){const o=new Option(`${r.date} • Hồ sơ ${state.records.indexOf(r)+1}`,r.id,r.id===active.id,r.id===active.id);$('records').add(o);}$('add').textContent=active.type==='diary'?'+ Thêm trang nhật ký':active.type==='defect'?'+ Thêm 5 dòng lỗi':'+ Thêm bộ biên bản';$('pages').replaceChildren();const blank=$('templateOnly').checked;
-for(let pi=0;pi<plans.length;pi++){const plan=plans[pi],shell=document.createElement('div'),paper=document.createElement('article'),canvas=document.createElement('canvas');shell.className='sheet-shell';paper.className='paper';paper.style.width=L.width+'px';paper.style.height=L.height+'px';paper.append(canvas);shell.append(paper);$('pages').append(shell);canvas.setAttribute('aria-label',`${titles[active.type]} — trang ${pi+1}`);await draw(plan,canvas,1.8,blank);if(epoch!==run)return;
-if(!blank)plan.fields.forEach((f,fi)=>{const el=document.createElement(f.photo?'button':'textarea');el.className='slot';el.dataset.page=pi;el.dataset.field=fi;el.dataset.key=f.key;el.setAttribute('aria-label',f.label);el.title=f.label;Object.assign(el.style,{left:f.x+'px',top:f.y+'px',width:f.w+'px',height:f.h+'px',font:font(f),lineHeight:f.line+'px'});
-if(f.photo){el.textContent=active.photos[f.key]?'Đổi ảnh':'+ Ảnh';el.onclick=()=>selectPhoto(f);}else{el.value=value(f);el.spellcheck=false;el.onfocus=()=>{$('fieldHelp').textContent=f.label+` · Times New Roman ${f.size} pt`;};el.oninput=()=>{write(f,el.value);el.classList.toggle('overflow',overflow(f));validate();};el.onblur=()=>render();}paper.append(el);});}
-zoom();validate();showLegacy();}
-function zoom(){const z=$('zoom').value==='fit'?Math.min(1.333333,Math.max(.2,($('pages').clientWidth-12)/L.width)):Number($('zoom').value);document.querySelectorAll('.sheet-shell').forEach(s=>{s.style.width=L.width*z+'px';s.style.height=L.height*z+'px';s.firstChild.style.transform=`scale(${z})`;});}
-async function selectPhoto(f){const input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp';input.onchange=async()=>{const file=input.files[0];if(!file)return;try{const bitmap=await createImageBitmap(file),c=document.createElement('canvas'),r=Math.min(1,1200/bitmap.width);c.width=bitmap.width*r;c.height=bitmap.height*r;c.getContext('2d').drawImage(bitmap,0,0,c.width,c.height);bitmap.close();active.photos[f.key]=c.toDataURL('image/jpeg',.9);save();render();}catch(e){$('status').textContent='Không đọc được ảnh. Hãy chọn PNG hoặc JPG.';}};input.click();}
-function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}
-function fontAvailable(){measure.font='12px monospace';const width=measure.measureText('Wmi012 Công trình').width;measure.font='12px "Times New Roman", monospace';return Math.abs(width-measure.measureText('Wmi012 Công trình').width)>.1;}
-async function exportFile(type){if(busy)return;plans=build();if(!validate()){$('warnings').scrollIntoView({block:'center'});return;}if(!fontAvailable()){$('status').textContent='Máy này chưa có Times New Roman. Để xuất đúng font mẫu, hãy mở hồ sơ trên máy có font này.';return;}const snapshot={record:structuredClone(active),project:structuredClone(effectiveProject())};busy=true;document.querySelector('main').inert=true;$('busy').hidden=false;try{await document.fonts.ready;const pdf=type==='pdf'?new window.jspdf.jsPDF({unit:'pt',format:[L.width,L.height],compress:true}):null,zip={};for(let i=0;i<plans.length;i++){const c=document.createElement('canvas');await draw(plans[i],c,300/72,false,snapshot);if(pdf){if(i)pdf.addPage([L.width,L.height]);pdf.addImage(c.toDataURL('image/png'),'PNG',0,0,L.width,L.height,undefined,'FAST');}else{const blob=await new Promise(r=>c.toBlob(r,'image/png'));zip[active.type==='diary'?`Nhật ký thi công-${active.date.split('-').reverse().join('.')}-trang-${i+1}.png`:`${active.type}-${active.date}-trang-${i+1}.png`]=new Uint8Array(await blob.arrayBuffer());}$('status').textContent=`Đang xuất trang ${i+1}/${plans.length}…`;}
-const blob=pdf?pdf.output('blob'):new Blob([fflate.zipSync(zip,{level:0})],{type:'application/zip'});let archived;try{archived=await HSHArchive.capture(blob,{format:type,pages:plans.length,snapshot});}catch(error){$('archiveStatus').textContent='Chưa lưu được lịch sử: '+error.message+'. Hãy giữ file tải xuống.';}download(blob,HSHArchive.downloadName(snapshot.record,type,archived?.entry?.filename||`${active.type}-${active.date}-${Date.now()}.${pdf?'pdf':'zip'}`));$('status').textContent=`Đã tạo ${plans.length} trang, 300 dpi. ${archived?.message||'Đã lưu vào lịch sử bên dưới.'}`;setTimeout(()=>{$('exportArchive').scrollIntoView({behavior:'smooth',block:'start'});},300);
-}catch(e){$('status').textContent='Chưa xuất được file: '+e.message;}finally{busy=false;document.querySelector('main').inert=false;$('busy').hidden=true;}}
-for(const [key,label] of Object.entries(labels)){const l=document.createElement('label');l.textContent=label;const input=document.createElement('input');input.dataset.common=key;input.value=state.project[key]||'';input.oninput=()=>{effectiveProject()[key]=input.value;save();};input.onchange=render;l.append(input);$('project').append(l);}
-$('date').onchange=()=>{if($('date').value){active.date=$('date').value;save();render();}};$('new').onclick=()=>create($('type').value);$('type').onchange=()=>{const r=state.records.findLast(r=>r.type===$('type').value);if(r){active=r;render();}else create($('type').value);};$('records').onchange=()=>{active=state.records.find(r=>r.id===$('records').value);render();};$('add').onclick=()=>{active.count+=active.type==='defect'?5:1;save();render();};$('zoom').onchange=zoom;$('templateOnly').onchange=render;$('pdf').onclick=()=>exportFile('pdf');$('png').onclick=()=>exportFile('png');$('backup').onclick=()=>download(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),'ho-so-cong-trinh-ban-sao.json');
-const requested=new URLSearchParams(location.search).get('type'),type=titles[requested]?requested:'diary';active=!requested&&state.lastRecordId?state.records.find(r=>r.id===state.lastRecordId):state.records.findLast(r=>r.type===type);if(active)render();else create(type);
-HSHArchive.init(async(snapshot,exportId)=>{const record=snapshot.record;if(!record||!titles[record.type]||!snapshot.project)throw Error('Bản lưu thiếu dữ liệu hồ sơ.');active={...structuredClone(record),id:crypto.randomUUID(),originRecordId:record.originRecordId||record.id,sourceExportId:exportId,projectOverride:structuredClone(snapshot.project)};state.records.push(active);save();await render();$('pages').scrollIntoView({block:'start'});});
-window.hshTemplateQA={build,draw,validate,value,wrap,get plans(){return plans;},get active(){return active;},get state(){return state;}};
+  "use strict";
+  const $ = (id) => document.getElementById(id),
+    L = window.HSH_TEMPLATE_LAYOUT,
+    storage = "hsh-dossier-editor-v1";
+  const titles = {
+    diary: "03. Nhật ký công trình",
+    acceptance: "07. Nghiệm thu công việc",
+    defect: "09. Defect List",
+  };
+  const files = {
+    diary: "03.NHAT KY CONG TRINH.DOC",
+    acceptance: "07.BBNT CONG VIEC XAY DUNG.doc",
+    defect: "09.BIEN BAN GHI NHAN DEFECT LIST.docx",
+  };
+  const labels = {
+    name: "Dự án / Công trình",
+    package: "Gói thầu",
+    address: "Địa điểm",
+    owner: "Chủ đầu tư",
+    contractor: "Đơn vị thi công",
+    contract: "Hợp đồng số",
+  };
+  const defaults = {
+    name: "CẢI TẠO & XÂY MỚI HOA SEN HOME PHỦ LÝ",
+    package: "Thi công cải tạo và xây mới cửa hàng Hoa Sen Home Phủ Lý",
+    address: "Phủ Lý – Ninh Bình",
+    owner: "TẬP ĐOÀN HOA SEN (HSG)",
+    contractor: "CÔNG TY TNHH TM HOÀNG GIANG",
+    contract: "01/2026/HĐXD/HSG-HG",
+  };
+  let state = { project: { ...defaults }, records: [] },
+    active,
+    plans = [],
+    epoch = 0,
+    busy = false;
+  try {
+    const data = JSON.parse(localStorage.getItem(storage));
+    if (data?.project && Array.isArray(data.records)) state = data;
+  } catch (e) {
+    $("status").textContent = "Không đọc được dữ liệu đã lưu.";
+  }
+  const effectiveProject = () => active?.projectOverride || state.project;
+  const measure = document.createElement("canvas").getContext("2d"),
+    images = new Map();
+  const today = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
+  const dateText = (context) => {
+    const [y, m, d] = (context?.record || active).date.split("-");
+    return `ngày ${d} tháng ${m} năm ${y}`;
+  };
+  function save() {
+    state.lastRecordId = active?.id;
+    try {
+      localStorage.setItem(storage, JSON.stringify(state));
+      $("status").textContent = "Đã lưu trên máy này";
+    } catch (e) {
+      $("status").textContent =
+        "Chưa lưu được trên máy. Hãy tải bản sao dữ liệu để tránh mất nội dung.";
+    }
+  }
+  function migrate(r) {
+    if (r.layout === 2) return;
+    r.photos ??= {};
+    r.fields ??= {};
+    if (r.type === "defect") r.count = Math.max(5, r.count || 1);
+    r.layout = 2;
+  }
+  function create(type) {
+    active = {
+      id: crypto.randomUUID(),
+      type,
+      date: today(),
+      fields: {},
+      photos: {},
+      count: type === "defect" ? 5 : 1,
+      layout: 2,
+    };
+    state.records.push(active);
+    save();
+    render();
+  }
+  function font(f) {
+    return `${f.italic ? "italic " : ""}${f.bold ? "bold " : ""}${f.size}px "Times New Roman"`;
+  }
+  function value(f, context) {
+    const record = context?.record || active;
+    if (f.key.startsWith("common:"))
+      return (context?.project || effectiveProject())[f.key.slice(7)] || "";
+    if (Object.hasOwn(record.fields, f.key)) return record.fields[f.key];
+    if (f.auto === "year") return record.date.slice(0, 4);
+    if (f.auto === "pageCount") return String(3 + record.count);
+    if (f.auto === "firstPage") return "1";
+    if (f.auto === "date") return dateText(context);
+    if (f.auto === "meeting")
+      return `Hôm nay, vào lúc … giờ … phút, ${dateText(context)}, các bên liên quan gồm có:`;
+    return f.default || "";
+  }
+  function wrap(text, f) {
+    measure.font = font(f);
+    let lines = [];
+    for (const paragraph of String(text).replace(/\r/g, "").split("\n")) {
+      if (!paragraph) {
+        lines.push("");
+        continue;
+      }
+      let line = "";
+      for (const word of paragraph.split(/\s+/)) {
+        if (measure.measureText(line ? line + " " + word : word).width <= f.w) {
+          line = line ? line + " " + word : word;
+        } else {
+          if (line) lines.push(line);
+          line = "";
+          for (const char of word) {
+            if (measure.measureText(line + char).width > f.w && line) {
+              lines.push(line);
+              line = "";
+            }
+            line += char;
+          }
+        }
+      }
+      lines.push(line);
+    }
+    return lines;
+  }
+  function overflow(f) {
+    if (f.photo) return false;
+    const text = value(f);
+    return (
+      !!text && (wrap(text, f).length - 1) * f.line + f.size * 1.107 > f.h + 0.4
+    );
+  }
+  function getImage(src) {
+    if (!images.has(src))
+      images.set(
+        src,
+        new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = () => reject(Error("Không đọc được mẫu hoặc hình ảnh."));
+          im.src = src;
+        }),
+      );
+    return images.get(src);
+  }
+  function base(source, fields, extra = {}) {
+    return { source, fields: fields.map((f) => ({ ...f })), ...extra };
+  }
+  function build() {
+    if (active.type === "diary") {
+      const p = L.diary.slice(0, 3).map((t) => base(t.source, t.fields));
+      for (let i = 0; i < active.count; i++)
+        p.push(
+          base(
+            "03-4",
+            L.diary[3].fields.map((f) => ({
+              ...f,
+              key: f.key.includes("sig") ? "day" + i + f.key : f.key + i,
+            })),
+          ),
+        );
+      return p;
+    }
+    if (active.type === "acceptance") {
+      const p = [];
+      for (let i = 0; i < active.count; i++)
+        L.acceptance.forEach((t) =>
+          p.push(
+            base(
+              t.source,
+              t.fields.map((f) => ({
+                ...f,
+                key:
+                  i && !f.key.startsWith("common:")
+                    ? f.key + "_set" + i
+                    : f.key,
+              })),
+            ),
+          ),
+        );
+      return p;
+    }
+    const x = [
+        56.88, 90.38, 162.98, 212.69, 283.49, 361.51, 407.11, 452.62, 531.7,
+        566.76,
+      ],
+      rows = [];
+    for (let i = 0; i < active.count; i++) {
+      const cols = [
+        ["issue", 1, "Nội dung lỗi"],
+        ["location", 2, "Vị trí / khu vực"],
+        ["before", 3, "Ảnh minh họa"],
+        ["fix", 4, "Biện pháp khắc phục"],
+        ["from", 5, "Bắt đầu"],
+        ["to", 6, "Kết thúc"],
+        ["after", 7, "Ảnh sau khắc phục"],
+        ["note", 8, "Ghi chú"],
+      ];
+      const fs = cols.map(([key, c, label]) =>
+        L.slot(
+          key + i,
+          `${label} — dòng ${i + 1}`,
+          x[c] + 5.5,
+          0,
+          x[c + 1] - x[c] - 11,
+          12,
+          10,
+          { photo: key === "before" || key === "after", row: i },
+        ),
+      );
+      let h = 14.31;
+      for (const f of fs) {
+        if (f.photo) {
+          if (active.photos[f.key]) h = Math.max(h, 65);
+        } else if (value(f))
+          h = Math.max(h, wrap(value(f), f).length * 11.5 + 2.5);
+      }
+      rows.push({ i, h, fields: fs });
+    }
+    const groups = [];
+    let group = [],
+      height = 0;
+    for (const row of rows) {
+      if (group.length && height + row.h > 130) {
+        groups.push(group);
+        group = [];
+        height = 0;
+      }
+      group.push(row);
+      height += row.h;
+    }
+    if (group.length) groups.push(group);
+    return groups.map((rows, index) => {
+      let y = 517.75;
+      const fields = L.defect.fields
+        .filter((f) => !f.bottom)
+        .map((f) => ({ ...f }));
+      for (const row of rows) {
+        row.y = y;
+        for (const f of row.fields)
+          fields.push({ ...f, y: y + 0.45, h: row.h - 1.2 });
+        y += row.h;
+      }
+      const delta = y - 589.3;
+      fields.push(
+        ...L.defect.fields
+          .filter((f) => f.bottom)
+          .map((f) => ({ ...f, y: f.y + delta })),
+      );
+      return base("09-1", fields, {
+        rows,
+        delta,
+        x,
+        page: index + 1,
+        total: groups.length,
+        tooTall: y > 648,
+      });
+    });
+  }
+  async function draw(plan, canvas, scale = 1.5, blank = false, context) {
+    canvas.width = Math.round(L.width * scale);
+    canvas.height = Math.round(L.height * scale);
+    const c = canvas.getContext("2d");
+    c.scale(scale, scale);
+    c.fillStyle = "white";
+    c.fillRect(0, 0, L.width, L.height);
+    const im = await getImage(
+      "assets/hoa-sen/templates/" + plan.source + ".svg",
+    );
+    c.drawImage(im, 0, 0, L.width, L.height);
+    if (
+      plan.rows &&
+      !blank &&
+      (plan.rows.length !== 5 ||
+        plan.rows[0].i !== 0 ||
+        plan.rows.some((r) => r.h !== 14.31))
+    ) {
+      c.fillStyle = "white";
+      c.fillRect(55.9, 517.75, 513, 240);
+      c.save();
+      c.beginPath();
+      c.rect(55.9, 589.3 + plan.delta, 513, 148);
+      c.clip();
+      c.drawImage(im, 0, plan.delta, L.width, L.height);
+      c.restore();
+      c.fillStyle = "#666";
+      for (const row of plan.rows) {
+        for (const x of plan.x) c.fillRect(x - 0.24, row.y, 0.48, row.h);
+        c.fillRect(
+          plan.x[0],
+          row.y + row.h - 0.24,
+          plan.x.at(-1) - plan.x[0],
+          0.48,
+        );
+        c.fillStyle = "#000";
+        c.font = '10px "Times New Roman"';
+        c.fillText(String(row.i + 1), 71.2, row.y + 9.35);
+        c.fillStyle = "#666";
+      }
+      c.fillStyle = "white";
+      c.fillRect(516, 786, 57, 15);
+      c.fillStyle = "black";
+      c.font = '12px "Times New Roman"';
+      c.textAlign = "right";
+      c.fillText(`Trang ${plan.page}/${plan.total}`, 567, 797.3);
+      c.textAlign = "left";
+    }
+    if (blank) return;
+    for (const f of plan.fields) {
+      if (f.photo) {
+        const src = (context?.record || active).photos[f.key];
+        if (!src) continue;
+        const photo = await getImage(src),
+          ratio = Math.min(f.w / photo.width, (f.h - 2) / photo.height);
+        c.drawImage(
+          photo,
+          f.x + (f.w - photo.width * ratio) / 2,
+          f.y + 1,
+          photo.width * ratio,
+          photo.height * ratio,
+        );
+        continue;
+      }
+      const text = value(f, context);
+      if (!text) continue;
+      c.fillStyle = "white";
+      c.fillRect(f.x, f.y, f.w, f.h);
+      for (const m of f.mask || []) c.fillRect(...m);
+      c.save();
+      c.beginPath();
+      c.rect(f.x, f.y, f.w, f.h);
+      c.clip();
+      c.font = font(f);
+      c.fillStyle = "black";
+      c.textBaseline = "alphabetic";
+      c.textAlign = f.align || "left";
+      let y = f.y + f.size * 0.891;
+      for (const line of wrap(text, f)) {
+        c.fillText(line, f.align === "center" ? f.x + f.w / 2 : f.x, y);
+        y += f.line;
+      }
+      c.restore();
+    }
+  }
+  function write(f, text) {
+    if (f.key.startsWith("common:")) {
+      effectiveProject()[f.key.slice(7)] = text;
+      const input = $("project").querySelector(
+        `[data-common="${f.key.slice(7)}"]`,
+      );
+      if (input) input.value = text;
+    } else active.fields[f.key] = text;
+    save();
+  }
+  function validate() {
+    const bad = plans.flatMap((p) => p.fields.filter(overflow)),
+      tall = plans.some((p) => p.tooTall);
+    $("warnings").textContent = bad.length
+      ? `Có ${bad.length} ô vượt chỗ trống của mẫu: ${[...new Set(bad.map((f) => f.label))].join(", ")}. Hãy rút gọn hoặc chuyển phần tiếp sang trang mới; cỡ chữ được giữ nguyên.`
+      : tall
+        ? "Một dòng Defect quá dài cho một trang. Hãy tách nội dung sang dòng tiếp theo."
+        : "";
+    document.querySelectorAll(".slot").forEach((el) => {
+      const f = plans[+el.dataset.page]?.fields[+el.dataset.field];
+      el.classList.toggle("overflow", f && !f.photo && overflow(f));
+    });
+    return !bad.length && !tall;
+  }
+  function showLegacy() {
+    const used = new Set(plans.flatMap((p) => p.fields.map((f) => f.key)));
+    const extra = Object.entries(active.fields).filter(
+      ([k, v]) => v && !used.has(k),
+    );
+    $("legacy").hidden = !extra.length;
+    $("legacyContent").replaceChildren();
+    for (const [k, v] of extra) {
+      const p = document.createElement("p");
+      p.textContent =
+        ({
+          basis: "Tài liệu làm căn cứ",
+          staff: "Danh sách cán bộ",
+          register: "Thông tin đánh số trang",
+          time: "Thời gian",
+          participant0: "Phòng ĐTXDCB",
+          participant1: "Cửa hàng trưởng / Trưởng kho",
+          participant2: "Phòng kiểm soát",
+          participant3: "Đơn vị thi công",
+        }[k] || "Nội dung đã lưu") +
+        ": " +
+        v;
+      $("legacyContent").append(p);
+    }
+  }
+  async function render() {
+    HSHArchive.setType(active.type);
+    $("coverPdf").hidden = active.type !== "diary";
+    const run = ++epoch;
+    migrate(active);
+    save();
+    plans = build();
+    document
+      .querySelectorAll("[data-common]")
+      .forEach(
+        (el) => (el.value = effectiveProject()[el.dataset.common] || ""),
+      );
+    $("snapshotNotice").hidden = !active.projectOverride;
+    $("snapshotNotice").textContent = active.projectOverride
+      ? "Bản sao từ lịch sử: thông tin công trình được giữ riêng cho bản này."
+      : "";
+    $("type").value = active.type;
+    $("date").value = active.date;
+    $("original").href =
+      "assets/hoa-sen/docs/" + encodeURIComponent(files[active.type]);
+    $("records").replaceChildren();
+    for (const r of state.records.filter((r) => r.type === active.type)) {
+      const o = new Option(
+        `${r.date} • Hồ sơ ${state.records.indexOf(r) + 1}`,
+        r.id,
+        r.id === active.id,
+        r.id === active.id,
+      );
+      $("records").add(o);
+    }
+    $("add").textContent =
+      active.type === "diary"
+        ? "+ Thêm trang nhật ký"
+        : active.type === "defect"
+          ? "+ Thêm 5 dòng lỗi"
+          : "+ Thêm bộ biên bản";
+    $("pages").replaceChildren();
+    const blank = $("templateOnly").checked;
+    for (let pi = 0; pi < plans.length; pi++) {
+      const plan = plans[pi],
+        shell = document.createElement("div"),
+        paper = document.createElement("article"),
+        canvas = document.createElement("canvas");
+      shell.className = "sheet-shell";
+      paper.className = "paper";
+      paper.style.width = L.width + "px";
+      paper.style.height = L.height + "px";
+      paper.append(canvas);
+      shell.append(paper);
+      $("pages").append(shell);
+      canvas.setAttribute(
+        "aria-label",
+        `${titles[active.type]} — trang ${pi + 1}`,
+      );
+      await draw(plan, canvas, 1.8, blank);
+      if (epoch !== run) return;
+      if (!blank)
+        plan.fields.forEach((f, fi) => {
+          const el = document.createElement(f.photo ? "button" : "textarea");
+          el.className = "slot";
+          el.dataset.page = pi;
+          el.dataset.field = fi;
+          el.dataset.key = f.key;
+          el.setAttribute("aria-label", f.label);
+          el.title = f.label;
+          Object.assign(el.style, {
+            left: f.x + "px",
+            top: f.y + "px",
+            width: f.w + "px",
+            height: f.h + "px",
+            font: font(f),
+            lineHeight: f.line + "px",
+          });
+          if (f.photo) {
+            el.textContent = active.photos[f.key] ? "Đổi ảnh" : "+ Ảnh";
+            el.onclick = () => selectPhoto(f);
+          } else {
+            el.value = value(f);
+            el.spellcheck = false;
+            if (f.quickOptions) {
+              const quick = document.createElement("select");
+              quick.className = "quick-choice";
+              quick.setAttribute("aria-label", `${f.label} — chọn nhanh`);
+              quick.title = "Chọn nhanh";
+              quick.append(new Option("☰", ""));
+              f.quickOptions.forEach((option) => quick.append(new Option(option, option)));
+              Object.assign(quick.style, {
+                position: "absolute",
+                left: f.x + f.w - 34 + "px",
+                top: f.y + "px",
+                width: "30px",
+                height: f.h + "px",
+                fontSize: "10px",
+                zIndex: "3",
+              });
+              quick.onchange = () => {
+                if (!quick.value) return;
+                el.value = quick.value;
+                write(f, quick.value);
+                validate();
+                quick.value = "";
+              };
+              paper.append(quick);
+            }
+            el.onfocus = () => {
+              $("fieldHelp").textContent =
+                f.label + ` · Times New Roman ${f.size} pt`;
+            };
+            el.oninput = () => {
+              write(f, el.value);
+              el.classList.toggle("overflow", overflow(f));
+              validate();
+            };
+            el.onblur = () => render();
+          }
+          paper.append(el);
+        });
+    }
+    zoom();
+    validate();
+    showLegacy();
+  }
+  function zoom() {
+    const z =
+      $("zoom").value === "fit"
+        ? Math.min(
+            1.333333,
+            Math.max(0.2, ($("pages").clientWidth - 12) / L.width),
+          )
+        : Number($("zoom").value);
+    document.querySelectorAll(".sheet-shell").forEach((s) => {
+      s.style.width = L.width * z + "px";
+      s.style.height = L.height * z + "px";
+      s.firstChild.style.transform = `scale(${z})`;
+    });
+  }
+  async function selectPhoto(f) {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/png,image/jpeg,image/webp";
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+      try {
+        const bitmap = await createImageBitmap(file),
+          c = document.createElement("canvas"),
+          r = Math.min(1, 1200 / bitmap.width);
+        c.width = bitmap.width * r;
+        c.height = bitmap.height * r;
+        c.getContext("2d").drawImage(bitmap, 0, 0, c.width, c.height);
+        bitmap.close();
+        active.photos[f.key] = c.toDataURL("image/jpeg", 0.9);
+        save();
+        render();
+      } catch (e) {
+        $("status").textContent = "Không đọc được ảnh. Hãy chọn PNG hoặc JPG.";
+      }
+    };
+    input.click();
+  }
+  function download(blob, name) {
+    const url = URL.createObjectURL(blob),
+      a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
+  function fontAvailable() {
+    measure.font = "12px monospace";
+    const width = measure.measureText("Wmi012 Công trình").width;
+    measure.font = '12px "Times New Roman", monospace';
+    return (
+      Math.abs(width - measure.measureText("Wmi012 Công trình").width) > 0.1
+    );
+  }
+  async function exportFile(type, scope = "diary") {
+    if (busy) return;
+    plans = build();
+    if (!validate()) {
+      $("warnings").scrollIntoView({ block: "center" });
+      return;
+    }
+    if (!fontAvailable()) {
+      $("status").textContent =
+        "Máy này chưa có Times New Roman. Để xuất đúng font mẫu, hãy mở hồ sơ trên máy có font này.";
+      return;
+    }
+    const snapshot = {
+      record: structuredClone(active),
+      project: structuredClone(effectiveProject()),
+    };
+    const exportPlans =
+      active.type === "diary" && scope === "cover"
+        ? plans.slice(0, 3)
+        : active.type === "diary"
+          ? plans.slice(3)
+          : plans;
+    busy = true;
+    document.querySelector("main").inert = true;
+    $("busy").hidden = false;
+    try {
+      await document.fonts.ready;
+      const pdf =
+          type === "pdf"
+            ? new window.jspdf.jsPDF({
+                unit: "pt",
+                format: [L.width, L.height],
+                compress: true,
+              })
+            : null,
+        zip = {};
+      for (let i = 0; i < exportPlans.length; i++) {
+        const c = document.createElement("canvas");
+        await draw(exportPlans[i], c, 300 / 72, false, snapshot);
+        if (pdf) {
+          if (i) pdf.addPage([L.width, L.height]);
+          pdf.addImage(
+            c.toDataURL("image/png"),
+            "PNG",
+            0,
+            0,
+            L.width,
+            L.height,
+            undefined,
+            "FAST",
+          );
+        } else {
+          const blob = await new Promise((r) => c.toBlob(r, "image/png"));
+          zip[
+            active.type === "diary"
+              ? `Nhật ký thi công-${active.date.split("-").reverse().join(".")}-trang-${i + 1}.png`
+              : `${active.type}-${active.date}-trang-${i + 1}.png`
+          ] = new Uint8Array(await blob.arrayBuffer());
+        }
+        $("status").textContent = `Đang xuất trang ${i + 1}/${exportPlans.length}…`;
+      }
+      const blob = pdf
+        ? pdf.output("blob")
+        : new Blob([fflate.zipSync(zip, { level: 0 })], {
+            type: "application/zip",
+          });
+      let archived;
+      try {
+        archived = await HSHArchive.capture(blob, {
+          format: type,
+          pages: exportPlans.length,
+          snapshot,
+        });
+      } catch (error) {
+        $("archiveStatus").textContent =
+          "Chưa lưu được lịch sử: " +
+          error.message +
+          ". Hãy giữ file tải xuống.";
+      }
+      download(
+        blob,
+        HSHArchive.downloadName(
+          snapshot.record,
+          type,
+          archived?.entry?.filename ||
+            `${active.type}-${active.date}-${Date.now()}.${pdf ? "pdf" : "zip"}`,
+        ),
+      );
+      $("status").textContent =
+        `Đã tạo ${exportPlans.length} trang, 300 dpi. ${archived?.message || "Đã lưu vào lịch sử bên dưới."}`;
+      setTimeout(() => {
+        $("exportArchive").scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 300);
+    } catch (e) {
+      $("status").textContent = "Chưa xuất được file: " + e.message;
+    } finally {
+      busy = false;
+      document.querySelector("main").inert = false;
+      $("busy").hidden = true;
+    }
+  }
+  for (const [key, label] of Object.entries(labels)) {
+    const l = document.createElement("label");
+    l.textContent = label;
+    const input = document.createElement("input");
+    input.dataset.common = key;
+    input.value = state.project[key] || "";
+    input.oninput = () => {
+      effectiveProject()[key] = input.value;
+      save();
+    };
+    input.onchange = render;
+    l.append(input);
+    $("project").append(l);
+  }
+  $("date").onchange = () => {
+    if ($("date").value) {
+      active.date = $("date").value;
+      save();
+      render();
+    }
+  };
+  $("new").onclick = () => create($("type").value);
+  $("type").onchange = () => {
+    const r = state.records.findLast((r) => r.type === $("type").value);
+    if (r) {
+      active = r;
+      render();
+    } else create($("type").value);
+  };
+  $("records").onchange = () => {
+    active = state.records.find((r) => r.id === $("records").value);
+    render();
+  };
+  $("add").onclick = () => {
+    active.count += active.type === "defect" ? 5 : 1;
+    save();
+    render();
+  };
+  $("zoom").onchange = zoom;
+  $("templateOnly").onchange = render;
+  $("pdf").onclick = () => exportFile("pdf", "diary");
+  $("png").onclick = () => exportFile("png", "diary");
+  $("coverPdf").onclick = () => exportFile("pdf", "cover");
+  $("backup").onclick = () =>
+    download(
+      new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }),
+      "ho-so-cong-trinh-ban-sao.json",
+    );
+  const requested = new URLSearchParams(location.search).get("type"),
+    type = titles[requested] ? requested : "diary";
+  active =
+    !requested && state.lastRecordId
+      ? state.records.find((r) => r.id === state.lastRecordId)
+      : state.records.findLast((r) => r.type === type);
+  if (active) render();
+  else create(type);
+  HSHArchive.init(async (snapshot, exportId) => {
+    const record = snapshot.record;
+    if (!record || !titles[record.type] || !snapshot.project)
+      throw Error("Bản lưu thiếu dữ liệu hồ sơ.");
+    active = {
+      ...structuredClone(record),
+      id: crypto.randomUUID(),
+      originRecordId: record.originRecordId || record.id,
+      sourceExportId: exportId,
+      projectOverride: structuredClone(snapshot.project),
+    };
+    state.records.push(active);
+    save();
+    await render();
+    $("pages").scrollIntoView({ block: "start" });
+  });
+  window.hshTemplateQA = {
+    build,
+    draw,
+    validate,
+    value,
+    wrap,
+    get plans() {
+      return plans;
+    },
+    get active() {
+      return active;
+    },
+    get state() {
+      return state;
+    },
+  };
 })();
 
-window.addEventListener("resize", () => { if ($("zoom").value === "fit") zoom(); });
+window.addEventListener("resize", () => {
+  if ($("zoom").value === "fit") zoom();
+});
