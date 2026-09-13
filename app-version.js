@@ -1,2 +1,2 @@
 // Single release source. Change only this value for each published release.
-self.APP_VERSION = '10.40';
+self.APP_VERSION = '10.41';
