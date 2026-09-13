@@ -95,6 +95,7 @@ function render(highlightId=null){
     const actions=document.createElement('div');
     actions.className='archive-actions';
     actions.append(button('Tải lại đúng file',async()=>{const x=await loadEntry(e.id);download(x.blob,downloadName(x.snapshot.record,x.format,x.filename));message('Đã gửi bản lưu gốc đến trình duyệt để tải.');}),button('Tạo bản sao để sửa',async()=>{const x=await loadEntry(e.id);await restoreEditor(structuredClone(x.snapshot),x.id);message('Đã mở bản sao để sửa; file lịch sử được giữ nguyên.');}));
+    if(!e.driveSaved)actions.append(button('Lưu lên Google Drive',async()=>{const x=await loadEntry(e.id);await HSHDrive.save(x.blob,x.filename);x.driveSaved=true;await cacheEntry(x);await refresh();message('Đã lưu lên Google Drive.');}));
     if(!e.githubSaved)actions.append(button('Lưu lên GitHub',async()=>{const x=await loadEntry(e.id);await HSHGitHub.save(x);x.githubSaved=true;try{await cacheEntry(x);}catch(e){}await refresh();message('Đã lưu công khai trên GitHub.');}));
     if(!e.folderSaved)actions.append(button('Ghi vào thư mục',async()=>{const x=await loadEntry(e.id);await putFolder(x);x.folderSaved=true;await cacheEntry(x);await refresh();message('Đã ghi bản sao vào thư mục.');}));
     row.append(title,details,badge,note,actions);
