@@ -352,7 +352,8 @@
         `[data-common="${f.key.slice(7)}"]`,
       );
       if (input) input.value = text;
-    } else active.fields[f.key] = text;
+    } else if (text) active.fields[f.key] = text;
+    else delete active.fields[f.key];
     save();
   }
   function validate() {
