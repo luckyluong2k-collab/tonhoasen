@@ -7,7 +7,7 @@
     if (!window.google?.accounts?.oauth2) throw Error("Google Drive chưa sẵn sàng. Hãy tải lại trang.");
     tokenClient ??= google.accounts.oauth2.initTokenClient({
       client_id: clientId,
-      scope: "https://www.googleapis.com/auth/drive.file",
+      scope: "https://www.googleapis.com/auth/drive",
       callback: (response) => { accessToken = response.access_token; },
     });
   }

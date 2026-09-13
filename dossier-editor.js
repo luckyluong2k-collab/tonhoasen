@@ -765,5 +765,11 @@
 })();
 
 window.addEventListener("resize", () => {
-  if ($("zoom").value === "fit") zoom();
+  const zoomSelect = document.getElementById("zoom");
+  if (zoomSelect?.value === "fit") document.querySelectorAll(".sheet-shell").forEach((sheet) => {
+    const scale = Math.min(1.333333, Math.max(0.2, (document.getElementById("pages").clientWidth - 12) / 595.32));
+    sheet.style.width = 595.32 * scale + "px";
+    sheet.style.height = 842.04 * scale + "px";
+    sheet.firstChild.style.transform = `scale(${scale})`;
+  });
 });
