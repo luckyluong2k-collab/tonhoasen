@@ -500,7 +500,6 @@
                 el.value = quick.value;
                 write(f, quick.value);
                 validate();
-                quick.value = "";
               };
               paper.append(quick);
             }
