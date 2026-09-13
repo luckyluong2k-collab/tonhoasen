@@ -2,6 +2,7 @@
 importScripts('./app-version.js');
 const CACHE_NAME = `hsh-phuly-v${self.APP_VERSION}`;
 const CORE = [
+  "./interface-polish.css",
   "./sync-overview.js",
   "./sheet-diary.js",
   "./nhat-ky-cong-trinh.html",
