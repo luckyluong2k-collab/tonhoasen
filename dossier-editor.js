@@ -642,6 +642,9 @@
         archived = await HSHArchive.capture(blob, {
           format: type,
           pages: exportPlans.length,
+          filename: active.type === "diary"
+            ? `${scope === "cover" ? "Bìa nhật ký thi công" : "Nhật ký thi công"}-${active.date.split("-").reverse().join(".")}.${type === "pdf" ? "pdf" : "zip"}`
+            : `${active.type}-${active.date}.${type === "pdf" ? "pdf" : "zip"}`,
           snapshot,
         });
       } catch (error) {
