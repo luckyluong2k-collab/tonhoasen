@@ -454,6 +454,9 @@
       );
       await draw(plan, canvas, 1.8, blank);
       if (epoch !== run) return;
+      const repaint = () => draw(plan, canvas, 1.8, blank).catch(error => {
+        $('status').textContent = 'Chưa cập nhật được bản xem: ' + error.message;
+      });
       if (!blank)
         plan.fields.forEach((f, fi) => {
           const el = document.createElement(f.photo ? "button" : "textarea");
@@ -486,6 +489,7 @@
               quick.title = "Chọn nhanh";
               quick.append(new Option("Chọn", ""));
               (f.quickOptions || ["Nắng", "Nhiều mây", "Âm u", "Mưa nhỏ", "Mưa"]).forEach((option) => quick.append(new Option(option, option)));
+              quick.value = [...quick.options].some(option => option.value === el.value) ? el.value : '';
               Object.assign(quick.style, {
                 position: "absolute",
                 left: f.x + f.w - 58 + "px",
@@ -502,6 +506,7 @@
                 if (!quick.value) return;
                 el.value = quick.value;
                 write(f, quick.value);
+                repaint();
                 validate();
               };
               paper.append(quick);
@@ -512,6 +517,7 @@
             };
             el.oninput = () => {
               write(f, el.value);
+              repaint();
               el.classList.toggle("overflow", overflow(f));
               validate();
             };
