@@ -358,9 +358,9 @@
     else delete active.fields[f.key];
     save();
   }
-  function validate() {
-    const bad = plans.flatMap((p) => p.fields.filter(overflow)),
-      tall = plans.some((p) => p.tooTall);
+  function validate(checkPlans = plans) {
+    const bad = checkPlans.flatMap((p) => p.fields.filter(overflow)),
+      tall = checkPlans.some((p) => p.tooTall);
     $("warnings").textContent = bad.length
       ? `Có ${bad.length} ô vượt chỗ trống của mẫu: ${[...new Set(bad.map((f) => f.label))].join(", ")}. Hãy rút gọn hoặc chuyển phần tiếp sang trang mới; cỡ chữ được giữ nguyên.`
       : tall
@@ -527,7 +527,9 @@
   }
   function setMode(mode) {
     document.body.dataset.editorMode=mode;
-    ['Entry','Preview','Archive'].forEach(name=>$('mode'+name).setAttribute('aria-pressed',String(name.toLowerCase()===mode)));
+    ['Preview','Archive'].forEach(name=>$('mode'+name).setAttribute('aria-pressed',String(name.toLowerCase()===mode)));
+    $('modePreview').textContent=mode==='preview'?'Đóng bản in':'Xem bản in';
+    $('modeArchive').textContent=mode==='archive'?'Đóng lịch sử':'Lịch sử & Drive';
     if(mode==='preview') { document.body.classList.add('show-cover'); render(); }
     if(mode==='archive') HSHArchive.refresh();
   }
@@ -546,7 +548,7 @@
       });group.append(fields);host.append(group);
     });
   }
-  $('modeEntry').onclick=()=>setMode('entry');$('modePreview').onclick=()=>setMode('preview');$('modeArchive').onclick=()=>setMode('archive');
+  $('modePreview').onclick=()=>setMode(document.body.dataset.editorMode==='preview'?'entry':'preview');$('modeArchive').onclick=()=>setMode(document.body.dataset.editorMode==='archive'?'entry':'archive');
   document.body.dataset.editorMode='entry';
   $('showHistory').addEventListener('click',()=>setMode('archive'));
   function zoom() {
@@ -625,11 +627,17 @@
   }
   async function exportFile(type, scope = "diary") {
     if (busy) return;
-    plans = build();
-    if (!validate()) {
-      $("warnings").scrollIntoView({ block: "center" });
-      return;
-    }
+    busy = true;
+    document.querySelector('main').inert = true;
+    $('busy').hidden = false;
+    $('exportFeedback').textContent = 'Đang chuẩn bị file…';
+    try {
+      await new Promise(resolve => setTimeout(resolve, 30));
+      await Promise.race([
+        Promise.all(['', 'bold ', 'italic ', 'bold italic '].map(style => document.fonts.load(`${style}12px "HSH Serif"`))),
+        new Promise((_, reject) => setTimeout(() => reject(Error('Chưa tải được font. Kiểm tra mạng rồi thử lại.')), 15000))
+      ]);
+      plans = build();
     const snapshot = {
       record: structuredClone(active),
       project: structuredClone(effectiveProject()),
@@ -640,12 +648,8 @@
         : active.type === "diary"
           ? plans.slice(3)
           : plans;
-    busy = true;
-    document.querySelector("main").inert = true;
-    $("busy").hidden = false;
-    try {
-      await document.fonts.ready;
-      await Promise.all(['', 'bold ', 'italic ', 'bold italic '].map(style => document.fonts.load(`${style}12px "HSH Serif"`)));
+      if (!validate(exportPlans)) throw Error($('warnings').textContent);
+      if(type === "pdf" && !window.jspdf?.jsPDF) throw Error("Chưa tải được bộ tạo PDF. Tải lại trang khi có mạng rồi thử lại.");
       const pdf =
           type === "pdf"
             ? new window.jspdf.jsPDF({
@@ -713,6 +717,7 @@
       );
       $("status").textContent =
         `Đã tạo ${exportPlans.length} trang, 300 dpi. ${archived?.message || "Đã lưu vào lịch sử bên dưới."}`;
+      $("exportFeedback").textContent = "Đã tạo file. Bấm Tải file bên dưới để lưu vào điện thoại.";
       setMode("archive");
       setTimeout(() => {
         $("exportArchive").scrollIntoView({
@@ -721,7 +726,9 @@
         });
       }, 300);
     } catch (e) {
-      $("status").textContent = "Chưa xuất được file: " + e.message;
+      $('exportFeedback').textContent = "Chưa xuất được file: " + e.message;
+      $('exportFeedback').scrollIntoView({block:'center'});
+      $("status").textContent = $('exportFeedback').textContent;
     } finally {
       busy = false;
       document.querySelector("main").inert = false;
@@ -751,7 +758,7 @@
   };
   $("new").onclick = () => create($("type").value);
   $("type").onchange = () => {
-    const r = state.records.findLast((r) => r.type === $("type").value);
+    const r = [...state.records].reverse().find((r) => r.type === $("type").value);
     if (r) {
       active = r;
       render();
@@ -787,7 +794,7 @@
   active =
     !requested && state.lastRecordId
       ? state.records.find((r) => r.id === state.lastRecordId)
-      : state.records.findLast((r) => r.type === type);
+      : [...state.records].reverse().find((r) => r.type === type);
   if (active) render();
   else create(type);
   HSHArchive.init(async (snapshot, exportId) => {

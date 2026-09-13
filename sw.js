@@ -1,5 +1,5 @@
 // Hoa Sen Home Phủ Lý - Service Worker Cache V10.14
-const CACHE_NAME = 'hsh-phuly-v10.28';
+const CACHE_NAME = 'hsh-phuly-v10.29';
 const FULL_DRAWING_ASSETS = [
   ...Array.from({ length: 6 }, (_, index) => `./assets/hoa-sen/foundation-full-page-${index + 1}.png`),
   ...Array.from({ length: 70 }, (_, index) => `./assets/hoa-sen/design-full-page-${String(index + 1).padStart(2, '0')}.png`)
@@ -28,11 +28,11 @@ const ASSETS_TO_CACHE = [
   './dossier-editor.html',
   './dossier-editor.css',
   './dossier-editor.js',
-  './dossier-editor.js?v=10.28',
-  './dossier-editor.css?v=10.28',
+  './dossier-editor.js?v=10.29',
+  './dossier-editor.css?v=10.29',
   './dossier-template-layout.js?v=10.3',
-  './dossier-history.js?v=10.28',
-  './dossier-drive.js?v=10.28',
+  './dossier-history.js?v=10.29',
+  './dossier-drive.js?v=10.29',
   './dossier-github.js?v=10.26',
   './dossier-workflow.js?v=10.3',
   './vendor/fflate.min.js',
@@ -114,6 +114,14 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
+  const url = new URL(event.request.url);
+  if(url.origin === self.location.origin && (event.request.mode === 'navigate' || /\.(?:js|css)$/.test(url.pathname))) {
+    event.respondWith(fetch(event.request).then(response => {
+      if(response.ok) { const copy=response.clone(); event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy))); }
+      return response;
+    }).catch(async () => (await caches.match(event.request)) || Response.error()));
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
