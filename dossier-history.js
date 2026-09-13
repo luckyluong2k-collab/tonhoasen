@@ -8,7 +8,7 @@ async function transaction(store,mode,action){const db=await database();return n
 const hash=async blob=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))).map(b=>b.toString(16).padStart(2,'0')).join('');
 const cleanName=name=>typeof name==='string'&&name.length>0&&!/[\\/:*?"<>|\u0000-\u001f]/.test(name)&&!name.includes('..');
 function validSnapshot(s){const r=s?.record;return r&&types.includes(r.type)&&typeof r.id==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&Number.isInteger(r.count)&&r.count>0&&r.count<=1000&&r.fields&&typeof r.fields==='object'&&!Array.isArray(r.fields)&&Object.values(r.fields).every(v=>typeof v==='string')&&r.photos&&typeof r.photos==='object'&&Object.values(r.photos).every(v=>typeof v==='string'&&/^data:image\/(png|jpeg|webp);base64,/.test(v))&&s.project&&typeof s.project==='object'&&!Array.isArray(s.project)&&Object.values(s.project).every(v=>typeof v==='string');}
-function valid(meta){return validSnapshot(meta?.snapshot)&&meta.type===meta.snapshot.record.type&& meta?.schema===schema&&/^EXP-[a-zA-Z0-9-]+$/.test(meta.id)&&types.includes(meta.type)&&['pdf','png'].includes(meta.format)&&cleanName(meta.filename)&&/^[a-f0-9]{64}$/.test(meta.sha256)&&meta.snapshot?.record&&meta.snapshot?.project&&typeof meta.exportedAt==='string';}
+function valid(meta){return validSnapshot(meta?.snapshot)&&meta.type===meta.snapshot.record.type&& meta?.schema===schema&&/^EXP-[a-zA-Z0-9-]+$/.test(meta.id)&&types.includes(meta.type)&&['pdf','png','zip'].includes(meta.format)&&cleanName(meta.filename)&&/^[a-f0-9]{64}$/.test(meta.sha256)&&meta.snapshot?.record&&meta.snapshot?.project&&typeof meta.exportedAt==='string';}
 async function permission(){try{return !!folder&&(await folder.queryPermission({mode:'readwrite'}))==='granted';}catch(e){return false;}}
 async function writeFile(dir,name,data){const h=await dir.getFileHandle(name,{create:true});const stream=await h.createWritable();await stream.write(data);await stream.close();}
 function metaOnly(entry){const {blob,...meta}=entry;return meta;}
@@ -41,7 +41,7 @@ async function refreshDrive(){
   const type=types.includes(props.hshType)?props.hshType:(existing?.type||'diary');
   const date=/^\d{4}-\d{2}-\d{2}$/.test(props.hshRecordDate||'')?props.hshRecordDate:existing?.recordDate||'';
   const exportedAt=Number.isFinite(Date.parse(props.hshExportedAt))?props.hshExportedAt:existing?.exportedAt||file.createdTime;
-  const row={...existing,id:existing?.id||'DRIVE-'+file.id,type,filename:file.name,format:file.mimeType==='application/pdf'?'pdf':'png',recordDate:date,exportedAt,pages:props.hshPages||existing?.pages||'',sha256:existing?.sha256||file.sha256Checksum,driveFileId:file.id,driveSaved:true,remoteOnly:existing?.remoteOnly??!existing,driveError:'',projectName:existing?.projectName||'',timeFromDrive:!props.hshExportedAt&&!existing?.exportedAt};
+  const row={...existing,id:existing?.id||'DRIVE-'+file.id,type,filename:file.name,format:file.mimeType==='application/pdf'?'pdf':(existing?.format||'zip'),recordDate:date,exportedAt,pages:props.hshPages||existing?.pages||'',sha256:existing?.sha256||file.sha256Checksum,driveFileId:file.id,driveSaved:true,remoteOnly:existing?.remoteOnly??!existing,driveError:'',projectName:existing?.projectName||'',timeFromDrive:!props.hshExportedAt&&!existing?.exportedAt};
   if(!existing?.remoteOnly&&existing?.sha256&&existing.sha256===file.sha256Checksum)row.driveVerifiedAt=new Date().toISOString();
   else if(existing?.sha256&&existing.sha256!==file.sha256Checksum){row.driveVerifiedAt=null;row.driveError='Nội dung Drive khác bản gốc trên máy này.';}
   const index=entries.findIndex(e=>e.id===row.id);if(index<0)entries.push(row);else entries[index]=row;
@@ -76,7 +76,7 @@ function render(highlightId=null){
     const row=document.createElement('article');
     row.className='archive-entry'+(e.id===highlightId?' archive-entry-highlight':'');
     const title=document.createElement('strong');
-    title.textContent=`${({diary:'Nhật ký',acceptance:'Nghiệm thu',defect:'Defect List'})[e.type]}${e.number?' · '+e.number:''} · ${e.format==='pdf'?'PDF':'PNG (ZIP)'}`;
+    title.textContent=`${({diary:'Nhật ký',acceptance:'Nghiệm thu',defect:'Defect List'})[e.type]}${e.number?' · '+e.number:''} · ${e.format==='pdf'?'PDF':e.format==='zip'?'PDF từng ngày (ZIP)':'PNG (ZIP)'}`;
     const fileName=document.createElement('h3');fileName.className='archive-filename';fileName.textContent=e.filename||'Chưa ghi nhận tên file';
     const time=document.createElement('p');time.className='archive-export-time';time.textContent=(e.timeFromDrive?'Lưu Drive lúc ':'Xuất lúc ')+new Date(e.exportedAt).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour12:false})+' (giờ Việt Nam)';
     const details=document.createElement('p');
@@ -93,7 +93,7 @@ function render(highlightId=null){
       else{const x=await loadEntry(e.id);download(x.blob,e.filename||x.filename);}
       message('Đã gửi file đến trình duyệt để tải.');
     }));
-    if(!e.remoteOnly)actions.append(button('Sửa bản sao',async()=>{const x=await loadEntry(e.id);await restoreEditor(structuredClone(x.snapshot),x.id);message('Đã mở bản sao để sửa.');}));
+    if(!e.remoteOnly&&e.templateVersion!=='sheet-diary')actions.append(button('Sửa bản sao',async()=>{const x=await loadEntry(e.id);await restoreEditor(structuredClone(x.snapshot),x.id);message('Đã mở bản sao để sửa.');}));
 
     if(e.driveFileId && e.driveSaved){
       const open=document.createElement('a');open.href='https://drive.google.com/file/d/'+encodeURIComponent(e.driveFileId)+'/view';open.target='_blank';open.rel='noopener';open.textContent='Mở file trên Drive';actions.append(open);
@@ -107,7 +107,7 @@ function render(highlightId=null){
 }
 async function capture(blob,context){
   const now=new Date(),id='EXP-'+now.toISOString().replace(/[^0-9]/g,'').slice(0,17)+'-'+crypto.randomUUID().slice(0,8);
-  const entry={schema,id,exportedAt:now.toISOString(),sourceRecordId:context.snapshot.record.originRecordId||context.snapshot.record.id,type:context.snapshot.record.type,recordDate:context.snapshot.record.date,projectName:context.snapshot.project.name,number:context.snapshot.record.fields.number||context.snapshot.record.fields.volume||'',format:context.format,pages:context.pages,templateVersion:'word-original-v2',snapshot:structuredClone(context.snapshot),sha256:await hash(blob),filename:context.filename||`${id}.${context.format==='pdf'?'pdf':'zip'}`,blob,folderSaved:false};
+  const entry={schema,id,exportedAt:now.toISOString(),sourceRecordId:context.snapshot.record.originRecordId||context.snapshot.record.id,type:context.snapshot.record.type,recordDate:context.snapshot.record.date,projectName:context.snapshot.project.name,number:context.snapshot.record.fields.number||context.snapshot.record.fields.volume||'',format:context.format,pages:context.pages,templateVersion:context.snapshot.source==='sheet-diary'?'sheet-diary':'word-original-v2',snapshot:structuredClone(context.snapshot),sha256:await hash(blob),filename:context.filename||`${id}.${context.format==='pdf'?'pdf':'zip'}`,blob,folderSaved:false};
   const stamp=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Ho_Chi_Minh',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(now).replaceAll('/','.').replace(', ','_').replaceAll(':','-');
   if(entry.type==='diary')entry.filename=(entry.filename.startsWith('Bìa ')?'Bìa nhật ký thi công-':'Nhật ký thi công-')+stamp.split('_')[0]+'.'+(entry.format==='pdf'?'pdf':'zip');
   entry.filename=entry.filename.replace(/\.(pdf|zip)$/i,`-xuất-${stamp}.${String(now.getMilliseconds()).padStart(3,'0')}.$1`);
