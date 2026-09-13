@@ -11,13 +11,20 @@
       callback: (response) => { accessToken = response.access_token; },
     });
   }
-  function connect() {
+  async function waitForGoogle() {
+    for (let attempt = 0; attempt < 20; attempt++) {
+      if (window.google?.accounts?.oauth2) return;
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+    throw Error("Google Drive chưa sẵn sàng. Hãy tải lại trang.");
+  }
+  async function connect() {
     return new Promise((resolve, reject) => {
-      try {
+      waitForGoogle().then(() => {
         ready();
         tokenClient.callback = (response) => response.error ? reject(Error("Chưa được cấp quyền Google Drive.")) : (accessToken = response.access_token, resolve());
         tokenClient.requestAccessToken({ prompt: "consent" });
-      } catch (error) { reject(error); }
+      }).catch(reject);
     });
   }
   async function save(blob, name) {
@@ -35,4 +42,12 @@
     return response.json();
   }
   window.HSHDrive = { get connected() { return !!accessToken; }, connect, save };
+  document.addEventListener("DOMContentLoaded", () => {
+    const button = document.getElementById("driveConnect");
+    if (!button) return;
+    button.onclick = async () => {
+      try { await connect(); document.getElementById("driveConnection").textContent = "Đã kết nối Google Drive. Các lần xuất mới sẽ tự lưu vào thư mục nhật ký."; }
+      catch (error) { document.getElementById("driveConnection").textContent = error.message; }
+    };
+  });
 })();
