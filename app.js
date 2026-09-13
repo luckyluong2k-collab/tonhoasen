@@ -1,5 +1,5 @@
 /**
- * HOA SEN HOME PHỦ LÝ - FIELD CONTROL V9.8 PRO
+ * HOA SEN HOME PHỦ LÝ - FIELD CONTROL
  * Dự án: Cải tạo & Xây mới Cửa Hàng Hoa Sen Home Phủ Lý - Hà Nam
  * Hợp đồng: 01/2026/HĐXD/HSG-HG (Giá trị HĐ: 3.854.146.466 VNĐ - Không tính VAT)
  * Ngày khởi công: 10/09/2026 (Hôm nay - Ngày 01/60)
@@ -2803,7 +2803,7 @@ function showToast(msg, type = 'info') {
 // 15. GLOBAL EVENT LISTENERS & APP STARTUP
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('[HoaSenHome V9.8] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
+  console.log('[HoaSenHome v'+window.APP_VERSION+'] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
 
   setupLightboxInteractions();
 
@@ -2883,7 +2883,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     showToast("Đã kết nối Internet thành công!", "success");
   });
 
-  console.log('[HoaSenHome V9.8] Startup complete. Single source of truth active.');
+  console.log('[HoaSenHome v'+window.APP_VERSION+'] Startup complete. Single source of truth active.');
 });
 
 window.hshCopyPreviousLog = async function() {

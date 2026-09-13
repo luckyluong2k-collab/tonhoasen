@@ -1,149 +1,76 @@
-// Hoa Sen Home Phủ Lý - Service Worker Cache V10.14
-const CACHE_NAME = 'hsh-phuly-v10.35';
-const FULL_DRAWING_ASSETS = [
-  ...Array.from({ length: 6 }, (_, index) => `./assets/hoa-sen/foundation-full-page-${index + 1}.png`),
-  ...Array.from({ length: 70 }, (_, index) => `./assets/hoa-sen/design-full-page-${String(index + 1).padStart(2, '0')}.png`)
+// The page and worker share the same release source.
+importScripts('./app-version.js');
+const CACHE_NAME = `hsh-phuly-v${self.APP_VERSION}`;
+const CORE = [
+  ...['Regular','Bold','Italic','BoldItalic'].map(style => `./vendor/fonts/Tinos-${style}.ttf`),
+  "./app-release.js",
+  "./app-version.js",
+  "./app.js",
+  "./assets/app/apple-touch-icon.png",
+  "./assets/app/icon-192.png",
+  "./assets/app/icon-512.png",
+  "./assets/app/icon-maskable-512.png",
+  "./assets/app/icon.svg",
+  "./assets/hoa-sen/project-document-index.js",
+  "./assets/hoa-sen/templates/03-1.svg",
+  "./assets/hoa-sen/templates/03-2.svg",
+  "./assets/hoa-sen/templates/03-3.svg",
+  "./assets/hoa-sen/templates/03-4.svg",
+  "./assets/hoa-sen/templates/07-1.svg",
+  "./assets/hoa-sen/templates/07-2.svg",
+  "./assets/hoa-sen/templates/09-1.svg",
+  "./bien-phap-thi-cong.html",
+  "./construction-processes.js",
+  "./dossier-drive.js",
+  "./dossier-editor.css",
+  "./dossier-editor.html",
+  "./dossier-editor.js",
+  "./dossier-github.js",
+  "./dossier-history.js",
+  "./dossier-template-layout.js",
+  "./dossier-workflow.js",
+  "./index.html",
+  "./manifest.json",
+  "./method-statement-data.js",
+  "./method-statement.css",
+  "./method-statement.js",
+  "./responsive.css",
+  "./responsive.js",
+  "./styles.css",
+  "./vendor/fflate.min.js",
+  "./vendor/html2canvas.min.js",
+  "./vendor/jspdf.umd.min.js"
 ];
-const PROJECT_DOCUMENT_ASSETS = [
-  './assets/hoa-sen/docs/01.BAO CAO NGAY.xlsx',
-  './assets/hoa-sen/docs/03.NHAT KY CONG TRINH.DOC',
-  './assets/hoa-sen/docs/07.BBNT CONG VIEC XAY DUNG.doc',
-  './assets/hoa-sen/docs/09.BIEN BAN GHI NHAN DEFECT LIST.docx',
-  './assets/hoa-sen/docs/10.CHECKLIST NGHIEM THU PHAN XAY DUNG.xls',
-  './assets/hoa-sen/docs/11.CHECKLIST NGHIEM THU PHAN MEP.xls',
-  './assets/hoa-sen/docs/BM - HO SO THANH - QUYET TOAN.xlsx',
-  './assets/hoa-sen/docs/signed HDTC HSH PHU LY NINH BINH.pdf',
-  './assets/hoa-sen/docs/2026.05.23_TKTC_HOME PHỦ LÝ.pdf',
-  './assets/hoa-sen/docs/20260908 KC MÓNG PS.pdf',
-  './assets/hoa-sen/docs/2026.08.06 TMCG THI CONG CAI TAO CUA HANG HOA SEN HOME PHU LY - NINH BINH r1.xlsx'
-];
-const ASSETS_TO_CACHE = [
-  './manifest.json?v=10.35', './assets/app/icon.svg', './assets/app/icon-192.png', './assets/app/icon-512.png', './assets/app/icon-maskable-512.png', './assets/app/apple-touch-icon.png',
-  './bien-phap-thi-cong.html', './method-statement.css?v=10.34', './method-statement-data.js?v=10.34', './method-statement.js?v=10.34',
-  ...['Regular','Bold','Italic','BoldItalic'].map(style => './vendor/fonts/Tinos-'+style+'.ttf'),
-  './',
-  './index.html',
-  './styles.css',
-  './construction-processes.js?v=10.8',
-  './responsive.css?v=10.27',
-  './responsive.js?v=10.5',
-  './dossier-editor.html',
-  './dossier-editor.css',
-  './dossier-editor.js',
-  './dossier-editor.js?v=10.33',
-  './dossier-editor.css?v=10.33',
-  './dossier-template-layout.js?v=10.33',
-  './dossier-history.js?v=10.33',
-  './dossier-drive.js?v=10.33',
-  './dossier-github.js?v=10.26',
-  './dossier-workflow.js?v=10.3',
-  './vendor/fflate.min.js',
-  './assets/hoa-sen/templates/03-1.svg',
-  './assets/hoa-sen/templates/03-2.svg',
-  './assets/hoa-sen/templates/03-3.svg',
-  './assets/hoa-sen/templates/03-4.svg',
-  './assets/hoa-sen/templates/07-1.svg',
-  './assets/hoa-sen/templates/07-2.svg',
-  './assets/hoa-sen/templates/09-1.svg',
-  './vendor/html2canvas.min.js',
-  './vendor/jspdf.umd.min.js',
-  './assets/hoa-sen/project-document-index.js',
-  './assets/hoa-sen/phoi-canh-mat-dung-hoa-sen-home.png',
-  './assets/hoa-sen/phoi-canh-3d-bam-ban-ve.png',
-  './assets/hoa-sen/phoi-canh-3d-bam-ban-ve-v2.png',
-  './assets/hoa-sen/phoi-canh-3d-bam-ban-ve-dim.svg',
-  './assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v7-canopy7m.png',
-  './assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v7-canopy7m-dim.png',
-  './assets/hoa-sen/phoi-canh-3d-bam-ban-ve-duyet-v7-canopy7m-dim-hd.png',
-  './app.js',
-  './app.js?v=10.8',
-  './manifest.json',
-  './assets/hoa-sen/foundation-page-1.png',
-  './assets/hoa-sen/foundation-page-2.png',
-  './assets/hoa-sen/foundation-page-3.png',
-  './assets/hoa-sen/foundation-page-4.png',
-  './assets/hoa-sen/foundation-page-5.png',
-  './assets/hoa-sen/foundation-page-6.png',
-  './assets/hoa-sen/design-page-1.png',
-  './assets/hoa-sen/design-page-4.png',
-  './assets/hoa-sen/design-page-5.png',
-  './assets/hoa-sen/design-page-7.png',
-  './assets/hoa-sen/design-page-16.png',
-  './assets/hoa-sen/design-page-24.png',
-  './assets/hoa-sen/design-page-30.png',
-  './assets/hoa-sen/design-page-35.png',
-  './assets/hoa-sen/design-page-52.png',
-  './assets/hoa-sen/design-page-68.png',
-  ...FULL_DRAWING_ASSETS,
-  ...PROJECT_DOCUMENT_ASSETS,
-  'https://cdn.tailwindcss.com',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css',
-  'https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[ServiceWorker] Caching core assets...');
-      return cache.addAll(ASSETS_TO_CACHE).catch(err => {
-        console.warn('[ServiceWorker] Some external CDN assets skipped in pre-cache:', err);
-      });
-    })
-  );
-  self.skipWaiting();
+self.addEventListener('install', event => {
+  // A partial download must not replace the working release.
+  event.waitUntil(caches.open(CACHE_NAME).then(cache =>
+    cache.addAll(CORE.map(path => new Request(path, {cache:'reload'})))
+  ));
 });
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keyList) => {
-      return Promise.all(
-        keyList.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log('[ServiceWorker] Removing old cache:', key);
-            return caches.delete(key);
-          }
-        })
-      );
-    })
-  );
-  self.clients.claim();
+self.addEventListener('message', event => {
+  if (event.data?.type === 'ACTIVATE_RELEASE') self.skipWaiting();
 });
-
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-
+self.addEventListener('activate', event => {
+  // Keep previous release caches while other tabs may still use them.
+  event.waitUntil(self.clients.claim());
+});
+self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  if(url.origin === self.location.origin && (event.request.mode === 'navigate' || /\.(?:js|css)$/.test(url.pathname))) {
-    event.respondWith(fetch(event.request).then(response => {
-      if(response.ok) { const copy=response.clone(); event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy))); }
-      return response;
-    }).catch(async () => (await caches.match(event.request)) || Response.error()));
-    return;
-  }
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
-        }
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-        return networkResponse;
-      }).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-      });
-    })
-  );
+  // Never intercept Google Drive / OAuth or non-GET operations.
+  if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
+  const root = new URL('./', self.location.href);
+  if (!url.pathname.startsWith(root.pathname)) return;
+  let path = './' + url.pathname.slice(root.pathname.length);
+  if (path === './') path = './index.html';
+  const core = CORE.includes(path);
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // Core is an atomic release, including HTML, version, styles, scripts and manifest.
+    const key = core ? new URL(path, root).href : event.request;
+    const cached = await cache.match(key);
+    if (cached) return cached;
+    const response = await fetch(event.request);
+    if (response.ok) await cache.put(key, response.clone());
+    return response;
+  })());
 });
-

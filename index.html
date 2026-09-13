@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
+<head><script src="app-version.js"></script><script src="app-release.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="theme-color" content="#0A2C54">
-    <meta name="description" content="Hệ thống Quản lý Kỹ thuật, Thi công và Hồ sơ Dự án HOA SEN HOME Phủ Lý - Phiên bản Hiện trường v9.8">
-    <link rel="manifest" href="manifest.json?v=10.35">
-    <link rel="icon" type="image/svg+xml" href="assets/app/icon.svg?v=10.35">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/app/apple-touch-icon.png?v=10.35">
+    <meta name="description" content="Hệ thống Quản lý Kỹ thuật, Thi công và Hồ sơ Dự án HOA SEN HOME Phủ Lý">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="assets/app/icon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/app/apple-touch-icon.png">
     <meta name="apple-mobile-web-app-title" content="HSH Phủ Lý">
-    <title>Hoa Sen Home Phủ Lý - Chỉ huy, Kỹ thuật & Hồ sơ Công trường v9.8</title>
+    <title>Hoa Sen Home Phủ Lý - Chỉ huy, Kỹ thuật & Hồ sơ Công trường</title>
 
     <!-- Google Fonts & Font Awesome 6.4 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,9 +24,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <!-- Custom Modern Stylesheet with Left Sidebar Layout -->
-    <link rel="stylesheet" href="styles.css?v=10.1">
-    <link rel="stylesheet" href="responsive.css?v=10.27">
-<link rel="stylesheet" href="method-statement.css?v=10.34">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="responsive.css">
+<link rel="stylesheet" href="method-statement.css">
 </head>
 <body class="theme-light">
     <!-- Offline & Network Status Notification Bar -->
@@ -146,7 +146,7 @@
                     <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
                     <div class="user-details">
                         <div class="user-name">Chỉ huy trưởng</div>
-                        <div class="user-role">Dự án HSH Phủ Lý v9.8</div>
+                        <div class="user-role"><span data-app-version></span></div>
                     </div>
                 </div>
             </div>
@@ -1554,21 +1554,13 @@
     </nav>
     <!-- Core Application Logic -->
     <script src="assets/hoa-sen/project-document-index.js"></script>
-    <script src="app.js?v=10.10"></script>
-    <script src="responsive.js?v=10.5"></script>
-    <script src="construction-processes.js?v=10.8"></script>
-    <script src="method-statement-data.js?v=10.34"></script>
-    <script src="method-statement.js?v=10.34"></script>
+    <script src="app.js"></script>
+    <script src="responsive.js"></script>
+    <script src="construction-processes.js"></script>
+    <script src="method-statement-data.js"></script>
+    <script src="method-statement.js"></script>
 
     <!-- PWA Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=10.12')
-                    .then(reg => console.log('Hoa Sen Home PWA SW registered successfully:', reg.scope))
-                    .catch(err => console.log('SW registration error:', err));
-            });
-        }
-    </script>
+
 </body>
 </html>
