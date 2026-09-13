@@ -48,3 +48,16 @@ body:has(#rows) .toolbar .btn{flex:1 1 140px;font-size:12px}.history-tools label
 }
 @media(prefers-reduced-motion:reduce){.btn,.mini,.nav-item{transition:none}}
 @media print{#syncOverview{display:none!important}}
+
+.mobile-history-summary{display:none}
+@media(max-width:700px){
+.sheetbox .diary-saved-row{display:flex!important;flex-direction:column;padding:0!important;margin:0!important;border-bottom:1px solid #dce5ee;border-radius:0!important}
+.sheetbox .diary-saved-row:not(.history-expanded)>td:not(.mobile-history-summary){display:none!important}
+.sheetbox .diary-saved-row>.mobile-history-summary{display:block!important;order:-1;border:0;padding:0!important;position:static;background:#fff!important}
+.mobile-history-summary:before{display:none!important}
+.history-expand{display:grid;grid-template-columns:1fr auto;gap:5px 10px;width:100%;border:0;background:transparent;text-align:left;padding:13px 14px;color:#153754;font:inherit;cursor:pointer}
+.history-expand strong{font-size:13px}.history-expand span{grid-column:1/-1;grid-row:2;font-size:12px;color:#60738a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.history-expand small{font-size:11px;align-self:center}
+.sheetbox .diary-saved-row.history-expanded>td:not(.mobile-history-summary){position:static!important;padding:8px 14px!important;min-height:0;font-size:13px;border:0}
+.sheetbox .diary-saved-row .mini{min-height:40px;padding:8px 12px}.sheetbox .diary-saved-row .row-sync{margin-bottom:4px}
+}
+.sheetbox .diary-saved-row[hidden]{display:none!important}
