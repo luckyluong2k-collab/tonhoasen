@@ -4,15 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Điền hồ sơ đúng mẫu • Hoa Sen Home</title>
-    <link rel="stylesheet" href="dossier-editor.css?v=10.5" />
+    <link rel="stylesheet" href="dossier-editor.css?v=10.6" />
   </head>
   <body>
     <header>
-      <a href="index.html#dossier">← Về trang công trình</a
+      <button id="mobileMenu" type="button">☰ Thông tin & bìa</button
+      ><a href="index.html#dossier">← Về trang công trình</a
       ><strong>HỒ SƠ CÔNG TRÌNH</strong><span id="status" role="status"></span>
     </header>
     <main>
       <aside>
+        <button id="mobileCover" type="button">Hiện phần bìa</button>
         <h2>Thông tin dùng chung</h2>
         <p>
           Điền sẵn vào các vị trí có sẵn trên mẫu. Sửa một lần để dùng cho các
@@ -152,6 +154,6 @@
     <script src="dossier-history.js?v=10.7"></script>
     <script src="dossier-workflow.js?v=10.3"></script>
     <script src="dossier-template-layout.js?v=10.1"></script>
-      <script src="dossier-editor.js?v=10.9"></script>
+      <script src="dossier-editor.js?v=10.10"></script>
   </body>
 </html>

@@ -396,6 +396,7 @@
   }
   async function render() {
     HSHArchive.setType(active.type);
+    document.body.classList.toggle("diary-mode", active.type === "diary");
     $("coverPdf").hidden = active.type !== "diary";
     const run = ++epoch;
     migrate(active);
@@ -717,6 +718,12 @@
   $("pdf").onclick = () => exportFile("pdf", "diary");
   $("png").onclick = () => exportFile("png", "diary");
   $("coverPdf").onclick = () => exportFile("pdf", "cover");
+  $("mobileMenu").onclick = () => document.body.classList.toggle("menu-open");
+  $("mobileCover").onclick = () => {
+    document.body.classList.add("show-cover");
+    document.body.classList.remove("menu-open");
+    document.querySelector("#pages .sheet-shell")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   $("backup").onclick = () =>
     download(
       new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }),
