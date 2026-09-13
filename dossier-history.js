@@ -82,7 +82,8 @@ function render(highlightId=null){
 
     }
     if(!e.driveVerifiedAt)actions.append(button(e.driveSaved?'Kiểm tra lại':'Gửi lên Drive',async()=>{await HSHDrive.connect();const x=await loadEntry(e.id);await cacheEntry(x);await syncPending();}));
-    row.append(title,fileName,time,details,badge,actions);
+    const info=document.createElement('div');info.className='archive-file-info';info.append(fileName,details);
+    row.append(info,time,badge,actions);
     body.append(row);
   }
 }

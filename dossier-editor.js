@@ -523,33 +523,17 @@
     zoom();
     validate();
     showLegacy();
-    renderEasyEntry();
   }
   function setMode(mode) {
     document.body.dataset.editorMode=mode;
     ['Preview','Archive'].forEach(name=>$('mode'+name).setAttribute('aria-pressed',String(name.toLowerCase()===mode)));
-    $('modePreview').textContent=mode==='preview'?'Đóng bản in':'Xem bản in';
-    $('modeArchive').textContent=mode==='archive'?'Đóng lịch sử':'Lịch sử & Drive';
-    if(mode==='preview') { document.body.classList.add('show-cover'); render(); }
+    $('modePreview').textContent='Mẫu nhật ký';
+    $('modeArchive').textContent='Lịch sử & Drive';
+    if(mode==='preview') { render(); }
     if(mode==='archive') HSHArchive.refresh();
   }
-  function renderEasyEntry() {
-    const host=$('easyEntry');host.replaceChildren();
-    plans.forEach((plan,pi)=>{
-      if(!plan.fields.length)return;
-      const group=document.createElement('details');group.className='entry-group';group.open=active.type==='diary'?pi>=3:pi===0;
-      const heading=document.createElement('summary');heading.textContent=active.type==='diary'?(pi<3?'Thông tin bìa · trang '+(pi+1):'Nhật ký · trang '+(pi-2)):'Nội dung · trang '+(pi+1);group.append(heading);
-      const fields=document.createElement('div');fields.className='entry-fields';
-      plan.fields.filter(f=>!f.key.startsWith('common:')).forEach(f=>{
-        const label=document.createElement('label');label.textContent=f.label;
-        if(f.photo){const button=document.createElement('button');button.type='button';button.textContent=active.photos[f.key]?'Đổi ảnh':'Thêm ảnh';button.onclick=()=>selectPhoto(f);label.append(button);}
-        else{const input=document.createElement(f.h>45?'textarea':'input');input.value=value(f);input.setAttribute('aria-label',f.label);input.dataset.easyKey=f.key;if(f.h>45){input.rows=6;label.className='entry-wide';}if(f.key.startsWith('workers'))input.inputMode='numeric';input.oninput=()=>{write(f,input.value);input.classList.toggle('invalid',overflow(f));validate();};label.append(input);if(f.quickOptions){const choices=document.createElement('div');choices.className='entry-choices';f.quickOptions.forEach(option=>{const btn=document.createElement('button');btn.type='button';btn.textContent=option;btn.onclick=()=>{input.value=option;input.dispatchEvent(new Event('input'));};choices.append(btn)});label.append(choices);}}
-        fields.append(label);
-      });group.append(fields);host.append(group);
-    });
-  }
-  $('modePreview').onclick=()=>setMode(document.body.dataset.editorMode==='preview'?'entry':'preview');$('modeArchive').onclick=()=>setMode(document.body.dataset.editorMode==='archive'?'entry':'archive');
-  document.body.dataset.editorMode='entry';
+  $('modePreview').onclick=()=>setMode('preview');$('modeArchive').onclick=()=>setMode('archive');
+  document.body.dataset.editorMode='preview';
   $('showHistory').addEventListener('click',()=>setMode('archive'));
   function zoom() {
     const z =
@@ -810,6 +794,7 @@
     };
     state.records.push(active);
     save();
+    setMode("preview");
     await render();
     $("pages").scrollIntoView({ block: "start" });
   });
