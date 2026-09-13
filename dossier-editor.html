@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Điền hồ sơ đúng mẫu • Hoa Sen Home</title>
-    <link rel="stylesheet" href="dossier-editor.css?v=10.29" />
+    <link rel="stylesheet" href="dossier-editor.css?v=10.30" />
   </head>
   <body>
     <header>
@@ -43,7 +43,7 @@
       <section class="workspace">
         <div class="editor-heading"><div><span class="editor-eyebrow">HOA SEN HOME · HỒ SƠ HIỆN TRƯỜNG</span><h1>Nhập hôm nay. Quản lý rõ ràng.</h1><p>Nhập theo từng mục, kiểm tra bản in và theo dõi file đã lưu.</p></div><a class="drive-folder-link" href="https://drive.google.com/drive/folders/1yfO7aow3oukxMdtkHiG1J6ytW9r3QlFY" target="_blank" rel="noopener">Mở thư mục Drive ↗</a></div>
         <div class="editor-modes" role="group" aria-label="Chế độ làm việc"><button id="modePreview" aria-pressed="false">Xem bản in</button><button id="modeArchive" aria-pressed="false">Lịch sử & Drive</button></div>
-        <p class="hint">Phiên bản 10.29 · Hỗ trợ Chrome Android</p><p id="exportFeedback" role="status" aria-live="polite"></p><p id="draftStatus" role="status">Bản nháp trên thiết bị</p>
+        <p class="hint">Phiên bản 10.30 · Hỗ trợ Chrome Android</p><p id="exportFeedback" role="status" aria-live="polite"></p><p id="draftStatus" role="status">Bản nháp trên thiết bị</p>
         
         <nav>
           <label>Ngày lập<input id="date" type="date" /></label
@@ -81,53 +81,9 @@
         <div id="pages"></div>
         <section id="exportArchive" class="export-archive">
           <h2>Lịch sử biên bản đã xuất</h2>
-          <p>
-            Mỗi lần xuất giữ nguyên file và thông tin tại thời điểm xuất. Sửa
-            bản nháp không thay đổi bản lịch sử.
-          </p>
-          <p>
-            Theo dõi từng lần xuất bên dưới. Chỉ bản có trạng thái Drive đã xác minh mới được xác nhận khớp nội dung; bản nháp vẫn lưu riêng trên thiết bị.
-          </p>
-          <details>
-            <summary>Kết nối GitHub để lưu hồ sơ</summary>
-            <p>
-              Tạo mã truy cập chỉ dành cho kho tonhoasen, quyền Contents: Read
-              and write. Mã chỉ giữ trong phiên trang này, không lưu vào hồ sơ.
-            </p>
-            <a
-              href="https://github.com/settings/personal-access-tokens/new"
-              target="_blank"
-              rel="noopener"
-              >Tạo mã truy cập GitHub</a
-            ><label
-              >Mã truy cập GitHub<input
-                id="githubToken"
-                type="password"
-                autocomplete="off"
-                spellcheck="false" /></label
-            ><button id="githubConnect">Kết nối lưu GitHub</button
-            ><button id="githubDisconnect">Ngắt kết nối</button>
-          </details>
-          <p id="githubConnection" role="status">
-            Chưa kết nối quyền ghi GitHub. Có thể xem lịch sử công khai.
-          </p>
-          <button id="githubRefresh">Cập nhật lịch sử GitHub</button>
-          <button id="driveConnect">Kết nối Google Drive</button>
-          <p id="driveConnection" role="status">Chưa kết nối Google Drive.</p>
-          <p id="archiveFolder">Chưa chọn thư mục lưu bản sao.</p>
-          <div class="archive-actions">
-            <button id="archiveConnect">Chọn thư mục lưu</button
-            ><button id="archiveReconnect">Kết nối lại thư mục</button
-            ><button id="archiveBackup">Sao lưu lịch sử ZIP</button
-            ><button id="archiveImport">Khôi phục từ ZIP</button
-            ><input id="archiveImportFile" type="file" accept=".zip" hidden />
-          </div>
-          <p class="hint">
-            Bộ nhớ trình duyệt chỉ là bản lưu tạm và có thể mất khi xóa dữ liệu.
-            Chọn thư mục riêng (có thể nằm trong Google Drive/OneDrive) để tự
-            ghi bản sao sau mỗi lần xuất. Đồng bộ lên đám mây do ứng dụng
-            Drive/OneDrive trên máy thực hiện.
-          </p>
+          <p>File mới nhất ở trên cùng. File chờ sẽ tự gửi tiếp sau khi kết nối Drive; màu xanh xác nhận nội dung đã khớp.</p>
+          <button id="driveConnect">Kết nối Drive &amp; gửi file chờ</button>
+          <p id="driveConnection" role="status">File chưa gửi được sẽ được giữ trên thiết bị và gửi tiếp khi kết nối lại.</p>
           <p id="archiveStatus" role="status"></p>
           <div class="archive-filters">
             <label
@@ -152,12 +108,12 @@
       <script>
         for(const id of ['pdf','png','coverPdf']) document.getElementById(id).onclick=()=>{
           const feedback=document.getElementById('exportFeedback');
-          feedback.textContent='Trang chưa tải xong bộ xuất file. Hãy tải lại trang khi có mạng. Phiên bản 10.29.';
+          feedback.textContent='Trang chưa tải xong bộ xuất file. Hãy tải lại trang khi có mạng. Phiên bản 10.30.';
           feedback.scrollIntoView({block:'center'});
         };
         window.addEventListener('error',event=>{
           if(event.filename && /dossier-(editor|template-layout)\.js/.test(event.filename)) {
-            document.getElementById('exportFeedback').textContent='Chưa khởi động được phần xuất file: '+event.message+'. Phiên bản 10.29.';
+            document.getElementById('exportFeedback').textContent='Chưa khởi động được phần xuất file: '+event.message+'. Phiên bản 10.30.';
           }
         });
       </script>
@@ -165,13 +121,13 @@
       <script src="vendor/fflate.min.js"></script>
       <script src="https://accounts.google.com/gsi/client" async></script>
       <script src="dossier-github.js?v=10.26"></script>
-      <script src="dossier-drive.js?v=10.29"></script>
-    <script src="dossier-history.js?v=10.29"></script>
+      <script src="dossier-drive.js?v=10.30"></script>
+    <script src="dossier-history.js?v=10.30"></script>
     <script src="dossier-workflow.js?v=10.3"></script>
       <script src="dossier-template-layout.js?v=10.3"></script>
-      <script src="dossier-editor.js?v=10.29"></script>
+      <script src="dossier-editor.js?v=10.30"></script>
     <script>
-      if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js?v=10.29', {updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js?v=10.30', {updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});
     </script>
   </body>
 </html>
