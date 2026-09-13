@@ -56,9 +56,11 @@
     try {
       localStorage.setItem(storage, JSON.stringify(state));
       $("status").textContent = "Đã lưu trên máy này";
+      if ($('draftStatus')) $('draftStatus').textContent='Đã lưu bản nháp lúc '+new Date().toLocaleTimeString('vi-VN')+' · trên thiết bị này';
     } catch (e) {
       $("status").textContent =
         "Chưa lưu được trên máy. Hãy tải bản sao dữ liệu để tránh mất nội dung.";
+      if ($('draftStatus')) $('draftStatus').textContent='Chưa lưu được bản nháp — tải bản sao dữ liệu ngay';
     }
   }
   function migrate(r) {
@@ -521,7 +523,32 @@
     zoom();
     validate();
     showLegacy();
+    renderEasyEntry();
   }
+  function setMode(mode) {
+    document.body.dataset.editorMode=mode;
+    ['Entry','Preview','Archive'].forEach(name=>$('mode'+name).setAttribute('aria-pressed',String(name.toLowerCase()===mode)));
+    if(mode==='preview') { document.body.classList.add('show-cover'); render(); }
+    if(mode==='archive') HSHArchive.refresh();
+  }
+  function renderEasyEntry() {
+    const host=$('easyEntry');host.replaceChildren();
+    plans.forEach((plan,pi)=>{
+      if(!plan.fields.length)return;
+      const group=document.createElement('details');group.className='entry-group';group.open=active.type==='diary'?pi>=3:pi===0;
+      const heading=document.createElement('summary');heading.textContent=active.type==='diary'?(pi<3?'Thông tin bìa · trang '+(pi+1):'Nhật ký · trang '+(pi-2)):'Nội dung · trang '+(pi+1);group.append(heading);
+      const fields=document.createElement('div');fields.className='entry-fields';
+      plan.fields.filter(f=>!f.key.startsWith('common:')).forEach(f=>{
+        const label=document.createElement('label');label.textContent=f.label;
+        if(f.photo){const button=document.createElement('button');button.type='button';button.textContent=active.photos[f.key]?'Đổi ảnh':'Thêm ảnh';button.onclick=()=>selectPhoto(f);label.append(button);}
+        else{const input=document.createElement(f.h>45?'textarea':'input');input.value=value(f);input.setAttribute('aria-label',f.label);input.dataset.easyKey=f.key;if(f.h>45){input.rows=6;label.className='entry-wide';}if(f.key.startsWith('workers'))input.inputMode='numeric';input.oninput=()=>{write(f,input.value);input.classList.toggle('invalid',overflow(f));validate();};label.append(input);if(f.quickOptions){const choices=document.createElement('div');choices.className='entry-choices';f.quickOptions.forEach(option=>{const btn=document.createElement('button');btn.type='button';btn.textContent=option;btn.onclick=()=>{input.value=option;input.dispatchEvent(new Event('input'));};choices.append(btn)});label.append(choices);}}
+        fields.append(label);
+      });group.append(fields);host.append(group);
+    });
+  }
+  $('modeEntry').onclick=()=>setMode('entry');$('modePreview').onclick=()=>setMode('preview');$('modeArchive').onclick=()=>setMode('archive');
+  document.body.dataset.editorMode='entry';
+  $('showHistory').addEventListener('click',()=>setMode('archive'));
   function zoom() {
     const z =
       $("zoom").value === "fit"
@@ -669,6 +696,7 @@
       );
       $("status").textContent =
         `Đã tạo ${exportPlans.length} trang, 300 dpi. ${archived?.message || "Đã lưu vào lịch sử bên dưới."}`;
+      setMode("archive");
       setTimeout(() => {
         $("exportArchive").scrollIntoView({
           behavior: "smooth",

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Điền hồ sơ đúng mẫu • Hoa Sen Home</title>
-    <link rel="stylesheet" href="dossier-editor.css?v=10.26" />
+    <link rel="stylesheet" href="dossier-editor.css?v=10.27" />
   </head>
   <body>
     <header>
@@ -41,6 +41,10 @@
         </details>
       </aside>
       <section class="workspace">
+        <div class="editor-heading"><div><span class="editor-eyebrow">HOA SEN HOME · HỒ SƠ HIỆN TRƯỜNG</span><h1>Nhập hôm nay. Quản lý rõ ràng.</h1><p>Nhập theo từng mục, kiểm tra bản in và theo dõi file đã lưu.</p></div><a class="drive-folder-link" href="https://drive.google.com/drive/folders/1yfO7aow3oukxMdtkHiG1J6ytW9r3QlFY" target="_blank" rel="noopener">Mở thư mục Drive ↗</a></div>
+        <div class="editor-modes" role="group" aria-label="Chế độ làm việc"><button id="modeEntry" aria-pressed="true">1 · Nhập nội dung</button><button id="modePreview" aria-pressed="false">2 · Xem bản in</button><button id="modeArchive" aria-pressed="false">3 · Lịch sử & Drive</button></div>
+        <p id="draftStatus" role="status">Bản nháp trên thiết bị</p>
+        
         <nav>
           <label>Ngày lập<input id="date" type="date" /></label
           ><button id="add">+ Thêm trang</button
@@ -48,7 +52,7 @@
           ><button id="coverPdf" hidden>Xuất PDF bìa</button
           ><button id="png">Xuất ảnh PNG</button
           ><button id="showHistory">Lịch sử đã xuất</button>
-        </nav>
+        </nav><section id="easyEntry" aria-label="Nhập hồ sơ"></section>
         <div class="view-tools">
           <label
             >Hiển thị<select id="zoom">
@@ -82,8 +86,7 @@
             bản nháp không thay đổi bản lịch sử.
           </p>
           <p>
-            Lịch sử và file xuất được lưu trên GitHub để không mất khi xóa dữ liệu
-            trình duyệt. Hãy kết nối quyền ghi trước khi xuất.
+            Theo dõi từng lần xuất bên dưới. Chỉ bản có trạng thái Drive đã xác minh mới được xác nhận khớp nội dung; bản nháp vẫn lưu riêng trên thiết bị.
           </p>
           <details>
             <summary>Kết nối GitHub để lưu hồ sơ</summary>
@@ -154,6 +157,6 @@
     <script src="dossier-history.js?v=10.26"></script>
     <script src="dossier-workflow.js?v=10.3"></script>
       <script src="dossier-template-layout.js?v=10.3"></script>
-      <script src="dossier-editor.js?v=10.17"></script>
+      <script src="dossier-editor.js?v=10.27"></script>
   </body>
 </html>
