@@ -43,7 +43,7 @@
     const status=document.getElementById('driveConnection');
     if(status)status.textContent='Đang kết nối và tải file lên Google Drive…';
     if (!accessToken) {
-      try { await reconnectSilently(); } catch (error) { await connect(); }
+      throw Error("Hãy bấm Kết nối Google Drive rồi lưu lại file trong lịch sử.");
     }
     const metadata = { name, parents: [folderId], mimeType: blob.type || "application/octet-stream" };
     const boundary = "hsh_drive_boundary";
@@ -52,11 +52,11 @@
       `--${boundary}\r\nContent-Type: ${metadata.mimeType}\r\n\r\n`, blob, `\r\n--${boundary}--`,
     ], { type: `multipart/related; boundary=${boundary}` });
     const response = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink", {
-      method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body,
+      signal: AbortSignal.timeout(60000), method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body,
     });
     if (response.status === 401 && !retry) {
-      await reconnectSilently().catch(() => connect());
-      return save(blob, name, true);
+      accessToken = "";
+      throw Error("Phiên Drive hết hạn. Bấm Kết nối Google Drive rồi lưu lại từ lịch sử.");
     }
     if (!response.ok) throw Error("Google Drive không nhận được file (" + response.status + ").");
     const file = await response.json();

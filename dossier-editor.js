@@ -85,7 +85,7 @@
     render();
   }
   function font(f) {
-    return `${f.italic ? "italic " : ""}${f.bold ? "bold " : ""}${f.size}px "Times New Roman"`;
+    return `${f.italic ? "italic " : ""}${f.bold ? "bold " : ""}${f.size}px "Times New Roman", "HSH Serif"`;
   }
   function value(f, context) {
     const record = context?.record || active;
@@ -588,31 +588,46 @@
     input.click();
   }
   function download(blob, name) {
+    let panel = $("downloadReady");
+    if (!panel) {
+      panel = document.createElement("section");
+      panel.id = "downloadReady";
+      $("exportArchive").prepend(panel);
+    }
+    if (panel.dataset.url) URL.revokeObjectURL(panel.dataset.url);
     const url = URL.createObjectURL(blob),
       a = document.createElement("a");
+    panel.dataset.url = url;
+    const title = document.createElement("strong");
+    title.textContent = "File đã sẵn sàng: " + name;
+    const hint = document.createElement("p");
+    hint.textContent = "Nếu file chưa tự tải, bấm Tải file. Trên iPhone, bạn có thể chọn Chia sẻ → Lưu vào Tệp.";
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name;
+    link.textContent = "⬇ Tải file";
+    panel.replaceChildren(title, hint, link);
+    const file = new File([blob], name, {type: blob.type});
+    if (navigator.canShare?.({files: [file]})) {
+      const share = document.createElement("button");
+      share.textContent = "Chia sẻ / Lưu vào Tệp";
+      share.onclick = async () => {
+        try { await navigator.share({files: [file]}); }
+        catch (error) { if (error.name !== "AbortError") hint.textContent = "Chưa chia sẻ được. Hãy dùng nút Tải file."; }
+      };
+      panel.append(share);
+    }
     a.href = url;
     a.download = name;
+    document.body.append(a);
     a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-  }
-  function fontAvailable() {
-    measure.font = "12px monospace";
-    const width = measure.measureText("Wmi012 Công trình").width;
-    measure.font = '12px "Times New Roman", monospace';
-    return (
-      Math.abs(width - measure.measureText("Wmi012 Công trình").width) > 0.1
-    );
+    a.remove();
   }
   async function exportFile(type, scope = "diary") {
     if (busy) return;
     plans = build();
     if (!validate()) {
       $("warnings").scrollIntoView({ block: "center" });
-      return;
-    }
-    if (!fontAvailable()) {
-      $("status").textContent =
-        "Máy này chưa có Times New Roman. Để xuất đúng font mẫu, hãy mở hồ sơ trên máy có font này.";
       return;
     }
     const snapshot = {
@@ -630,6 +645,7 @@
     $("busy").hidden = false;
     try {
       await document.fonts.ready;
+      await Promise.all(['', 'bold ', 'italic ', 'bold italic '].map(style => document.fonts.load(`${style}12px "HSH Serif"`)));
       const pdf =
           type === "pdf"
             ? new window.jspdf.jsPDF({
@@ -663,6 +679,7 @@
           ] = new Uint8Array(await blob.arrayBuffer());
         }
         $("status").textContent = `Đang xuất trang ${i + 1}/${exportPlans.length}…`;
+        c.width = c.height = 1;
       }
       const blob = pdf
         ? pdf.output("blob")

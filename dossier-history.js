@@ -93,12 +93,17 @@ async function capture(blob,context){
   const now=new Date(),id='EXP-'+now.toISOString().replace(/[^0-9]/g,'').slice(0,17)+'-'+crypto.randomUUID().slice(0,8);
   const entry={schema,id,exportedAt:now.toISOString(),sourceRecordId:context.snapshot.record.originRecordId||context.snapshot.record.id,type:context.snapshot.record.type,recordDate:context.snapshot.record.date,projectName:context.snapshot.project.name,number:context.snapshot.record.fields.number||context.snapshot.record.fields.volume||'',format:context.format,pages:context.pages,templateVersion:'word-original-v2',snapshot:structuredClone(context.snapshot),sha256:await hash(blob),filename:context.filename||`${id}.${context.format==='pdf'?'pdf':'zip'}`,blob,folderSaved:false};
   const stamp=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Ho_Chi_Minh',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(now).replaceAll('/','.').replace(', ','_').replaceAll(':','-');
+  if(entry.type==='diary')entry.filename=(entry.filename.startsWith('Bìa ')?'Bìa nhật ký thi công-':'Nhật ký thi công-')+stamp.split('_')[0]+'.'+(entry.format==='pdf'?'pdf':'zip');
   entry.filename=entry.filename.replace(/\.(pdf|zip)$/i,`-xuất-${stamp}.${String(now.getMilliseconds()).padStart(3,'0')}.$1`);
   let cached=false,folderError='';
   try{await cacheEntry(entry,true);cached=true;}catch(e){folderError='Chưa lưu trên thiết bị: '+e.message;}
 
+  const initial=summary(entry);
+  entries.unshift(initial);saveSummariesBackup();render(initial.id);
+  // Local export is ready immediately; cloud uploads never block mobile downloads.
+  const sync = async () => {
   if(await permission()){try{await putFolder(entry);entry.folderSaved=true;}catch(e){folderError=e.message;}}
-  try{const driveFile=await HSHDrive.save(entry.blob,entry.filename);entry.driveFileId=driveFile.id;entry.driveSaved=true;entry.driveUploadedAt=new Date().toISOString();try{await HSHDrive.verify(entry.driveFileId,entry.sha256);entry.driveVerifiedAt=new Date().toISOString();}catch(e){entry.driveError=e.message;}}catch(e){entry.driveError=e.message;if($('driveConnection'))$('driveConnection').textContent='Chưa lưu được lên Drive: '+e.message;folderError+=' Drive: '+e.message;}
+  if(HSHDrive.connected)try{const driveFile=await HSHDrive.save(entry.blob,entry.filename);entry.driveFileId=driveFile.id;entry.driveSaved=true;entry.driveUploadedAt=new Date().toISOString();try{await HSHDrive.verify(entry.driveFileId,entry.sha256);entry.driveVerifiedAt=new Date().toISOString();}catch(e){entry.driveError=e.message;}}catch(e){entry.driveError=e.message;if($('driveConnection'))$('driveConnection').textContent='Chưa lưu được lên Drive: '+e.message;folderError+=' Drive: '+e.message;}
   if(HSHGitHub.connected){try{await HSHGitHub.save(entry);entry.githubSaved=true;}catch(e){folderError+=' '+e.message;}}
   try{await cacheEntry(entry);cached=true;}catch(e){}
   const item=summary(entry);
@@ -109,7 +114,10 @@ async function capture(blob,context){
   else entries.unshift(item);
   saveSummariesBackup();
   render(item.id);
-  const result=entry.driveVerifiedAt?'Đã lưu Drive và kiểm tra nội dung khớp bản xuất.':entry.driveSaved?'Drive đã nhận file; chưa xác minh nội dung.':entry.githubSaved?'Đã lưu lịch sử công khai trên GitHub.':entry.folderSaved?'Đã lưu lịch sử và bản sao thư mục.':cached?'Đã lưu lịch sử tạm trên trình duyệt; cần sao lưu ra thư mục hoặc ZIP.':'Đã lưu lịch sử trên phiên làm việc. Hãy tải file và sao lưu ZIP.';
+  };
+  setTimeout(() => { sync().catch(error => message('File đã tạo; chưa sao lưu đầy đủ: '+error.message)); }, 0);
+
+  const result=entry.driveVerifiedAt?'Đã lưu Drive và kiểm tra nội dung khớp bản xuất.':entry.driveSaved?'Drive đã nhận file; chưa xác minh nội dung.':entry.githubSaved?'Đã lưu lịch sử công khai trên GitHub.':entry.folderSaved?'Đã lưu lịch sử và bản sao thư mục.':cached?(HSHDrive.connected?'Đã lưu trên thiết bị. Đang sao lưu Drive; xem trạng thái trong thẻ lịch sử.':'Đã lưu trên thiết bị. Chưa kết nối Drive; bấm Kết nối Google Drive rồi Lưu lên Google Drive.'):'Đã lưu lịch sử trên phiên làm việc. Hãy tải file và sao lưu ZIP.';
   message(result+(folderError?' Lỗi thư mục: '+folderError:''));
   return {entry,saved:cached||!!entry.driveSaved||!!entry.folderSaved||!!entry.githubSaved,folderSaved:entry.folderSaved,message:result+(folderError?' Chưa lưu đầy đủ: '+folderError:'')};
 }
