@@ -478,15 +478,15 @@
               quick.className = "quick-choice";
               quick.setAttribute("aria-label", `${f.label} — chọn nhanh`);
               quick.title = "Chọn nhanh";
-              quick.append(new Option("☰", ""));
+              quick.append(new Option("Chọn", ""));
               f.quickOptions.forEach((option) => quick.append(new Option(option, option)));
               Object.assign(quick.style, {
                 position: "absolute",
                 left: f.x + f.w - 34 + "px",
                 top: f.y + "px",
-                width: "30px",
+                width: "44px",
                 height: f.h + "px",
-                fontSize: "10px",
+                fontSize: "9px",
                 zIndex: "3",
               });
               quick.onchange = () => {
