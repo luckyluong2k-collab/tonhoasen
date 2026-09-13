@@ -507,7 +507,7 @@
               el.classList.toggle("overflow", overflow(f));
               validate();
             };
-            el.onblur = () => render();
+            el.onblur = () => validate();
           }
           paper.append(el);
         });
