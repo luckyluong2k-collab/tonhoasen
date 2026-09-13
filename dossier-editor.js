@@ -89,7 +89,7 @@
     const record = context?.record || active;
     if (f.key.startsWith("common:"))
       return (context?.project || effectiveProject())[f.key.slice(7)] || "";
-    if (Object.hasOwn(record.fields, f.key)) return record.fields[f.key];
+    if (Object.hasOwn(record.fields, f.key) && record.fields[f.key] !== "") return record.fields[f.key];
     if (f.auto === "year") return record.date.slice(0, 4);
     if (f.auto === "pageCount") return String(3 + record.count);
     if (f.auto === "firstPage") return "1";
