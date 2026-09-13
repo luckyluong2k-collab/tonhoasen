@@ -24,7 +24,23 @@ function render(){const body=$('rows');body.innerHTML='';data.forEach((r,i)=>{co
 function readRow(tr){const a=normalize(data[Number(tr.dataset.i)]);tr.querySelectorAll('[data-k]').forEach(el=>{const k=+el.dataset.k;a[k]=k===0?isoToVi(el.value):el.value});return a}
 function addLocalRow(src){collect();meta.push({row:null,dirty:true,base:null});const today=new Date();const iso=today.toISOString().slice(0,10);const r=src?[...src]:[isoToVi(iso),'','','','','','','','','','','','',''];data.push(r);persist();render();requestAnimationFrame(()=>{const t=$('rows').lastElementChild;t?.scrollIntoView({block:'center'});t?.querySelector('input')?.focus()})}
 async function auth(){if(token)return token;if(!window.google?.accounts?.oauth2)throw Error('Google chưa tải xong. Hãy thử lại sau vài giây.');return new Promise((resolve,reject)=>{tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:'https://www.googleapis.com/auth/spreadsheets',callback:r=>{if(r.error)return reject(Error(r.error));token=r.access_token;setStatus('Đã kết nối Google Sheet');resolve(token)},error_callback:()=>reject(Error('Cửa sổ đăng nhập Google bị đóng hoặc chặn.'))});tokenClient.requestAccessToken({prompt:''})})}
-async function api(url,opt={},retry=true){await auth();const r=await fetch(url,{...opt,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opt.headers||{})}});if(r.status===401){token='';if(retry)return api(url,opt,false);throw Error('Phiên Google hết hạn. Kết nối lại để tiếp tục.');}if(!r.ok)throw Error('Google Sheets lỗi '+r.status+': '+await r.text());return r.status===204?null:r.json()}
+async function api(url,opt={},retry=true){
+ try{await auth();}catch(e){e.notWritten=true;throw e;}
+ const r=await fetch(url,{...opt,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opt.headers||{})}});
+ if(r.status===401){token='';if(retry)return api(url,opt,false);const e=Error('Phiên Google hết hạn. Bấm Kết nối Google để tiếp tục.');e.notWritten=true;throw e;}
+ if(!r.ok){let body={};try{body=await r.json();}catch(_){}const disabled=body.error?.details?.some(d=>d.reason==='SERVICE_DISABLED');
+ const e=Error(disabled?'Google Sheets API chưa được bật cho dự án 205763163202. Chủ dự án cần bật API, sau đó bấm Lưu lại. Bản nháp vẫn được giữ trên máy.':r.status===403?'Google từ chối quyền sửa bảng tính. Kiểm tra tài khoản Google và quyền chỉnh sửa Sheet; bản nháp vẫn được giữ.':r.status===429?'Google đang giới hạn lượt truy cập. Đợi một lát rồi bấm Lưu lại.':`Chưa lưu được lên Sheet (lỗi ${r.status}). Bản nháp vẫn được giữ trên máy.`);
+ e.notWritten=r.status>=400&&r.status<500&&r.status!==408;throw e;
+ }return r.status===204?null:r.json();
+}
+async function resolvePending(m,row){
+ const result=await api(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(`'${TAB}'!A2:N`)}`);
+ const attempted=normalize(m.attempt||row);
+ const matches=(result.values||[]).map((r,i)=>({row:i+2,values:normalize(r)})).filter(x=>JSON.stringify(x.values)===JSON.stringify(attempted));
+ if(matches.length>1)throw Error('Có nhiều dòng trùng nội dung trên Sheet. Hãy đối chiếu trước khi lưu để tránh ghi nhầm.');
+ if(matches.length===1){m.row=matches[0].row;m.base=matches[0].values;}
+ m.uncertain=false;delete m.attempt;persist();
+}
 async function load(){if(saving)return;collect();setProg('Đang tải…');try{
  const range=encodeURIComponent(`'${TAB}'!A2:N`);
  const j=await api(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}`);
@@ -43,11 +59,12 @@ async function load(){if(saving)return;collect();setProg('Đang tải…');try{
  const ds=data.map(r=>viToIso(r[0])).filter(Boolean).sort();if(ds.length){$('fromDate').value=ds[0];$('toDate').value=ds.at(-1);}
  }catch(e){setProg(e.message);}}
 async function checkUnchanged(m){const j=await api(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(`'${TAB}'!A${m.row}:N${m.row}`)}`);if(JSON.stringify(normalize(j.values?.[0]))!==JSON.stringify(normalize(m.base)))throw Error('Dòng trên Sheet đã thay đổi hoặc di chuyển. Bản nháp được giữ; hãy đối chiếu Sheet trước khi lưu.');}
-async function saveIndex(i){if(saving)return;collect();const row=[...data[i]],m=meta[i];if(!row[0])return alert('Hãy chọn ngày.');if(m.uncertain)return alert('Lần thêm trước chưa xác nhận. Kiểm tra Sheet và tải lại dữ liệu trước khi gửi thêm để tránh trùng.');saving=true;setProg('Đang lưu…');try{
+async function saveIndex(i){if(saving)return;collect();const row=[...data[i]],m=meta[i];if(!row[0])return alert('Hãy chọn ngày.');saving=true;setProg('Đang lưu…');try{
+ if(m.uncertain){setProg('Đang kiểm tra lần lưu trước trên Sheet…');await resolvePending(m,row);}
  if(m.row){await checkUnchanged(m);await api(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(`'${TAB}'!A${m.row}:N${m.row}`)}?valueInputOption=RAW`,{method:'PUT',body:JSON.stringify({values:[row]})});}
- else {m.uncertain=true;persist();const result=await api(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(`'${TAB}'!A:N`)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',body:JSON.stringify({values:[row]})});const match=result.updates?.updatedRange?.match(/!A(\d+):/);if(!match)throw Error('Chưa xác nhận vị trí dòng mới.');m.row=Number(match[1]);m.uncertain=false;}
+ else {await auth();m.attempt=[...row];m.uncertain=true;persist();const result=await api(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(`'${TAB}'!A:N`)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',body:JSON.stringify({values:[row]})});const match=result.updates?.updatedRange?.match(/!A(\d+):/);if(!match)throw Error('Chưa xác nhận vị trí dòng mới.');m.row=Number(match[1]);m.uncertain=false;delete m.attempt;}
  m.base=row;m.dirty=JSON.stringify(data[i])!==JSON.stringify(row);persist();setProg('Đã lưu đúng dòng '+m.row+' trên Sheet.');
- }catch(e){setProg(e.message);}finally{saving=false;}}
+ }catch(e){if(e.notWritten&&!m.row){m.uncertain=false;delete m.attempt;persist();}setProg(e.message);}finally{saving=false;}}
 async function deleteIndex(i){if(saving||!confirm('Xóa dòng này khỏi bảng dữ liệu?'))return;collect();saving=true;try{const m=meta[i];if(m.uncertain)throw Error('Kiểm tra lần thêm chưa xác nhận trên Sheet trước khi xóa bản nháp.');if(m.row){await checkUnchanged(m);await api(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(`'${TAB}'!A${m.row}:N${m.row}`)}:clear`,{method:'POST',body:'{}'});}data.splice(i,1);meta.splice(i,1);persist();render();setProg('Đã xóa đúng dòng.');}catch(e){setProg(e.message);}finally{saving=false;}}
 function rowHasContent(r){return [1,2,3,5,7,10,11,13].some(k=>String(r[k]||'').trim());}
 let templateImage;
