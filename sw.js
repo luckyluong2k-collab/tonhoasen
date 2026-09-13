@@ -2,6 +2,7 @@
 importScripts('./app-version.js');
 const CACHE_NAME = `hsh-phuly-v${self.APP_VERSION}`;
 const CORE = [
+  "./field-workflow.js", "./field-workflow.css",
   ...['Regular','Bold','Italic','BoldItalic'].map(style => `./vendor/fonts/Tinos-${style}.ttf`),
   "./app-release.js",
   "./app-version.js",
@@ -25,7 +26,6 @@ const CORE = [
   "./dossier-editor.css",
   "./dossier-editor.html",
   "./dossier-editor.js",
-  "./dossier-github.js",
   "./dossier-history.js",
   "./dossier-template-layout.js",
   "./dossier-workflow.js",

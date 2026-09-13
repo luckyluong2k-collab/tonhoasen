@@ -558,6 +558,7 @@ window.hshSliderPrev = function() {
 // 7. ENHANCED CAD LIGHTBOX ENGINE (ROTATE, CAD INVERT, ZOOM 500%)
 // ==========================================================================
 window.hshLightboxOpen = function(drawingId) {
+  try { localStorage.setItem('hsh-last-drawing', drawingId); } catch (_) {}
   customLightboxItem = null;
   const idx = COMPLETE_DRAWINGS.findIndex(d => d.id === drawingId);
   currentLightboxIndex = idx >= 0 ? idx : 0;

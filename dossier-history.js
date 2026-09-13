@@ -20,7 +20,7 @@ async function cacheEntry(entry,add=false){
 }
 async function putFolder(entry){if(!await permission())throw Error('Chưa có quyền ghi vào thư mục.');const dir=await folder.getDirectoryHandle(entry.id,{create:true});await writeFile(dir,entry.filename,entry.blob);await writeFile(dir,'record.json',JSON.stringify(metaOnly(entry),null,2));return true;}
 async function fromFolder(id){if(!await permission())throw Error('Hãy kết nối lại thư mục lưu.');const dir=await folder.getDirectoryHandle(id);const file=await dir.getFileHandle('record.json');const data=await file.getFile();if(data.size>25000000)throw Error('Thông tin lịch sử quá lớn.');const meta=JSON.parse(await data.text());if(!valid(meta)||meta.id!==id)throw Error('Thông tin lịch sử không hợp lệ.');const blob=await(await dir.getFileHandle(meta.filename)).getFile();if(await hash(blob)!==meta.sha256)throw Error('File không khớp bản đã lưu. Hãy dùng bản sao khác.');return {...meta,blob,folderSaved:true};}
-async function loadEntry(id){let entry;try{entry=await transaction('exports','readonly',s=>s.get(id));}catch(e){}if(!entry?.blob){try{entry=await fromFolder(id);}catch(e){entry=await HSHGitHub.read(id);}}if(!valid(entry)||await hash(entry.blob)!==entry.sha256)throw Error('File lưu trữ không khớp. Không tải bản bị thay đổi.');return entry;}
+async function loadEntry(id){let entry;try{entry=await transaction('exports','readonly',s=>s.get(id));}catch(e){}if(!entry?.blob){try{entry=await fromFolder(id);}catch(e){throw Error('Không có bản gốc trên thiết bị. Hãy mở file trên Drive hoặc khôi phục bản sao.');}}if(!valid(entry)||await hash(entry.blob)!==entry.sha256)throw Error('File lưu trữ không khớp. Không tải bản bị thay đổi.');return entry;}
 async function scanFolder(){let imported=0,failed=0;if(!await permission())return {imported,failed};for await(const [id,h]of folder.entries()){if(h.kind!=='directory'||!/^EXP-[a-zA-Z0-9-]+$/.test(id))continue;try{const entry=await fromFolder(id);try{await cacheEntry(entry);}catch(e){}const index=entries.findIndex(x=>x.id===id);if(index<0)entries.push(summary(entry));else entries[index]=summary(entry);imported++;}catch(e){failed++;}}return {imported,failed};}
 function downloadName(record,format,fallback){
 if(fallback && !fallback.startsWith('EXP-'))return fallback;
@@ -60,16 +60,6 @@ async function refresh(isManual=false){
     else if(isManual)message('Không mở được bộ nhớ tạm. Hãy dùng thư mục lưu và bản sao ZIP.');
   }
   if(await permission())await scanFolder();
-  try{
-    const remote=await HSHGitHub.list();
-    for(const item of remote.entries){
-      const i=entries.findIndex(e=>e.id===item.id);
-      if(i<0)entries.push({...item,githubSaved:true});
-      else if(entries[i].sha256===item.sha256)entries[i].githubSaved=true;
-    }
-  }catch(e){
-    if(isManual)message('Chưa đọc được một số bản lịch sử cũ: '+e.message);
-  }
   if(HSHDrive.connected){try{await refreshDrive();}catch(error){message(error.message);}}
   saveSummariesBackup();
   render();

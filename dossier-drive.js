@@ -49,5 +49,5 @@ async function describe(entry){
 }
 async function download(id){const r=await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?alt=media');if(!r.ok)throw Error('Chưa tải được file trên Drive ('+r.status+').');return r.blob();}
 window.HSHDrive={get connected(){return connected();},connect,reserveId,findExisting,save,verify,list,describe,download};
-document.addEventListener('DOMContentLoaded',()=>{status(connected()?'Đã kết nối Drive trong phiên này.':'Chưa kết nối Drive. File xuất sẽ chờ gửi trên thiết bị.');document.getElementById('driveConnect').onclick=async()=>{try{await connect();await window.HSHArchive?.syncPending();}catch(e){status(e.message);}};});
+document.addEventListener('DOMContentLoaded',()=>{status(connected()?'Đã kết nối Drive trong phiên này.':'Chưa kết nối Drive. File xuất sẽ chờ gửi trên thiết bị.');const button=document.getElementById('driveConnect');if(!button)return;button.onclick=async()=>{try{await connect();await window.HSHArchive?.syncPending();}catch(e){status(e.message);}};});
 })();
