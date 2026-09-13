@@ -976,10 +976,7 @@ async function renderDailyLogs() {
 }
 
 window.hshOpenDailyLogModal = function() {
-  const modal = document.getElementById('dailyLogModal');
-  const dateInput = document.getElementById('logInputDate');
-  if (dateInput && !dateInput.value) { const today = new Date(); dateInput.value = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
-  if (modal) modal.classList.add('active');
+  window.location.href = 'nhat-ky-cong-trinh.html';
 };
 
 window.hshCloseDailyLogModal = function() {

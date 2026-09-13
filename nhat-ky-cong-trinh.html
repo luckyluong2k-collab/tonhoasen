@@ -11,6 +11,7 @@
 #connect.connected{background:#087f5b;border-color:#087f5b;color:white}.diary-history-heading td{background:#e3f3eb!important;color:#176346;font-weight:bold;padding:12px}.diary-saved-row td{white-space:pre-wrap;overflow-wrap:anywhere;background:#f8fbfd;vertical-align:top}.diary-saved-row td:first-child{font-weight:bold;color:#0a2c54}
 .sheetbox table{table-layout:fixed;min-width:1360px}.sheetbox th{height:48px;vertical-align:middle;padding:10px 8px}.sheetbox th:nth-child(1){width:145px}.sheetbox th:nth-child(2),.sheetbox th:nth-child(3){width:115px}.sheetbox th:nth-child(4){width:100px}.sheetbox th:nth-child(5){width:135px}.sheetbox th:nth-child(10){width:110px}.sheetbox td{padding:9px;vertical-align:top}#rows input,#rows select,#rows textarea{min-width:0;width:100%;height:96px;min-height:96px;margin:0;border-radius:8px;padding:10px;font-size:14px}#rows textarea{resize:vertical}.row-actions{flex-direction:column}.row-actions .mini{min-height:42px}.diary-saved-row td{padding:14px 9px;line-height:1.5}
 @media(max-width:700px){.sheetbox table{min-width:0}.sheetbox tr.diary-entry-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.diary-entry-row td:nth-child(n+6),.diary-entry-row td:first-child{grid-column:1/-1}#rows input,#rows select{height:46px;min-height:46px}#rows textarea{height:96px;min-height:96px}.row-actions{flex-direction:row}.diary-saved-row td{min-height:24px}.diary-history-heading td{padding:12px!important}.diary-saved-row{background:#f8fbfd}}
+[hidden]{display:none!important}.row-sync{display:block;font-size:12px;line-height:1.4;margin-bottom:8px;color:#526982}.row-sync[data-state=saved]{color:#087f5b}.row-sync[data-state=error]{color:#b42318}.row-sync[data-state=pending]{color:#985b00}.mobile-field-group,#mobileSave{display:none}.history-tools label{max-width:260px}.history-tools{align-items:end}#historyMissing{flex-basis:100%}#exportPreview{max-height:70vh;overflow:auto;margin:12px 0}#conflictDialog{width:min(960px,95vw);max-height:85vh;border:1px solid #cbd8e6;border-radius:14px;padding:18px;color:#0a2c54}#conflictDialog table{min-width:0;table-layout:fixed}#conflictDialog td{white-space:pre-wrap;overflow-wrap:anywhere}#conflictDialog pre{white-space:pre-wrap}#conflictDialog::backdrop{background:#001b3d80}@media(max-width:700px){.mobile-field-group{display:block;grid-column:1/-1;background:#e8f0f8;padding:10px;border-radius:8px;margin-bottom:8px}.diary-entry-row td:nth-child(2),.diary-entry-row td:nth-child(8){grid-column:1/-1}#mobileSave{display:block;position:fixed;bottom:12px;left:12px;right:12px;z-index:50;box-shadow:0 3px 16px #1234;min-height:50px}body{padding-bottom:80px}}
 </style>
 </head>
 <body>
@@ -34,9 +35,9 @@
       <label><input id="combined" type="checkbox" checked>01 PDF tổng hợp</label>
       <label><input id="individual" type="checkbox" checked>ZIP chứa PDF từng ngày</label>
     </div>
-    <div class="export-actions"><button class="btn primary" id="exportNow">Xuất nhật ký</button><span class="hint">Ngày chưa có dữ liệu sẽ được bỏ qua.</span></div>
-  </section>
-  <p id="sheetSyncStatus" role="status" class="hint"></p><section class="sheetbox"><div class="table-wrap"><table><thead><tr><th>Ngày</th><th>Thời tiết sáng</th><th>Thời tiết chiều</th><th>Số công nhân</th><th>Cán bộ quản lý</th><th>Thiết bị thi công</th><th>Nội dung công việc</th><th>Ý kiến đơn vị thi công</th><th>Nhận xét chủ đầu tư</th><th>Thao tác</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+    <div class="export-actions"><button class="btn" id="previewExport">Kiểm tra & xem trước</button><button class="btn primary" id="exportNow">Xuất nhật ký</button><span class="hint">Ngày chưa có dữ liệu sẽ được bỏ qua.</span></div>
+  <div id="exportPreview" role="status"></div></section>
+  <p id="sheetSyncStatus" role="status" class="hint"></p><div class="toolbar history-tools"><label>Tìm nhật ký<input id="historyQuery" type="search" placeholder="Công việc, thiết bị, ngày…"></label><label>Tháng<input id="historyMonth" type="month"></label><span id="historyMissing" class="hint"></span></div><section class="sheetbox"><div class="table-wrap"><table><thead><tr><th>Ngày</th><th>Thời tiết sáng</th><th>Thời tiết chiều</th><th>Số công nhân</th><th>Cán bộ quản lý</th><th>Thiết bị thi công</th><th>Nội dung công việc</th><th>Ý kiến đơn vị thi công</th><th>Nhận xét chủ đầu tư</th><th>Thao tác</th></tr></thead><tbody id="rows"></tbody></table></div></section>
 </div>
 <div class="wrap" hidden><button id="showHistory" class="btn">Lịch sử & Drive</button><section id="exportArchive" class="export-archive">
           <h2>Lịch sử biên bản đã xuất</h2>
@@ -69,5 +70,6 @@
 <script src="dossier-drive.js"></script>
 <script src="dossier-history.js"></script>
 <script src="dossier-template-layout.js"></script>
+<button id="mobileSave" class="btn navy">Lưu nhật ký</button><dialog id="conflictDialog"><button class="btn" onclick="this.closest('dialog').close()">Đóng</button><div id="conflictBody"></div></dialog>
 <script src="sheet-diary.js"></script>
 <footer data-app-version style="padding:16px;font-size:12px"></footer></body></html>

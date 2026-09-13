@@ -27,8 +27,8 @@ async function request(url,options={}){
 }
 async function reserveId(){const r=await request('https://www.googleapis.com/drive/v3/files/generateIds?count=1&space=drive&type=files');if(!r.ok)throw Error('Chưa chuẩn bị được file trên Drive ('+r.status+').');const result=await r.json();if(!result.ids?.[0])throw Error('Drive chưa cấp mã file.');return result.ids[0];}
 async function findExisting(name,sha){const escape=s=>s.replaceAll('\\','\\\\').replaceAll("'","\\'");const q="'"+folderId+"' in parents and trashed = false and name = '"+escape(name)+"'";const r=await request('https://www.googleapis.com/drive/v3/files?'+new URLSearchParams({q,fields:'files(id,name,sha256Checksum)',pageSize:'100'}));if(!r.ok)throw Error('Chưa kiểm tra được file đã có trên Drive ('+r.status+').');return (await r.json()).files?.find(f=>f.sha256Checksum===sha);}
-async function save(blob,name,exportId,fileId){
- const metadata={name,parents:[folderId],mimeType:blob.type||'application/octet-stream',...(fileId?{id:fileId}:{}),...(exportId?{appProperties:{hshExportId:exportId}}:{})};
+async function save(blob,name,exportId,fileId,targetFolder=folderId){
+ const metadata={name,parents:[targetFolder],mimeType:blob.type||'application/octet-stream',...(fileId?{id:fileId}:{}),...(exportId?{appProperties:{hshExportId:exportId}}:{})};
  const boundary='hsh_drive_'+crypto.randomUUID();
  const body=new Blob([`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`,`--${boundary}\r\nContent-Type: ${metadata.mimeType}\r\n\r\n`,blob,`\r\n--${boundary}--`],{type:`multipart/related; boundary=${boundary}`});
  const r=await request('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{method:'POST',body});
