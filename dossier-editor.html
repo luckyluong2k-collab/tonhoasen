@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Điền hồ sơ đúng mẫu • Hoa Sen Home</title>
-    <link rel="stylesheet" href="dossier-editor.css?v=10.32" />
+    <link rel="stylesheet" href="dossier-editor.css?v=10.33" />
   </head>
   <body>
     <header>
@@ -43,7 +43,7 @@
       <section class="workspace">
         <div class="editor-heading"><div><span class="editor-eyebrow">HOA SEN HOME · HỒ SƠ HIỆN TRƯỜNG</span><h1>Nhập hôm nay. Quản lý rõ ràng.</h1><p>Sửa trực tiếp trên mẫu nhật ký và theo dõi file đã lưu.</p></div><a class="drive-folder-link" href="https://drive.google.com/drive/folders/1yfO7aow3oukxMdtkHiG1J6ytW9r3QlFY" target="_blank" rel="noopener">Mở thư mục Drive ↗</a></div>
         <div class="editor-modes" role="group" aria-label="Chế độ làm việc"><button id="modePreview" aria-pressed="true">Mẫu nhật ký</button><button id="modeArchive" aria-pressed="false">Lịch sử & Drive</button></div>
-        <p class="hint">Phiên bản 10.32 · Hỗ trợ Chrome Android</p><p id="exportFeedback" role="status" aria-live="polite"></p><p id="draftStatus" role="status">Bản nháp trên thiết bị</p>
+        <p class="hint">Phiên bản 10.33 · Hỗ trợ Chrome Android</p><p id="exportFeedback" role="status" aria-live="polite"></p><p id="draftStatus" role="status">Bản nháp trên thiết bị</p>
         
         <nav>
           <label>Ngày lập<input id="date" type="date" /></label
@@ -83,6 +83,7 @@
           <h2>Lịch sử biên bản đã xuất</h2>
           <p>File mới nhất ở trên cùng. File chờ sẽ tự gửi tiếp sau khi kết nối Drive; màu xanh xác nhận nội dung đã khớp.</p>
           <button id="driveConnect">Kết nối Drive &amp; gửi file chờ</button>
+          <button id="driveRefresh">Cập nhật lịch sử chung</button><p id="sharedHistoryStatus" role="status">Kết nối Drive để xem lịch sử chung trên máy tính và điện thoại. File chưa gửi chỉ hiện trên thiết bị đã xuất.</p>
           <p id="driveConnection" role="status">File chưa gửi được sẽ được giữ trên thiết bị và gửi tiếp khi kết nối lại.</p>
           <p id="archiveStatus" role="status"></p>
           <div class="archive-filters">
@@ -108,12 +109,12 @@
       <script>
         for(const id of ['pdf','png','coverPdf']) document.getElementById(id).onclick=()=>{
           const feedback=document.getElementById('exportFeedback');
-          feedback.textContent='Trang chưa tải xong bộ xuất file. Hãy tải lại trang khi có mạng. Phiên bản 10.32.';
+          feedback.textContent='Trang chưa tải xong bộ xuất file. Hãy tải lại trang khi có mạng. Phiên bản 10.33.';
           feedback.scrollIntoView({block:'center'});
         };
         window.addEventListener('error',event=>{
           if(event.filename && /dossier-(editor|template-layout)\.js/.test(event.filename)) {
-            document.getElementById('exportFeedback').textContent='Chưa khởi động được phần xuất file: '+event.message+'. Phiên bản 10.32.';
+            document.getElementById('exportFeedback').textContent='Chưa khởi động được phần xuất file: '+event.message+'. Phiên bản 10.33.';
           }
         });
       </script>
@@ -121,13 +122,13 @@
       <script src="vendor/fflate.min.js"></script>
       <script src="https://accounts.google.com/gsi/client" async></script>
       <script src="dossier-github.js?v=10.26"></script>
-      <script src="dossier-drive.js?v=10.32"></script>
-    <script src="dossier-history.js?v=10.32"></script>
+      <script src="dossier-drive.js?v=10.33"></script>
+    <script src="dossier-history.js?v=10.33"></script>
     <script src="dossier-workflow.js?v=10.3"></script>
-      <script src="dossier-template-layout.js?v=10.32"></script>
-      <script src="dossier-editor.js?v=10.32"></script>
+      <script src="dossier-template-layout.js?v=10.33"></script>
+      <script src="dossier-editor.js?v=10.33"></script>
     <script>
-      if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js?v=10.32', {updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js?v=10.33', {updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});
     </script>
   </body>
 </html>

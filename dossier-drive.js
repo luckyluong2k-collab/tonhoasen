@@ -37,6 +37,17 @@ async function save(blob,name,exportId,fileId){
  const file=await r.json();if(!file.id)throw Error('Drive chưa xác nhận mã file.');return file;
 }
 async function verify(id,sha){const r=await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?fields=id,name,trashed,sha256Checksum,webViewLink');if(!r.ok)throw Error('Chưa kiểm tra được file Drive ('+r.status+').');const file=await r.json();if(file.trashed||file.sha256Checksum!==sha)throw Error('File trên Drive chưa khớp nội dung bản xuất.');return file;}
-window.HSHDrive={get connected(){return connected();},connect,reserveId,findExisting,save,verify};
+async function list(){
+ const files=[];let pageToken='';
+ do {const params=new URLSearchParams({q:"'"+folderId+"' in parents and trashed = false and (mimeType = 'application/pdf' or mimeType = 'application/zip')",pageSize:'1000',fields:'nextPageToken,files(id,name,mimeType,createdTime,sha256Checksum,appProperties)',...(pageToken?{pageToken}:{})});
+ const r=await request('https://www.googleapis.com/drive/v3/files?'+params);if(!r.ok)throw Error('Chưa đọc được lịch sử chung trên Drive ('+r.status+').');const data=await r.json();files.push(...(data.files||[]));pageToken=data.nextPageToken||'';
+ }while(pageToken);return files;
+}
+async function describe(entry){
+ const appProperties={hshExportId:entry.id,hshType:entry.type,hshRecordDate:entry.recordDate,hshExportedAt:entry.exportedAt,hshPages:String(entry.pages)};
+ const r=await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(entry.driveFileId),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({appProperties})});if(!r.ok)throw Error('File đã lên Drive; chưa đồng bộ thông tin lịch sử ('+r.status+').');
+}
+async function download(id){const r=await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?alt=media');if(!r.ok)throw Error('Chưa tải được file trên Drive ('+r.status+').');return r.blob();}
+window.HSHDrive={get connected(){return connected();},connect,reserveId,findExisting,save,verify,list,describe,download};
 document.addEventListener('DOMContentLoaded',()=>{status(connected()?'Đã kết nối Drive trong phiên này.':'Chưa kết nối Drive. File xuất sẽ chờ gửi trên thiết bị.');document.getElementById('driveConnect').onclick=async()=>{try{await connect();await window.HSHArchive?.syncPending();}catch(e){status(e.message);}};});
 })();

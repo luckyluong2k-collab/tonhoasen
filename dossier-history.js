@@ -29,6 +29,27 @@ if(typeof fallback==='string'&&fallback.startsWith('Bìa nhật ký thi công-')
 return `Nhật ký thi công-${record.date.split('-').reverse().join('.')}.${format==='pdf'?'pdf':'zip'}`;
 }
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}
+async function refreshDrive(){
+ if(!HSHDrive.connected)return;
+ const files=await HSHDrive.list(),seen=new Set(files.map(f=>f.id));
+ // Remove obsolete remote-only rows from the index, never delete locally stored exports.
+ for(const old of entries.filter(e=>e.remoteOnly&&!seen.has(e.driveFileId)))await transaction('summaries','readwrite',store=>store.delete(old.id));
+ entries=entries.filter(e=>!e.remoteOnly||seen.has(e.driveFileId));
+ for(const file of files){
+  const props=file.appProperties||{};
+  const existing=entries.find(e=>e.driveFileId===file.id)||entries.find(e=>e.id===props.hshExportId&&e.sha256===file.sha256Checksum)||entries.find(e=>e.filename===file.name&&e.sha256&&e.sha256===file.sha256Checksum);
+  const type=types.includes(props.hshType)?props.hshType:(existing?.type||'diary');
+  const date=/^\d{4}-\d{2}-\d{2}$/.test(props.hshRecordDate||'')?props.hshRecordDate:existing?.recordDate||'';
+  const exportedAt=Number.isFinite(Date.parse(props.hshExportedAt))?props.hshExportedAt:existing?.exportedAt||file.createdTime;
+  const row={...existing,id:existing?.id||'DRIVE-'+file.id,type,filename:file.name,format:file.mimeType==='application/pdf'?'pdf':'png',recordDate:date,exportedAt,pages:props.hshPages||existing?.pages||'',sha256:existing?.sha256||file.sha256Checksum,driveFileId:file.id,driveSaved:true,remoteOnly:existing?.remoteOnly??!existing,driveError:'',projectName:existing?.projectName||'',timeFromDrive:!props.hshExportedAt&&!existing?.exportedAt};
+  if(!existing?.remoteOnly&&existing?.sha256&&existing.sha256===file.sha256Checksum)row.driveVerifiedAt=new Date().toISOString();
+  else if(existing?.sha256&&existing.sha256!==file.sha256Checksum){row.driveVerifiedAt=null;row.driveError='Nội dung Drive khác bản gốc trên máy này.';}
+  const index=entries.findIndex(e=>e.id===row.id);if(index<0)entries.push(row);else entries[index]=row;
+  await transaction('summaries','readwrite',store=>store.put(row));
+ }
+ saveSummariesBackup();render();
+ $('sharedHistoryStatus').textContent='Lịch sử chung: '+files.length+' file trên Drive · cập nhật '+new Date().toLocaleTimeString('vi-VN');
+}
 async function refresh(isManual=false){
   try{
     const idbEntries=await transaction('summaries','readonly',s=>s.getAll());
@@ -49,6 +70,7 @@ async function refresh(isManual=false){
   }catch(e){
     if(isManual)message('Chưa đọc được một số bản lịch sử cũ: '+e.message);
   }
+  if(HSHDrive.connected){try{await refreshDrive();}catch(error){message(error.message);}}
   saveSummariesBackup();
   render();
 }
@@ -66,9 +88,9 @@ function render(highlightId=null){
     const title=document.createElement('strong');
     title.textContent=`${({diary:'Nhật ký',acceptance:'Nghiệm thu',defect:'Defect List'})[e.type]}${e.number?' · '+e.number:''} · ${e.format==='pdf'?'PDF':'PNG (ZIP)'}`;
     const fileName=document.createElement('h3');fileName.className='archive-filename';fileName.textContent=e.filename||'Chưa ghi nhận tên file';
-    const time=document.createElement('p');time.className='archive-export-time';time.textContent='Xuất lúc '+new Date(e.exportedAt).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour12:false})+' (giờ Việt Nam)';
+    const time=document.createElement('p');time.className='archive-export-time';time.textContent=(e.timeFromDrive?'Lưu Drive lúc ':'Xuất lúc ')+new Date(e.exportedAt).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour12:false})+' (giờ Việt Nam)';
     const details=document.createElement('p');
-    details.textContent=`Ngày nhật ký: ${e.recordDate.split('-').reverse().join('/')} · ${e.pages} trang`;
+    details.textContent=[e.recordDate?'Ngày nhật ký: '+e.recordDate.split('-').reverse().join('/'):'',e.pages?e.pages+' trang':''].filter(Boolean).join(' · ');
     const badge=document.createElement('p');
     badge.className='archive-protection';
     badge.dataset.state=e.driveVerifiedAt?'verified':e.driveSaved?'uploaded':'pending';badge.textContent=e.driveVerifiedAt?'Drive: nội dung khớp bản xuất · kiểm tra '+new Date(e.driveVerifiedAt).toLocaleString('vi-VN'):e.driveSaved?'Drive: đã nhận file; chưa kiểm tra nội dung':'Chờ gửi lên Drive';if(e.driveError)badge.textContent+=' · '+e.driveError;
@@ -76,12 +98,18 @@ function render(highlightId=null){
     note.textContent=`${e.id} · File xuất để kiểm tra / trình ký; không tự xác nhận đã ký hoặc nghiệm thu đạt.`;
     const actions=document.createElement('div');
     actions.className='archive-actions';
-    actions.append(button('Tải file',async()=>{const x=await loadEntry(e.id);download(x.blob,downloadName(x.snapshot.record,x.format,x.filename));message('Đã gửi bản lưu gốc đến trình duyệt để tải.');}),button('Sửa bản sao',async()=>{const x=await loadEntry(e.id);await restoreEditor(structuredClone(x.snapshot),x.id);message('Đã mở bản sao để sửa; file lịch sử được giữ nguyên.');}));
+    actions.append(button('Tải file',async()=>{
+      if(e.remoteOnly){await HSHDrive.connect();const blob=await HSHDrive.download(e.driveFileId);if(e.sha256&&await hash(blob)!==e.sha256)throw Error('File trên Drive đã thay đổi. Cập nhật lịch sử trước khi tải.');download(blob,e.filename);}
+      else{const x=await loadEntry(e.id);download(x.blob,e.filename||x.filename);}
+      message('Đã gửi file đến trình duyệt để tải.');
+    }));
+    if(!e.remoteOnly)actions.append(button('Sửa bản sao',async()=>{const x=await loadEntry(e.id);await restoreEditor(structuredClone(x.snapshot),x.id);message('Đã mở bản sao để sửa.');}));
+
     if(e.driveFileId && e.driveSaved){
       const open=document.createElement('a');open.href='https://drive.google.com/file/d/'+encodeURIComponent(e.driveFileId)+'/view';open.target='_blank';open.rel='noopener';open.textContent='Mở file trên Drive';actions.append(open);
 
     }
-    if(!e.driveVerifiedAt)actions.append(button(e.driveSaved?'Kiểm tra lại':'Gửi lên Drive',async()=>{await HSHDrive.connect();const x=await loadEntry(e.id);await cacheEntry(x);await syncPending();}));
+    if(!e.remoteOnly&&!e.driveVerifiedAt)actions.append(button(e.driveSaved?'Kiểm tra lại':'Gửi lên Drive',async()=>{await HSHDrive.connect();const x=await loadEntry(e.id);await cacheEntry(x);await syncPending();}));
     const info=document.createElement('div');info.className='archive-file-info';info.append(fileName,details);
     row.append(info,time,badge,actions);
     body.append(row);
@@ -111,12 +139,12 @@ async function syncPending(){
  const run=async()=>{
   // Only local files belong to the automatic upload queue; legacy remote-only rows remain readable.
   const local=await transaction('exports','readonly',store=>store.getAll());
-  const pending=local.filter(e=>e.blob&&!e.driveVerifiedAt).sort((a,b)=>b.exportedAt.localeCompare(a.exportedAt));
+  const pending=local.filter(e=>e.blob&&(!e.driveVerifiedAt||!e.driveMetadataShared)).sort((a,b)=>b.exportedAt.localeCompare(a.exportedAt));
   let done=0;
   for(const item of pending){
    if(!HSHDrive.connected||navigator.onLine===false)break;
    let x=await loadEntry(item.id);
-   if(x.driveVerifiedAt)continue;
+   if(x.driveVerifiedAt&&x.driveMetadataShared)continue;
    message('Đang gửi / kiểm tra Drive: '+x.filename);
    try{
     if(!x.driveFileId){
@@ -128,14 +156,16 @@ async function syncPending(){
     }
     if(!x.driveSaved){await HSHDrive.save(x.blob,x.filename,x.id,x.driveFileId);x.driveSaved=true;x.driveUploadedAt=new Date().toISOString();await cacheEntry(x);}
     const file=await HSHDrive.verify(x.driveFileId,x.sha256);
-    x.driveVerifiedAt=new Date().toISOString();x.driveName=file.name;x.driveError='';done++;
+    x.driveVerifiedAt=new Date().toISOString();x.driveName=file.name;x.driveError='';
+    await HSHDrive.describe(x);x.driveMetadataShared=true;done++;
    }catch(error){x.driveError=error.name==='AbortError'?'Mạng chậm; file đang chờ gửi lại.':error.message;}
    await cacheEntry(x);
    const index=entries.findIndex(e=>e.id===x.id);if(index<0)entries.unshift(summary(x));else entries[index]=summary(x);
    saveSummariesBackup();render();
   }
-  const remaining=entries.filter(e=>!e.driveVerifiedAt).length;
-  message(done+' file đã xác minh trên Drive.'+(remaining?' Còn '+remaining+' file chưa xác minh; xem trạng thái từng dòng.':' Tất cả file trong lịch sử đã được xác minh.'));
+  await refreshDrive();
+  const remaining=entries.filter(e=>!e.remoteOnly&&!e.driveVerifiedAt).length;
+  message(done+' file đã xác minh trên Drive.'+(remaining?' Còn '+remaining+' file chưa xác minh; xem trạng thái từng dòng.':' Đã cập nhật lịch sử chung từ Drive.'));
  };
  syncing=(navigator.locks?navigator.locks.request('hsh-drive-upload',run):run()).finally(()=>{syncing=null;});
  return syncing;
@@ -144,6 +174,8 @@ async function init(onRestore){
  restoreEditor=onRestore;
  try{folder=await transaction('settings','readonly',store=>store.get('folder'));}catch(_){}
  $('showHistory').onclick=()=>$('exportArchive').scrollIntoView({behavior:'smooth',block:'start'});
+ $('driveRefresh').onclick=async()=>{try{await HSHDrive.connect();await syncPending();await refreshDrive();}catch(error){message(error.message);}};
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&HSHDrive.connected)refreshDrive().catch(error=>message(error.message));});
  $('archiveSearch').oninput=()=>render();$('archiveType').onchange=()=>render();
  await refresh();
  window.addEventListener('hsh-drive-connected',()=>syncPending().catch(e=>message(e.message)));
