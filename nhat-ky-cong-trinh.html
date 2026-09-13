@@ -36,9 +36,9 @@
     </div>
     <div class="export-actions"><button class="btn primary" id="exportNow">Xuất nhật ký</button><span class="hint">Ngày chưa có dữ liệu sẽ được bỏ qua.</span></div>
   </section>
-  <section class="sheetbox"><div class="table-wrap"><table><thead><tr><th>Ngày</th><th>Thời tiết sáng</th><th>Thời tiết chiều</th><th>Số công nhân</th><th>Cán bộ quản lý</th><th>Thiết bị thi công</th><th>Nội dung công việc</th><th>Ý kiến đơn vị thi công</th><th>Nhận xét chủ đầu tư</th><th>Thao tác</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+  <p id="sheetSyncStatus" role="status" class="hint"></p><section class="sheetbox"><div class="table-wrap"><table><thead><tr><th>Ngày</th><th>Thời tiết sáng</th><th>Thời tiết chiều</th><th>Số công nhân</th><th>Cán bộ quản lý</th><th>Thiết bị thi công</th><th>Nội dung công việc</th><th>Ý kiến đơn vị thi công</th><th>Nhận xét chủ đầu tư</th><th>Thao tác</th></tr></thead><tbody id="rows"></tbody></table></div></section>
 </div>
-<div class="wrap"><button id="showHistory" class="btn">Lịch sử & Drive</button><section id="exportArchive" class="export-archive">
+<div class="wrap" hidden><button id="showHistory" class="btn">Lịch sử & Drive</button><section id="exportArchive" class="export-archive">
           <h2>Lịch sử biên bản đã xuất</h2>
           <p>File mới nhất ở trên cùng. File chờ sẽ tự gửi tiếp sau khi kết nối Drive; màu xanh xác nhận nội dung đã khớp.</p>
           <button id="driveConnect">Kết nối Drive &amp; gửi file chờ</button>
