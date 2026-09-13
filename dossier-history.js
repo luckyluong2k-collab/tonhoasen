@@ -102,11 +102,12 @@ function render(highlightId=null){
   }
 }
 async function capture(blob,context){
-  if(!HSHGitHub.connected)throw Error('Hãy kết nối GitHub trước khi xuất để lưu file lịch sử an toàn.');
+  if(!HSHDrive.connected)throw Error('Hãy kết nối Google Drive trước khi xuất để lưu file lịch sử an toàn.');
   const now=new Date(),id='EXP-'+now.toISOString().replace(/[^0-9]/g,'').slice(0,17)+'-'+crypto.randomUUID().slice(0,8);
   const entry={schema,id,exportedAt:now.toISOString(),sourceRecordId:context.snapshot.record.originRecordId||context.snapshot.record.id,type:context.snapshot.record.type,recordDate:context.snapshot.record.date,projectName:context.snapshot.project.name,number:context.snapshot.record.fields.number||context.snapshot.record.fields.volume||'',format:context.format,pages:context.pages,templateVersion:'word-original-v2',snapshot:structuredClone(context.snapshot),sha256:await hash(blob),filename:`${id}.${context.format==='pdf'?'pdf':'zip'}`,blob,folderSaved:false};
   let cached=false,folderError='';
   if(await permission()){try{await putFolder(entry);entry.folderSaved=true;}catch(e){folderError=e.message;}}
+  try{await HSHDrive.save(entry.blob,entry.filename);entry.driveSaved=true;}catch(e){folderError+=' '+e.message;}
   if(HSHGitHub.connected){try{await HSHGitHub.save(entry);entry.githubSaved=true;}catch(e){folderError+=' '+e.message;}}
   try{await cacheEntry(entry,true);cached=true;}catch(e){}
   const item=summary(entry);
