@@ -4,7 +4,7 @@ const vm = require('node:vm');
 const context = {self:{}};
 vm.runInNewContext(fs.readFileSync('app-version.js','utf8'), context);
 assert.match(context.self.APP_VERSION, /^\d+\.\d+(?:\.\d+)?$/);
-for (const page of ['index.html','dossier-editor.html','bien-phap-thi-cong.html']) {
+for (const page of ['index.html','dossier-editor.html','bien-phap-thi-cong.html','nhat-ky-cong-trinh.html']) {
   const html = fs.readFileSync(page,'utf8');
   assert(html.includes('src="app-version.js"'), `${page}: missing version source`);
   assert(html.includes('src="app-release.js"'), `${page}: missing release manager`);

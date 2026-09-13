@@ -2,6 +2,7 @@
 importScripts('./app-version.js');
 const CACHE_NAME = `hsh-phuly-v${self.APP_VERSION}`;
 const CORE = [
+  "./nhat-ky-cong-trinh.html",
   "./field-workflow.js", "./field-workflow.css",
   ...['Regular','Bold','Italic','BoldItalic'].map(style => `./vendor/fonts/Tinos-${style}.ttf`),
   "./app-release.js",

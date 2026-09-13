@@ -3,7 +3,7 @@
   const host=document.getElementById('fieldWorkflow'),today=document.getElementById('todayWork');
   if(!host||!today)return;
   const stages=[
-    ['Nhật ký','Vị trí, công việc, khối lượng, nhân lực, thiết bị và ảnh trong ngày.','dossier-editor.html?type=diary','Lập nhật ký'],
+    ['Nhật ký','Vị trí, công việc, khối lượng, nhân lực, thiết bị và ảnh trong ngày.','nhat-ky-cong-trinh.html','Lập nhật ký'],
     ['Nghiệm thu vật liệu','Lô vật liệu, nguồn gốc, CO/CQ, phiếu giao hàng, kết quả kiểm tra/thí nghiệm.','',''],
     ['Nghiệm thu công việc','Đối tượng nghiệm thu, bản vẽ, nhật ký liên quan, kết quả kiểm tra và biên bản có chữ ký.','dossier-editor.html?type=acceptance','Lập biên bản'],
     ['Checklist','Chọn checklist theo công việc; ghi từng kết quả và các điểm còn thiếu.','#tab-qaqc','Mở checklist kỹ thuật'],
@@ -17,7 +17,7 @@
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const date=()=>new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Ho_Chi_Minh'});
   const navigate=tab=>{window.hshNavigateToTab(tab);document.getElementById(tab)?.scrollIntoView({block:'start'});};
-  today.innerHTML=`<h2>Việc hôm nay</h2><p class="field-note">${new Date().toLocaleDateString('vi-VN')} · Hoa Sen Home Phủ Lý</p><div class="field-actions"><a href="dossier-editor.html?type=diary">✎ Nhật ký hôm nay</a><button id="fieldCamera">📷 Chụp ảnh</button><a href="dossier-editor.html?type=acceptance">✓ Nghiệm thu</a><button id="fieldChecklist">☑ Checklist</button><button id="fieldDrawing">▧ Bản vẽ gần nhất</button></div><input id="fieldPhotoInput" type="file" accept="image/*" capture="environment" hidden><div id="fieldPhotoList" class="field-camera-list"></div><p id="fieldPhotoStatus" role="status" class="field-note"></p><button id="fieldPhotoSend" class="btn btn-outline" hidden>Gửi ảnh chờ lên Drive</button>`;
+  today.innerHTML=`<h2>Việc hôm nay</h2><p class="field-note">${new Date().toLocaleDateString('vi-VN')} · Hoa Sen Home Phủ Lý</p><div class="field-actions"><a href="nhat-ky-cong-trinh.html">✎ Nhật ký hôm nay</a><button id="fieldCamera">📷 Chụp ảnh</button><a href="dossier-editor.html?type=acceptance">✓ Nghiệm thu</a><button id="fieldChecklist">☑ Checklist</button><button id="fieldDrawing">▧ Bản vẽ gần nhất</button></div><input id="fieldPhotoInput" type="file" accept="image/*" capture="environment" hidden><div id="fieldPhotoList" class="field-camera-list"></div><p id="fieldPhotoStatus" role="status" class="field-note"></p><button id="fieldPhotoSend" class="btn btn-outline" hidden>Gửi ảnh chờ lên Drive</button>`;
   document.getElementById('fieldChecklist').onclick=()=>navigate('tab-qaqc');
   document.getElementById('fieldDrawing').onclick=()=>{const id=localStorage.getItem('hsh-last-drawing');navigate('tab-gallery');if(id)window.hshLightboxOpen(id);};
   document.getElementById('fieldCamera').onclick=()=>document.getElementById('fieldPhotoInput').click();
