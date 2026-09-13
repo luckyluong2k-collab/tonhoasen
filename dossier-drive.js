@@ -27,8 +27,19 @@
       }).catch(reject);
     });
   }
+  async function reconnectSilently() {
+    return new Promise((resolve, reject) => {
+      waitForGoogle().then(() => {
+        ready();
+        tokenClient.callback = (response) => response.error ? reject(Error("Cần cấp lại quyền Google Drive.")) : (accessToken = response.access_token, resolve());
+        tokenClient.requestAccessToken({ prompt: "", login_hint: "luckyluong2k@gmail.com" });
+      }).catch(reject);
+    });
+  }
   async function save(blob, name) {
-    if (!accessToken) await connect();
+    if (!accessToken) {
+      try { await reconnectSilently(); } catch (error) { await connect(); }
+    }
     const metadata = { name, parents: [folderId], mimeType: blob.type || "application/octet-stream" };
     const boundary = "hsh_drive_boundary";
     const body = new Blob([
@@ -38,6 +49,10 @@
     const response = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink", {
       method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body,
     });
+    if (response.status === 401) {
+      await reconnectSilently().catch(() => connect());
+      return save(blob, name);
+    }
     if (!response.ok) throw Error("Google Drive không nhận được file (" + response.status + ").");
     return response.json();
   }
