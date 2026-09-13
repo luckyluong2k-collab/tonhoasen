@@ -1,5 +1,5 @@
 // Hoa Sen Home Phủ Lý - Service Worker Cache V10.14
-const CACHE_NAME = 'hsh-phuly-v10.34';
+const CACHE_NAME = 'hsh-phuly-v10.35';
 const FULL_DRAWING_ASSETS = [
   ...Array.from({ length: 6 }, (_, index) => `./assets/hoa-sen/foundation-full-page-${index + 1}.png`),
   ...Array.from({ length: 70 }, (_, index) => `./assets/hoa-sen/design-full-page-${String(index + 1).padStart(2, '0')}.png`)
@@ -18,6 +18,7 @@ const PROJECT_DOCUMENT_ASSETS = [
   './assets/hoa-sen/docs/2026.08.06 TMCG THI CONG CAI TAO CUA HANG HOA SEN HOME PHU LY - NINH BINH r1.xlsx'
 ];
 const ASSETS_TO_CACHE = [
+  './manifest.json?v=10.35', './assets/app/icon.svg', './assets/app/icon-192.png', './assets/app/icon-512.png', './assets/app/icon-maskable-512.png', './assets/app/apple-touch-icon.png',
   './bien-phap-thi-cong.html', './method-statement.css?v=10.34', './method-statement-data.js?v=10.34', './method-statement.js?v=10.34',
   ...['Regular','Bold','Italic','BoldItalic'].map(style => './vendor/fonts/Tinos-'+style+'.ttf'),
   './',
