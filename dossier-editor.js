@@ -474,21 +474,26 @@
           } else {
             el.value = value(f);
             el.spellcheck = false;
-            if (f.quickOptions) {
+            el.readOnly = false;
+            el.disabled = false;
+            if (f.quickOptions || f.key.startsWith("weather") || f.key.startsWith("afternoon")) {
               const quick = document.createElement("select");
               quick.className = "quick-choice";
               quick.setAttribute("aria-label", `${f.label} — chọn nhanh`);
               quick.title = "Chọn nhanh";
               quick.append(new Option("Chọn", ""));
-              f.quickOptions.forEach((option) => quick.append(new Option(option, option)));
+              (f.quickOptions || ["Nắng", "Nhiều mây", "Âm u", "Mưa nhỏ", "Mưa"]).forEach((option) => quick.append(new Option(option, option)));
               Object.assign(quick.style, {
                 position: "absolute",
-                left: f.x + f.w - 34 + "px",
+                left: f.x + f.w - 58 + "px",
                 top: f.y + "px",
-                width: "44px",
+                width: "54px",
                 height: f.h + "px",
-                fontSize: "9px",
-                zIndex: "3",
+                fontSize: "10px",
+                zIndex: "4",
+                background: "#fff8df",
+                color: "#7d2020",
+                border: "1px solid #c79b52",
               });
               quick.onchange = () => {
                 if (!quick.value) return;

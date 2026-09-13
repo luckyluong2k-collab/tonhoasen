@@ -41,7 +41,13 @@
     if (!response.ok) throw Error("Google Drive không nhận được file (" + response.status + ").");
     return response.json();
   }
-  window.HSHDrive = { get connected() { return !!accessToken; }, connect, save };
+  async function remove(fileId) {
+    if (!fileId) return;
+    if (!accessToken) await connect();
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}`, { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } });
+    if (!response.ok && response.status !== 404) throw Error("Không xóa được file trên Google Drive (" + response.status + ").");
+  }
+  window.HSHDrive = { get connected() { return !!accessToken; }, connect, save, remove };
   document.addEventListener("DOMContentLoaded", () => {
     const button = document.getElementById("driveConnect");
     if (!button) return;
