@@ -46,6 +46,7 @@ async function loadEntry(id){let entry;try{entry=await transaction('exports','re
 async function scanFolder(){let imported=0,failed=0;if(!await permission())return {imported,failed};for await(const [id,h]of folder.entries()){if(h.kind!=='directory'||!/^EXP-[a-zA-Z0-9-]+$/.test(id))continue;try{const entry=await fromFolder(id);try{await cacheEntry(entry);}catch(e){}const index=entries.findIndex(x=>x.id===id);if(index<0)entries.push(summary(entry));else entries[index]=summary(entry);imported++;}catch(e){failed++;}}return {imported,failed};}
 function downloadName(record,format,fallback){
 if(record?.type!=='diary'||!/^\d{4}-\d{2}-\d{2}$/.test(record.date||''))return fallback;
+if(typeof fallback==='string'&&fallback.startsWith('Bìa nhật ký thi công-'))return fallback;
 return `Nhật ký thi công-${record.date.split('-').reverse().join('.')}.${format==='pdf'?'pdf':'zip'}`;
 }
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}
