@@ -23,7 +23,7 @@
       waitForGoogle().then(() => {
         ready();
         tokenClient.callback = (response) => response.error ? reject(Error("Chưa được cấp quyền Google Drive.")) : (accessToken = response.access_token, resolve());
-        tokenClient.requestAccessToken({ prompt: "consent" });
+        tokenClient.requestAccessToken({ prompt: "select_account consent", login_hint: "luckyluong2k@gmail.com" });
       }).catch(reject);
     });
   }
