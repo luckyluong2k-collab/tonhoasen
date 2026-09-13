@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const clientId = "59162542548-b98hq83vcn36f6v46vj6tm9uoo8n8mdq.apps.googleusercontent.com";
+  const clientId = "205763163202-bjketnf7ajl4pdsoq1peadjhufbrjh0p.apps.googleusercontent.com";
   const folderId = "1yfO7aow3oukxMdtkHiG1J6ytW9r3QlFY";
   let tokenClient, accessToken = "";
   function ready() {
