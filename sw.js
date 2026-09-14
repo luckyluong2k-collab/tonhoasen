@@ -7,6 +7,7 @@ const CORE = [
   "./sheet-diary.js",
   "./nhat-ky-cong-trinh.html",
   "./bao-cao-ngay.html",
+  "./chi-tiet-thep.html",
   "./field-workflow.js", "./field-workflow.css",
   ...['Regular','Bold','Italic','BoldItalic'].map(style => `./vendor/fonts/Tinos-${style}.ttf`),
   "./app-release.js",
