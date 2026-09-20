@@ -260,7 +260,13 @@ let currentLightboxRotation = 0;
 let isCADInverted = false;
 let currentLightboxPan = { x: 0, y: 0 };
 let lightboxPointerDrag = null;
+let lightboxPinchGesture = null;
 let customLightboxItem = null;
+let currentBoqZoom = 1;
+let boqPinchGesture = null;
+let currentBoqViewMode = window.matchMedia?.('(max-width: 768px)').matches ? 'cards' : 'table';
+let googleSheetToken = '';
+let googleSheetTokenClient = null;
 let chartInstances = {};
 
 // Formatting Helpers
@@ -348,6 +354,7 @@ function switchTab(tabId) {
   } else if (tabId === 'tab-gallery') {
     renderDrawings();
   } else if (tabId === 'tab-boq') {
+    setDefaultBoqZoom();
     renderBOQTable();
   } else if (tabId === 'tab-contract') {
     renderContractResults();
@@ -724,6 +731,12 @@ function applyLightboxTransform() {
   if (viewport) viewport.classList.toggle('is-pannable', currentLightboxZoom > 1);
 }
 
+function getTouchDistance(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.hypot(dx, dy);
+}
+
 function setupLightboxInteractions() {
   const viewport = document.getElementById('lbViewport');
   if (!viewport || viewport.dataset.interactionsReady === 'true') return;
@@ -741,8 +754,35 @@ function setupLightboxInteractions() {
     applyLightboxTransform();
   });
 
+  viewport.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 2) return;
+    event.preventDefault();
+    lightboxPointerDrag = null;
+    lightboxPinchGesture = {
+      startDistance: getTouchDistance(event.touches),
+      startZoom: currentLightboxZoom
+    };
+  }, { passive: false });
+
+  viewport.addEventListener('touchmove', (event) => {
+    if (!lightboxPinchGesture || event.touches.length !== 2) return;
+    event.preventDefault();
+    const nextZoom = lightboxPinchGesture.startZoom * (getTouchDistance(event.touches) / lightboxPinchGesture.startDistance);
+    currentLightboxZoom = Math.max(0.5, Math.min(5.0, nextZoom));
+    applyLightboxTransform();
+  }, { passive: false });
+
+  viewport.addEventListener('touchend', () => {
+    if (lightboxPinchGesture && currentLightboxZoom <= 1.01) {
+      currentLightboxZoom = 1;
+      currentLightboxPan = { x: 0, y: 0 };
+      applyLightboxTransform();
+    }
+    lightboxPinchGesture = null;
+  });
+
   viewport.addEventListener('pointerdown', (event) => {
-    if (currentLightboxZoom <= 1 || event.target.closest('button, input')) return;
+    if (currentLightboxZoom <= 1 || event.target.closest('button, input') || lightboxPinchGesture) return;
     lightboxPointerDrag = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -778,6 +818,115 @@ function setupLightboxInteractions() {
 // ==========================================================================
 // 8. BOQ TABLE 328 ROWS ENGINE (KHÔNG TÍNH VAT: 3.854.146.466 VNĐ)
 // ==========================================================================
+function applyBoqZoom() {
+  const table = document.getElementById('boqMainTable');
+  if (table) table.style.setProperty('--boq-zoom', currentBoqZoom.toFixed(2));
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
+}
+
+function setDefaultBoqZoom() {
+  currentBoqZoom = window.matchMedia?.('(max-width: 768px)').matches ? 0.82 : 1;
+  applyBoqZoom();
+}
+
+function setupBoqTouchZoom() {
+  const wrap = document.querySelector('.boq-table-wrap');
+  if (!wrap || wrap.dataset.touchZoomReady === 'true') return;
+  wrap.dataset.touchZoomReady = 'true';
+
+  wrap.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 2) return;
+    event.preventDefault();
+    boqPinchGesture = {
+      startDistance: getTouchDistance(event.touches),
+      startZoom: currentBoqZoom
+    };
+  }, { passive: false });
+
+  wrap.addEventListener('touchmove', (event) => {
+    if (!boqPinchGesture || event.touches.length !== 2) return;
+    event.preventDefault();
+    const nextZoom = boqPinchGesture.startZoom * (getTouchDistance(event.touches) / boqPinchGesture.startDistance);
+    currentBoqZoom = Math.max(0.68, Math.min(1.45, nextZoom));
+    applyBoqZoom();
+  }, { passive: false });
+
+  wrap.addEventListener('touchend', () => {
+    boqPinchGesture = null;
+  });
+
+  wrap.addEventListener('dblclick', (event) => {
+    if (event.target.closest('button, input, select')) return;
+    setDefaultBoqZoom();
+  });
+}
+
+function applyBoqViewMode() {
+  const cards = document.getElementById('boqCardsList');
+  const tableWrap = document.querySelector('.boq-table-wrap');
+  const cardBtn = document.getElementById('boqCardViewBtn');
+  const tableBtn = document.getElementById('boqTableViewBtn');
+  const useCards = currentBoqViewMode === 'cards';
+  cards?.toggleAttribute('hidden', !useCards);
+  tableWrap?.toggleAttribute('hidden', useCards);
+  cardBtn?.classList.toggle('active', useCards);
+  tableBtn?.classList.toggle('active', !useCards);
+}
+
+window.hshSetBoqViewMode = function(mode) {
+  currentBoqViewMode = mode === 'table' ? 'table' : 'cards';
+  applyBoqViewMode();
+};
+
+window.hshFilterBoqInProgress = function() {
+  const status = document.getElementById('boqStatusSelect');
+  if (status) status.value = status.value === 'in_progress' ? 'all' : 'in_progress';
+  currentBoqViewMode = 'cards';
+  renderBOQTable();
+};
+
+function renderBOQCards(items) {
+  const cards = document.getElementById('boqCardsList');
+  if (!cards) return;
+  if (items.length === 0) {
+    cards.innerHTML = '<div class="boq-empty-card">Không tìm thấy công tác nào phù hợp với bộ lọc.</div>';
+    return;
+  }
+  cards.innerHTML = items.map(item => {
+    const statusClass = item.status === 'done' ? 'done' : item.status === 'in_progress' ? 'progress' : 'pending';
+    const statusText = item.status === 'done' ? 'Hoàn thành' : item.status === 'in_progress' ? 'Đang làm' : 'Chưa làm';
+    return `
+      <article class="boq-mobile-card" data-boq-row="${item.row}">
+        <div class="boq-card-head">
+          <span class="boq-card-stt">${escapeHtml(item.stt || item.row)}</span>
+          <span class="boq-card-status ${statusClass}">${statusText}</span>
+        </div>
+        <h3>${escapeHtml(item.content)}</h3>
+        <div class="boq-card-meta">
+          <span>ĐVT: <strong>${escapeHtml(item.dvt || '-')}</strong></span>
+          <span>KL: <strong>${item.qty ? fmtDecimal(item.qty, 2) : '-'}</strong></span>
+          <span>Mã: <strong>${escapeHtml(item.code || 'HSG-V8')}</strong></span>
+        </div>
+        <div class="boq-card-money">
+          <span>Đơn giá: <strong>${item.price_total ? fmtNumber(item.price_total) : '-'}</strong></span>
+          <span>Thành tiền: <strong>${item.total_amt ? fmtCurrency(item.total_amt) : '-'}</strong></span>
+        </div>
+        ${item.brand || item.note ? `<p class="boq-card-note">${escapeHtml([item.brand ? `Nhãn hiệu: ${item.brand}` : '', item.note || ''].filter(Boolean).join(' · '))}</p>` : ''}
+        <button class="boq-card-toggle" type="button" onclick="window.hshToggleBoqStatus(${item.id})"><i class="fas fa-check"></i> Đổi trạng thái</button>
+      </article>
+    `;
+  }).join('');
+}
+
 async function renderBOQTable() {
   const tbody = document.getElementById('boqTableBody');
   if (!tbody) return;
@@ -785,6 +934,7 @@ async function renderBOQTable() {
   const searchKeyword = (document.getElementById('boqSearchInput')?.value || '').toLowerCase().trim();
   const chapterFilter = document.getElementById('boqChapterSelect')?.value || 'all';
   const statusFilter = document.getElementById('boqStatusSelect')?.value || 'all';
+  document.getElementById('boqInProgressBtn')?.classList.toggle('active', statusFilter === 'in_progress');
 
   let items = await db.boq.toArray();
 
@@ -887,6 +1037,10 @@ async function renderBOQTable() {
   }
 
   tbody.innerHTML = html;
+  renderBOQCards(filtered);
+  applyBoqZoom();
+  applyBoqViewMode();
+  setupBoqTouchZoom();
 }
 
 window.hshFilterBOQTable = function() {
@@ -935,6 +1089,127 @@ window.hshExportBOQExcel = function() {
   XLSX.utils.book_append_sheet(wb, ws, "BOQ_HoaSenHome");
   XLSX.writeFile(wb, "BOQ_HoaSenHome_PhuLy_328Dong_KhongVAT.xlsx");
   showToast("Xuất file Excel BOQ thành công!", "success");
+};
+
+const HSH_GOOGLE_CLIENT_ID = '205763163202-bjketnf7ajl4pdsoq1peadjhufbrjh0p.apps.googleusercontent.com';
+const HSH_SHEET_ID = '1QfMS1lw68LlCQCmaR0weB5WHq9DjfRg4HKrbTjRQ_3Y';
+const HSH_BOQ_SHEET_GID = 640537829;
+
+async function getGoogleSheetToken() {
+  if (googleSheetToken) return googleSheetToken;
+  if (!window.google?.accounts?.oauth2) throw Error('Google chưa tải xong. Hãy đợi vài giây rồi thử lại.');
+  return new Promise((resolve, reject) => {
+    googleSheetTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: HSH_GOOGLE_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/spreadsheets',
+      callback: result => {
+        if (result.error) return reject(Error(result.error));
+        googleSheetToken = result.access_token;
+        setTimeout(() => { googleSheetToken = ''; }, Math.max(1, Number(result.expires_in || 3600) - 60) * 1000);
+        resolve(googleSheetToken);
+      },
+      error_callback: () => reject(Error('Cửa sổ kết nối Google đã bị đóng hoặc bị chặn.'))
+    });
+    googleSheetTokenClient.requestAccessToken({ prompt: '' });
+  });
+}
+
+function sheetCell(value) {
+  if (value === null || value === undefined || value === '') return {};
+  if (typeof value === 'number' && Number.isFinite(value)) return { userEnteredValue: { numberValue: value } };
+  return { userEnteredValue: { stringValue: String(value) } };
+}
+
+function buildBoqSheetRows(items) {
+  const rows = [
+    ['DỰ ÁN CẢI TẠO HOA SEN HOME PHỦ LÝ - BẢNG TIÊN LƯỢNG BOQ CHI TIẾT'],
+    ['Nguồn', 'Ứng dụng Hoa Sen Home Phủ Lý', 'Cập nhật', new Date().toLocaleString('vi-VN')],
+    ['STT', 'Dòng', 'Chương mục', 'Tiểu mục', 'Mã hiệu', 'Nội dung công tác / vật tư', 'ĐVT', 'Khối lượng', 'Đơn giá vật tư', 'Đơn giá nhân công', 'Đơn giá tổng', 'Thành tiền', 'Nhãn hiệu', 'Ghi chú', 'Trạng thái']
+  ];
+  items.forEach(item => rows.push([
+    item.stt || item.row,
+    item.row || '',
+    item.sec || '',
+    item.subsec || '',
+    item.code || '',
+    item.content || '',
+    item.dvt || '',
+    Number(item.qty) || '',
+    Number(item.price_mat) || '',
+    Number(item.price_labor) || '',
+    Number(item.price_total) || '',
+    Number(item.total_amt) || '',
+    item.brand || '',
+    item.note || item.vendor_note || '',
+    item.status === 'done' ? 'Hoàn thành' : item.status === 'in_progress' ? 'Đang thi công' : 'Chưa triển khai'
+  ]));
+  return rows;
+}
+
+window.hshSyncBOQToGoogleSheet = async function() {
+  const button = document.getElementById('btnSyncBoqSheet');
+  const originalText = button?.innerHTML;
+  try {
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đẩy...';
+    }
+    showToast('Đang kết nối Google Sheet để đẩy BOQ...', 'info');
+    const token = await getGoogleSheetToken();
+    const storedItems = await db.boq.toArray();
+    const statusById = new Map(storedItems.map(item => [String(item.id), item.status]));
+    const rows = buildBoqSheetRows(RAW_BOQ.map(item => ({ ...item, status: statusById.get(String(item.id)) || 'pending' })));
+    const sheetRows = rows.map(row => ({ values: row.map(sheetCell) }));
+    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${HSH_SHEET_ID}:batchUpdate`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        requests: [
+          {
+            updateCells: {
+              range: { sheetId: HSH_BOQ_SHEET_GID, startRowIndex: 0, endRowIndex: 1200, startColumnIndex: 0, endColumnIndex: 20 },
+              fields: 'userEnteredValue'
+            }
+          },
+          {
+            updateCells: {
+              start: { sheetId: HSH_BOQ_SHEET_GID, rowIndex: 0, columnIndex: 0 },
+              rows: sheetRows,
+              fields: 'userEnteredValue'
+            }
+          },
+          {
+            repeatCell: {
+              range: { sheetId: HSH_BOQ_SHEET_GID, startRowIndex: 0, endRowIndex: 3 },
+              cell: { userEnteredFormat: { textFormat: { bold: true } } },
+              fields: 'userEnteredFormat.textFormat.bold'
+            }
+          },
+          {
+            autoResizeDimensions: {
+              dimensions: { sheetId: HSH_BOQ_SHEET_GID, dimension: 'COLUMNS', startIndex: 0, endIndex: 15 }
+            }
+          }
+        ]
+      })
+    });
+    if (!response.ok) {
+      let detail = '';
+      try { detail = (await response.json()).error?.message || ''; } catch (_) {}
+      throw Error(detail || `Google Sheet trả về lỗi ${response.status}.`);
+    }
+    showToast(`Đã đẩy ${RAW_BOQ.length} dòng BOQ lên trang tính 2.`, 'success');
+  } catch (error) {
+    showToast(`Chưa đẩy được BOQ: ${error.message}`, 'error');
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = originalText;
+    }
+  }
 };
 
 window.hshOpenBOQAddModal = function() {
@@ -2804,6 +3079,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('[HoaSenHome v'+window.APP_VERSION+'] Initializing application (No-VAT standard: 3.854.146.466 VNĐ)...');
 
   setupLightboxInteractions();
+  setDefaultBoqZoom();
 
   await initDatabase();
 

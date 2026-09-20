@@ -47,7 +47,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   #btnToggleGlareTop, #btnTopExport { display: none; }
   .current-page-title { font-size: 15px; line-height: 1.35; gap: 6px; }
   .current-page-title > i { display: none; }
-  .mobile-navigation { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); position: fixed; bottom: 0; inset-inline: 0; padding: 7px 6px calc(7px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid #d9e2ec; box-shadow: 0 -4px 24px #0a2c5410; z-index: 45; }
+  .mobile-navigation { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); position: fixed; bottom: 0; inset-inline: 0; padding: 7px 6px calc(7px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid #d9e2ec; box-shadow: 0 -4px 24px #0a2c5410; z-index: 45; }
   .mobile-navigation button { border: 0; background: transparent; color: #526176; min-height: 52px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; border-radius: 10px; font: 600 12px Inter, sans-serif; }
   .mobile-navigation button i { font-size: 19px; }
   .mobile-navigation button[aria-current="page"] { color: var(--hs-red); background: #fff0f2; }
@@ -69,6 +69,25 @@ button, a, input, select, textarea { touch-action: manipulation; }
   .btn, .form-control, .form-select { min-height: 44px; }
   .drawings-management-header, .section-heading-row, .dossier-table-head { gap: 12px; }
   .drawings-header-actions, .dossier-filters, .modal-footer { flex-wrap: wrap; }
+  .left-sidebar .nav-item:not([data-tab="tab-gallery"]):not([data-tab="tab-boq"]):not(.diary-shortcut),
+  .sidebar-footer { display: none; }
+  .field-action-secondary { display: none; }
+  .field-actions .field-action:not(.primary):not(.sheet-action):nth-of-type(n+6) { display: none; }
+  .sheet-header-bar, .sheet-footer-info { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .sheet-title-left { min-width: 0; align-items: flex-start; }
+  .sheet-title-text { overflow-wrap: anywhere; }
+  .sheet-controls, .lb-nav-buttons { display: flex; width: 100%; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+  .sheet-img-wrap { overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y pinch-zoom; }
+  .sheet-img-full { max-width: none; width: min(1120px, 250vw); }
+  .boq-table-wrap { max-height: calc(100dvh - 178px); border-radius: 10px; touch-action: pan-x pan-y; }
+  .boq-table { min-width: 1040px; font-size: calc(12px * var(--boq-zoom)); }
+  .boq-table th, .boq-table td { padding: calc(10px * var(--boq-zoom)) calc(12px * var(--boq-zoom)); }
+  .boq-table th { white-space: nowrap; }
+  .boq-actions { width: 100%; overflow-x: auto; padding-bottom: 2px; }
+  .boq-actions .btn { flex: 0 0 auto; }
+  .boq-view-switch { position: sticky; top: 72px; z-index: 20; background: rgba(241, 245, 249, .94); backdrop-filter: blur(8px); padding: 8px 0; }
+  .boq-view-btn { flex: 1; justify-content: center; }
+  .boq-cards-list[hidden], .boq-table-wrap[hidden] { display: none; }
   .custom-modal-card { width: calc(100% - 20px); max-height: calc(100dvh - 24px); margin: 12px auto; }
   .modal-header, .modal-body, .modal-footer { padding: 16px; }
   .modal-title { min-width: 0; overflow-wrap: anywhere; }

@@ -101,22 +101,10 @@
                     <span class="nav-text">Tiến độ & Nhật ký</span>
                 </a>
 
-                <a href="./dossier-editor.html?type=diary" class="nav-item diary-shortcut">
-                    <i class="fas fa-book-open nav-icon" aria-hidden="true"></i>
-                    <span class="nav-text">Nhật ký công trình</span>
-                    <span class="nav-badge badge-red">Điền mẫu</span>
-                </a>
-
                 <a href="./bao-cao-ngay.html" class="nav-item diary-shortcut">
                     <i class="fas fa-copy nav-icon" aria-hidden="true"></i>
                     <span class="nav-text">Báo cáo ngày</span>
                     <span class="nav-badge badge-green">Copy + lưu Sheet</span>
-                </a>
-
-                <a href="./chi-tiet-thep.html" class="nav-item diary-shortcut">
-                    <i class="fas fa-grip-lines-vertical nav-icon" aria-hidden="true"></i>
-                    <span class="nav-text">Chi tiết cốt thép</span>
-                    <span class="nav-badge badge-blue">M1–M8</span>
                 </a>
 
                 <a href="#qaqc" class="nav-item" data-tab="tab-qaqc" onclick="window.hshNavigateToTab('tab-qaqc'); return false;">
@@ -213,12 +201,14 @@
             <section id="tab-dashboard" class="content-tab-view active"><section id="todayWork" aria-label="Việc hôm nay"></section>
 
                 <div class="field-actions" aria-label="Thao tác hiện trường">
-                    <button class="field-action primary" onclick="window.hshOpenDailyLogModal()"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span><strong>Ghi nhật ký thi công</strong><small>Nhập công việc, nhân lực, phát sinh</small></span><b aria-hidden="true">＋</b></button>
                     <a class="field-action" href="./bao-cao-ngay.html"><i class="fas fa-copy" aria-hidden="true"></i><span><strong>Lập báo cáo ngày</strong><small>Điền mẫu, copy và lưu lên Sheet</small></span><b aria-hidden="true">→</b></a>
-                    <a class="field-action" href="./chi-tiet-thep.html"><i class="fas fa-grip-lines-vertical" aria-hidden="true"></i><span><strong>Chi tiết cốt thép</strong><small>Mô phỏng móng, cổ cột, đà kiềng</small></span><b aria-hidden="true">→</b></a>
+                    <button class="field-action" onclick="window.hshNavigateToTab('tab-gallery')"><i class="fas fa-layer-group" aria-hidden="true"></i><span><strong>Mở bản vẽ thi công</strong><small>Đối chiếu trực tiếp từ hồ sơ phát hành</small></span><b aria-hidden="true">→</b></button>
+                    <a class="field-action sheet-action" href="https://docs.google.com/spreadsheets/d/1QfMS1lw68LlCQCmaR0weB5WHq9DjfRg4HKrbTjRQ_3Y/edit" target="_blank" rel="noopener"><i class="fas fa-table" aria-hidden="true"></i><span><strong>Mở Sheet báo cáo</strong><small>File dữ liệu đang đồng bộ</small></span><b aria-hidden="true">↗</b></a>
+                    <a class="field-action sheet-action" href="https://docs.google.com/spreadsheets/d/1QfMS1lw68LlCQCmaR0weB5WHq9DjfRg4HKrbTjRQ_3Y/edit?gid=640537829#gid=640537829" target="_blank" rel="noopener"><i class="fas fa-file-invoice-dollar" aria-hidden="true"></i><span><strong>Mở Sheet BOQ</strong><small>Trang tính 2 trong file hiện tại</small></span><b aria-hidden="true">↗</b></a>
+                    <a class="field-action sheet-action" href="https://docs.google.com/spreadsheets/d/1QfMS1lw68LlCQCmaR0weB5WHq9DjfRg4HKrbTjRQ_3Y/edit" target="_blank" rel="noopener"><i class="fas fa-book-open" aria-hidden="true"></i><span><strong>Mở Sheet nhật ký</strong><small>Nhật ký dữ liệu đã nhập</small></span><b aria-hidden="true">↗</b></a>
                     <a class="field-action" href="./dossier-editor.html?type=acceptance"><i class="fas fa-file-signature" aria-hidden="true"></i><span><strong>Lập biên bản nghiệm thu</strong><small>Mở mẫu để điền hồ sơ</small></span><b aria-hidden="true">→</b></a>
                     <button class="field-action" onclick="window.hshNavigateToTab('tab-qaqc')"><i class="fas fa-clipboard-check" aria-hidden="true"></i><span><strong>Kiểm tra QA/QC</strong><small>Mở checklist nghiệm thu</small></span><b aria-hidden="true">→</b></button>
-                    <button class="field-action contract-action" onclick="window.hshOpenContractLookup()"><i class="fas fa-file-signature" aria-hidden="true"></i><span><strong>Tra cứu hợp đồng</strong><small>Tìm thanh toán, tiến độ, bảo hành</small></span><b aria-hidden="true">⌕</b></button>
+                    <button class="field-action contract-action field-action-secondary" onclick="window.hshOpenContractLookup()"><i class="fas fa-file-signature" aria-hidden="true"></i><span><strong>Tra cứu hợp đồng</strong><small>Tìm thanh toán, tiến độ, bảo hành</small></span><b aria-hidden="true">⌕</b></button>
                 </div>
 
                 <!-- Project Identity Banner -->
@@ -530,6 +520,7 @@
                         </div>
                         <div class="boq-actions">
                             <button class="btn btn-outline" onclick="window.hshExportBOQExcel()"><i class="fas fa-file-excel text-success"></i> Xuất Excel BOQ</button>
+                            <button class="btn btn-outline" id="btnSyncBoqSheet" onclick="window.hshSyncBOQToGoogleSheet()"><i class="fas fa-cloud-arrow-up text-primary"></i> Đẩy BOQ lên Sheet</button>
                             <button class="btn btn-primary" onclick="window.hshOpenBOQAddModal()"><i class="fas fa-plus"></i> Thêm đầu việc phát sinh</button>
                         </div>
                     </div>
@@ -574,6 +565,12 @@
                 </div>
 
                 <!-- BOQ Table Container -->
+                <div class="boq-view-switch" aria-label="Chọn kiểu xem BOQ">
+                    <button type="button" id="boqCardViewBtn" class="boq-view-btn active" onclick="window.hshSetBoqViewMode('cards')"><i class="fas fa-id-card"></i> Thẻ</button>
+                    <button type="button" id="boqTableViewBtn" class="boq-view-btn" onclick="window.hshSetBoqViewMode('table')"><i class="fas fa-table"></i> Bảng</button>
+                    <button type="button" id="boqInProgressBtn" class="boq-view-btn boq-work-btn" onclick="window.hshFilterBoqInProgress()"><i class="fas fa-person-digging"></i> Đang làm</button>
+                </div>
+                <div id="boqCardsList" class="boq-cards-list" aria-label="Danh sách BOQ dạng thẻ"></div>
                 <div class="table-responsive boq-table-wrap">
                     <table class="table boq-table" id="boqMainTable">
                         <thead>
@@ -605,7 +602,6 @@
                     </div>
                     <button class="btn btn-primary" onclick="window.hshOpenDailyLogModal()"><i class="fas fa-plus"></i> Ghi nhật ký thi công</button>
                     <a class="btn btn-outline" href="./bao-cao-ngay.html"><i class="fas fa-copy"></i> Báo cáo ngày / Copy</a>
-                    <a class="btn btn-outline" href="./chi-tiet-thep.html"><i class="fas fa-grip-lines-vertical"></i> Chi tiết cốt thép</a>
                 </div>
 
                 <a class="method-quick-link" href="#constructionMethod">Biện pháp thi công chi tiết ↓</a>
@@ -1552,11 +1548,9 @@
     </div>
 
     <nav class="mobile-navigation" aria-label="Điều hướng nhanh">
-        <button data-mobile-tab="tab-dashboard" aria-label="Tổng quan"><i class="fas fa-chart-pie" aria-hidden="true"></i><span>Tổng quan</span></button>
+        <button id="mobileDailyReport" aria-label="Báo cáo ngày"><i class="fas fa-copy" aria-hidden="true"></i><span>Báo cáo ngày</span></button>
         <button data-mobile-tab="tab-gallery" aria-label="Bản vẽ"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Bản vẽ</span></button>
-        <button data-mobile-tab="tab-progress" aria-label="Tiến độ"><i class="fas fa-tasks" aria-hidden="true"></i><span>Tiến độ</span></button>
-        <button data-mobile-tab="tab-dossier" aria-label="Hồ sơ"><i class="fas fa-folder-open" aria-hidden="true"></i><span>Hồ sơ</span></button>
-        <button id="mobileMore" aria-label="Mở tất cả chức năng" aria-controls="leftSidebar" aria-expanded="false"><i class="fas fa-bars" aria-hidden="true"></i><span>Thêm</span></button>
+        <button data-mobile-tab="tab-boq" aria-label="BOQ"><i class="fas fa-file-invoice-dollar" aria-hidden="true"></i><span>BOQ</span></button>
     </nav>
     <!-- Core Application Logic -->
     <script src="assets/hoa-sen/project-document-index.js"></script>

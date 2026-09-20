@@ -3,6 +3,7 @@
   const toggle = document.getElementById('btnSidebarToggle');
   const backdrop = document.getElementById('sidebarBackdrop');
   const more = document.getElementById('mobileMore');
+  const dailyReport = document.getElementById('mobileDailyReport');
   const mobile = matchMedia('(max-width: 1024px)');
   let previouslyOpen = false;
   function syncMenu() {
@@ -12,14 +13,15 @@
     document.body.classList.toggle('menu-open', open);
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-controls', 'leftSidebar');
-    more.setAttribute('aria-expanded', String(open));
+    more?.setAttribute('aria-expanded', String(open));
     if (open && !previouslyOpen) sidebar.querySelector('a').focus();
     if (!open && previouslyOpen) toggle.focus();
     previouslyOpen = open;
   }
   function close() { sidebar.classList.remove('sidebar-open'); }
   backdrop.addEventListener('click', close);
-  more.addEventListener('click', () => sidebar.classList.toggle('sidebar-open'));
+  more?.addEventListener('click', () => sidebar.classList.toggle('sidebar-open'));
+  dailyReport?.addEventListener('click', () => { window.location.href = './bao-cao-ngay.html'; });
   new MutationObserver(syncMenu).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
   mobile.addEventListener('change', () => { if (!mobile.matches) close(); syncMenu(); });
   document.addEventListener('keydown', event => {
@@ -40,8 +42,10 @@
       if (button.dataset.mobileTab === active) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');
     });
-    if (buttons.some(button => button.dataset.mobileTab === active)) more.removeAttribute('aria-current');
-    else more.setAttribute('aria-current', 'page');
+    if (more) {
+      if (buttons.some(button => button.dataset.mobileTab === active)) more.removeAttribute('aria-current');
+      else more.setAttribute('aria-current', 'page');
+    }
   }
   document.querySelectorAll('.content-tab-view').forEach(tab => new MutationObserver(syncTab).observe(tab, { attributes: true, attributeFilter: ['class'] }));
   syncMenu(); syncTab();
