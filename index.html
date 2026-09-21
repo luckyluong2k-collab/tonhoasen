@@ -28,7 +28,9 @@
     <link rel="stylesheet" href="responsive.css">
 <link rel="stylesheet" href="method-statement.css">
 <link rel="stylesheet" href="field-workflow.css">
-<script src="sync-overview.js" defer></script><link rel="stylesheet" href="interface-polish.css"></head>
+<script src="sync-overview.js" defer></script><link rel="stylesheet" href="interface-polish.css">
+    <link rel="stylesheet" href="tool-visuals.css">
+</head>
 <body class="theme-light">
     <!-- Offline & Network Status Notification Bar -->
     <div id="offlineNotice" class="network-banner" style="display: none;">
@@ -792,11 +794,21 @@
             <section id="tab-tools" class="content-tab-view">
                 <div class="tools-hero-header">
                     <div>
-                        <h2><i class="fas fa-calculator text-primary"></i> Bộ Máy tính Hiện trường Kỹ sư Xây dựng (10 Tool)</h2>
-                        <p class="text-muted">Tính toán nhanh khối lượng, định mức vật tư, thủy lực thoát nước, phụ tải điện và pháp lý HĐ tại công trường Hoa Sen Home</p>
+                        <span class="tools-eyebrow">HSH / GÓC KỸ THUẬT</span>
+                        <h2>Tính toán tại công trường</h2>
+                        <p class="text-muted">Nhìn cấu kiện · Nhập kích thước · Đọc khối lượng</p>
                     </div>
-                    <div class="tools-tag"><i class="fas fa-bolt text-warning"></i> TIÊU CHUẨN XÂY DỰNG VIỆT NAM (TCVN)</div>
+                    <div class="tools-tag"><i class="fas fa-drafting-compass" aria-hidden="true"></i> 10 công cụ trực quan</div>
                 </div>
+                <nav class="tools-filters" aria-label="Nhóm công cụ tính toán">
+                    <button type="button" data-tool-filter="all" aria-pressed="true">Tất cả <span>10</span></button>
+                    <button type="button" data-tool-filter="structure" aria-pressed="false">Kết cấu <span>3</span></button>
+                    <button type="button" data-tool-filter="finish" aria-pressed="false">Xây & hoàn thiện <span>3</span></button>
+                    <button type="button" data-tool-filter="mep" aria-pressed="false">Mái & MEP <span>3</span></button>
+                    <button type="button" data-tool-filter="inspection" aria-pressed="false">Nghiệm thu <span>1</span></button>
+                </nav>
+                <p class="tools-reading-tip">Bấm số đo trên hình để nhập. Chọn “Phóng to” để xem rõ cấu tạo và chú thích.</p>
+                <p id="tools-filter-status" class="tools-sr-only" role="status"></p>
 
                 <!-- 10 Field Tools Interactive Grid -->
                 <div class="field-tools-grid">
@@ -1645,6 +1657,7 @@
     </nav>
     <!-- Core Application Logic -->
     <script src="assets/hoa-sen/project-document-index.js"></script>
+    <script src="tool-visuals.js"></script>
     <script src="app.js"></script>
     <script src="responsive.js"></script>
     <script src="construction-processes.js"></script>

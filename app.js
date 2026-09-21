@@ -1510,6 +1510,7 @@ window.hshOpenInspectionSource = function() {
 
 // Tool 1: Bê tông & Cấp phối
 function renderConcreteGeometry() {
+  if (window.HshToolVisuals) return window.HshToolVisuals.render(1);
   const target = document.getElementById('t1_geometry');
   if (!target) return;
 
@@ -1621,6 +1622,7 @@ window.hshCalcConcrete = function() {
 
 // Tool 2: Thép tròn & Thép hình
 function renderSteelGeometry() {
+  if (window.HshToolVisuals) return window.HshToolVisuals.render(2);
   const target = document.getElementById('t2_geometry');
   if (!target) return;
 
@@ -1707,6 +1709,7 @@ window.hshCalcSteel = function() {
 
 // Tool 3: Sika Grout & Ramset
 function renderSikaGeometry() {
+  if (window.HshToolVisuals) return window.HshToolVisuals.render(3);
   const target = document.getElementById('t3_geometry');
   if (!target) return;
   const mode = document.getElementById('t3_mode')?.value || 'sika';
@@ -1784,6 +1787,7 @@ window.hshCalcSika = function() {
 
 // Tool 4: Gạch xây & Vữa
 function renderBrickGeometry() {
+  if (window.HshToolVisuals) return window.HshToolVisuals.render(4);
   const target = document.getElementById('t4_geometry');
   if (!target) return;
   const wallType = document.getElementById('t4_wall_type')?.value || 'wall200';
@@ -1843,6 +1847,7 @@ window.hshCalcBrick = function() {
 
 // Tool 5: Gạch ốp lát & Keo
 function renderTileGeometry() {
+  if (window.HshToolVisuals) return window.HshToolVisuals.render(5);
   const target = document.getElementById('t5_geometry');
   if (!target) return;
   const size = document.getElementById('t5_tile_size')?.value || '600x600';
@@ -1890,6 +1895,7 @@ window.hshCalcTile = function() {
 
 // Tool 6: Sơn KCC & Bột bả
 function renderPaintGeometry() {
+  if (window.HshToolVisuals) return window.HshToolVisuals.render(6);
   const target = document.getElementById('t6_geometry');
   if (!target) return;
   const type = document.getElementById('t6_paint_type')?.value || 'wall_ext';
@@ -1939,6 +1945,7 @@ window.hshCalcPaint = function() {
 
 // Tool 7: Tôn Mag Shield & Thủy lực
 function renderRoofGeometry() {
+  if (window.HshToolVisuals) return window.HshToolVisuals.render(7);
   const target = document.getElementById('t7_geometry');
   if (!target) return;
   const area = parseFloat(document.getElementById('t7_roof_area')?.value || 380);
@@ -1977,6 +1984,7 @@ window.hshCalcRoofHydraulics = function() {
 
 // Tool 8: Chiếu sáng & Điện 3 Pha
 function renderLightingGeometry() {
+  if (window.HshToolVisuals) return window.HshToolVisuals.render(8);
   const target = document.getElementById('t8_geometry');
   if (!target) return;
   const room = document.getElementById('t8_room_type')?.value || 'showroom';
@@ -2020,6 +2028,7 @@ window.hshCalcLightingAndPower = function() {
 
 // Tool 9: Báo cháy & PCCC
 function renderPcccGeometry() {
+  if (window.HshToolVisuals) return window.HshToolVisuals.render(9);
   const target = document.getElementById('t9_geometry');
   if (!target) return;
   const height = parseFloat(document.getElementById('t9_ceiling_hgt')?.value || 4.5);
@@ -2131,6 +2140,7 @@ window.hshRenderFieldGate = function() {
   if (geometry) {
     geometry.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Cổng kiểm tra ${aiEscape(preset.title)}"><path class="geo-stroke" d="M16 35h88M29 35l10-12M52 35l10-12M75 35l10-12"></path><circle class="geo-fill" cx="16" cy="35" r="8"></circle><circle class="geo-fill" cx="39" cy="35" r="8"></circle><circle class="geo-fill" cx="62" cy="35" r="8"></circle><circle class="geo-accent" cx="85" cy="35" r="8"></circle><text class="geo-text" x="13" y="38">1</text><text class="geo-text" x="36" y="38">2</text><text class="geo-text" x="59" y="38">3</text><text class="geo-text" x="82" y="38">4</text><text class="geo-text" x="12" y="61">BV</text><text class="geo-text" x="35" y="61">VL</text><text class="geo-text" x="58" y="61">TC</text><text class="geo-text" x="81" y="61">HS</text></svg><div><strong>${aiEscape(preset.title)}</strong><small>Checklist 4 cổng trước nghiệm thu</small><div class="geo-key">Bản vẽ · vật liệu · thi công · hồ sơ</div></div>`;
   }
+  if (window.HshToolVisuals) window.HshToolVisuals.render(10, { title: preset.title, done, total: preset.checks.length });
   const drawingLinks = preset.drawings.map(id => COMPLETE_DRAWINGS.find(item => item.id === id)).filter(Boolean).map(drawing => `<button class="field-gate-link" onclick="window.hshOpenDrawingRelation('tab-gallery','${drawing.id}')"><i class="fas fa-drafting-compass"></i> BV p.${drawing.pageNumber}</button>`).join('');
   const qaqcLinks = preset.qaqc.map(code => `<button class="field-gate-link" onclick="window.hshOpenQaQcSource('${code}')"><i class="fas fa-clipboard-check"></i> ${code}</button>`).join('');
   const boqLinks = preset.boq.map(row => `<button class="field-gate-link" onclick="window.hshOpenBoqSource(${row})"><i class="fas fa-list-ol"></i> BOQ ${row}</button>`).join('');

@@ -13,6 +13,8 @@ const CORE = [
   "./app-release.js",
   "./app-version.js",
   "./app.js",
+  "./tool-visuals.js",
+  "./tool-visuals.css",
   "./assets/app/apple-touch-icon.png",
   "./assets/app/icon-192.png",
   "./assets/app/icon-512.png",

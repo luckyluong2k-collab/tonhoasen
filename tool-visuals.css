@@ -1,0 +1,82 @@
+/* Scoped to the field calculators and their expanded drawings. */
+#tab-tools { --viz-ink: #173f52; --viz-teal: #167487; }
+#tab-tools .tools-hero-header { padding: 24px 28px; border: 1px solid #cedfe5; border-left: 4px solid #197589; border-radius: 16px; background: linear-gradient(115deg,#f1f8f9,#fff); gap: 20px; }
+#tab-tools .tools-eyebrow { display: block; color: #4d7583; font-size: 10px; font-weight: 800; letter-spacing: .14em; margin-bottom: 9px; }
+#tab-tools .tools-hero-header h2 { color: #173f52; font-size: clamp(21px,2.4vw,30px); letter-spacing: -.04em; margin-bottom: 8px; }
+#tab-tools .tools-tag { background: #e3f1f3; border-color: #c1dce1; color: #216174; white-space: nowrap; }
+.tools-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 10px; }
+.tools-filters button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border: 1px solid #d3e0e5; background: #fff; border-radius: 10px; padding: 9px 14px; font-family: inherit; font-size: 13px; font-weight: 600; line-height: 1.4; color: #446071; cursor: pointer; }
+.tools-filters button span { font-size: 11px; opacity: .75; }
+.tools-filters button[aria-pressed="true"] { color: #fff; background: #195c70; border-color: #195c70; }
+.tools-filters button:focus-visible,.viz-expand:focus-visible,.viz-close:focus-visible { outline: 3px solid #de922f; outline-offset: 3px; }
+.tools-reading-tip { color: #526c7b; font-size: 12px; line-height: 1.6; margin-bottom: 20px; }
+.tools-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+#tab-tools .field-tools-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; align-items: start; }
+#tab-tools .tool-card { padding: 22px; border-radius: 18px; border: 1px solid #d3e0e6; justify-content: flex-start; box-shadow: 0 4px 18px #173f5207; }
+#tab-tools .tool-card[hidden] { display: none !important; }
+#tab-tools .tool-card:hover { transform: none; border-color: #a4c2cf; box-shadow: 0 5px 24px #173f520d; }
+#tab-tools .tool-card-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+#tab-tools .tool-badge { background: #e6f1f4; color: #256377; letter-spacing: .06em; }
+#tab-tools .tool-card-head h4 { font-size: 18px; line-height: 1.45; letter-spacing: -.025em; }
+#tab-tools .tool-desc { min-height: 0; font-size: 12px; line-height: 1.65; margin-bottom: 6px; }
+#tab-tools .tool-geometry.tool-visual { display: block; margin: 12px 0 18px; padding: 0; background: #f5f9fa; border: 1px solid #d4e2e7; border-radius: 13px; overflow: hidden; }
+.viz-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 14px 14px 0; }
+#tab-tools .viz-heading strong { font-size: 13px; line-height: 1.5; color: #21475c; }
+#tab-tools .viz-heading small { font-size: 11px; line-height: 1.6; color: #536f7d; }
+.viz-expand { display: inline-flex; gap: 5px; align-items: center; flex-shrink: 0; min-height: 36px; padding: 7px 9px; font: inherit; font-size: 11px; font-weight: 600; color: #256377; background: #fff; border: 1px solid #c8dbe2; border-radius: 8px; cursor: pointer; }
+.viz-expand span { font-size: 17px; line-height: 1; }
+#tab-tools .tool-geometry svg.viz-drawing,.viz-dialog svg.viz-drawing { display: block; width: 100%; height: auto; max-height: 360px; background-image: radial-gradient(#ccdce2 .8px,transparent .8px); background-size: 18px 18px; }
+.viz-text { fill: #325769; font: 600 13px 'Inter',Arial,sans-serif; }
+.viz-hotspot { cursor: pointer; }
+.viz-hotspot:hover rect,.viz-hotspot:focus rect { fill: #fff5df; stroke: #bb791c; stroke-width: 2; }
+.viz-hotspot:focus { outline: none; }
+.viz-legend { display: flex; flex-wrap: wrap; gap: 7px 15px; padding: 0 14px 12px; }
+.viz-legend span { display: inline-flex; align-items: center; gap: 6px; color: #456574; font-size: 11px; line-height: 1.5; }
+.viz-legend i { display: block; width: 10px; height: 10px; border-radius: 3px; border: 1px solid #0002; }
+.viz-formula { padding: 11px 14px; background: #e8f1f4; border-top: 1px solid #d4e2e7; color: #28576a; font-size: 12px; line-height: 1.65; font-weight: 600; }
+.viz-note { padding: 10px 14px 12px; margin: 0; color: #516c79; font-size: 11px; line-height: 1.6; }
+#tab-tools .tool-form { background: #fff; padding: 0; border: 0; margin-bottom: 18px; }
+#tab-tools .tool-form .form-group { min-width: 0; }
+#tab-tools .tool-form label { color: #47616f; font-size: 12px; line-height: 1.5; margin-bottom: 6px; }
+#tab-tools .form-control { min-height: 44px; font-size: 14px; border-radius: 9px; border-color: #ccdae1; background: #f9fbfc; }
+#tab-tools .form-control:focus,#tab-tools .form-control.viz-input-active { background: #fff; border-color: #197589; box-shadow: 0 0 0 3px #19758921; }
+#tab-tools .form-control[readonly] { background: #edf3f6; }
+#tab-tools .tool-result-box { background: #102e40; border-radius: 12px; padding: 17px; font-family: 'Inter',Arial,sans-serif; box-shadow: none; }
+#tab-tools .result-main-val { color: #a2e4ec; font-size: 17px; line-height: 1.55; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+#tab-tools .result-breakdown { color: #b8cbd6; font-size: 12px; line-height: 1.8; gap: 6px; }
+#tab-tools .result-breakdown > div + div { border-top: 1px solid #ffffff0c; padding-top: 5px; }
+#tab-tools .tool-result-note { font-size: 11px; line-height: 1.65; }
+.viz-dialog { box-sizing: border-box; width: min(900px,calc(100vw - 32px)); max-height: calc(100dvh - 40px); padding: 0; margin: auto; border: 1px solid #bed3dd; border-radius: 18px; background: #f5f9fa; color: #173f52; overflow: auto; box-shadow: 0 25px 90px #082d4255; }
+.viz-dialog::backdrop { background: #072333b8; backdrop-filter: blur(4px); }
+.viz-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; background: #fff; border-bottom: 1px solid #d7e3e8; position: sticky; top: 0; z-index: 1; }
+.viz-dialog-head h2 { font-size: 18px; line-height: 1.5; margin: 0; }
+.viz-close { border: 1px solid #bccfd8; background: #f5f9fa; color: #244d62; border-radius: 8px; padding: 10px 14px; min-height: 44px; cursor: pointer; white-space: nowrap; }
+.viz-dialog svg.viz-drawing { max-height: 64dvh; min-height: 200px; }
+.viz-dialog .viz-legend,.viz-dialog .viz-note,.viz-dialog .viz-formula { padding-left: 22px; padding-right: 22px; }
+.viz-dialog-tip { padding: 0 22px 18px; font-size: 12px; color: #456574; }
+.outdoor-mode #tab-tools .viz-text { fill: #142f3c; }
+.outdoor-mode #tab-tools .tool-form label,.outdoor-mode #tab-tools .viz-note { color: #233f4e; }
+@media(max-width:1180px) { #tab-tools .field-tools-grid { grid-template-columns: minmax(0,1fr); } }
+@media(max-width:600px) {
+  #tab-tools .tools-hero-header { padding: 20px; align-items: flex-start; }
+  #tab-tools .tools-tag { font-size: 11px; }
+  #tab-tools .tool-card { padding: 16px; border-radius: 14px; }
+  #tab-tools .tool-card-head h4 { font-size: 17px; }
+  .tools-filters { gap: 6px; }
+  .tools-filters button { flex: 1 0 auto; padding: 9px 10px; font-size: 12px; }
+  .viz-heading { padding: 12px 10px 0; }
+  .viz-expand { min-height: 44px; }
+  #tab-tools .viz-heading strong { font-size: 12px; }
+  .viz-legend { padding-left: 10px; gap: 5px 10px; }
+  .viz-formula,.viz-note { padding-left: 10px; padding-right: 10px; }
+  #tab-tools .form-row-2 { grid-template-columns: minmax(0,1fr); }
+  #tab-tools .form-row-3 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  #tab-tools .form-row-3 .form-group:last-child { grid-column: 1 / -1; }
+  #tab-tools .form-control { font-size: 16px; }
+  #tab-tools .result-main-val { font-size: 16px; overflow-wrap: anywhere; }
+  .viz-dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 24px); border-radius: 12px; }
+  .viz-dialog-head { padding: 12px; }
+  .viz-dialog-head h2 { font-size: 16px; }
+}
+@media(prefers-reduced-motion:reduce) { #tab-tools *, .viz-dialog * { scroll-behavior: auto !important; transition: none !important; } }
+@media print { .tools-filters,.tools-reading-tip,.viz-expand,.viz-dialog { display: none !important; } #tab-tools .tool-card { break-inside: avoid; } }
