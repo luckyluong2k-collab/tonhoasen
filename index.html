@@ -1327,6 +1327,16 @@
                         <button class="btn btn-primary mt-2" onclick="window.hshSaveProjectConfig()"><i class="fas fa-save"></i> Lưu & Đồng bộ Toàn hệ thống</button>
                     </div>
 
+                    <div class="card p-4 notification-settings-card">
+                        <h4><i class="fas fa-bell text-warning"></i> Nhắc báo cáo nhật ký</h4>
+                        <p class="text-muted">Nhắc miễn phí lúc 07:30 mỗi ngày khi app/PWA đang chạy hoặc được mở lại gần giờ; cần cho phép thông báo trên điện thoại.</p>
+                        <div class="form-row-2 mt-3">
+                            <div class="form-group"><label for="diaryReminderTime">Giờ nhắc</label><input type="time" id="diaryReminderTime" class="form-control" value="07:30"></div>
+                            <div class="form-group"><label>Trạng thái</label><p id="diaryReminderStatus" class="notification-reminder-status">Chưa bật thông báo</p></div>
+                        </div>
+                        <div class="settings-inline-actions"><button class="btn btn-primary" type="button" id="btnEnableDiaryReminder"><i class="fas fa-bell"></i> Bật nhắc 07:30</button><button class="btn btn-outline" type="button" id="btnTestDiaryReminder"><i class="fas fa-paper-plane"></i> Gửi thử</button></div>
+                    </div>
+
                     <!-- Database & Cache Controls -->
                     <div class="card p-4">
                         <h4><i class="fas fa-database text-success"></i> Quản trị Dữ liệu Dexie IndexedDB & Offline</h4>
@@ -1635,6 +1645,7 @@
     <script src="dossier-drive.js"></script>
     <script src="field-workflow.js"></script>
     <script src="material-log.js"></script>
+    <script src="notification-reminder.js"></script>
     <!-- PWA Service Worker Registration -->
 
 </body>

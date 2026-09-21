@@ -1,4 +1,4 @@
-// Release 10.79. The page and worker share the same release source.
+// Release 10.81. The page and worker share the same release source.
 importScripts('./app-version.js');
 const CACHE_NAME = `hsh-phuly-v${self.APP_VERSION}`;
 const CORE = [
@@ -43,6 +43,7 @@ const CORE = [
   "./responsive.css",
   "./responsive.js",
   "./material-log.js",
+  "./notification-reminder.js",
   "./styles.css",
   "./vendor/fflate.min.js",
   "./vendor/html2canvas.min.js",
@@ -60,6 +61,28 @@ self.addEventListener('message', event => {
 self.addEventListener('activate', event => {
   // Keep previous release caches while other tabs may still use them.
   event.waitUntil(self.clients.claim());
+});
+self.addEventListener('push', event => {
+  let payload = {};
+  try { payload = event.data?.json() || {}; } catch (_) {}
+  const notification = payload.notification || payload.data || {};
+  if (!notification.title && !notification.body) return;
+  event.waitUntil(self.registration.showNotification(notification.title || 'Nhắc báo cáo nhật ký', {
+    body: notification.body || 'Đã đến giờ nhập báo cáo nhật ký công trình.',
+    icon: './assets/app/icon-192.png',
+    badge: './assets/app/icon-192.png',
+    tag: notification.tag || 'hsh-diary-daily',
+    data: { url: notification.click_action || payload.data?.url || './index.html#journal' }
+  }));
+});
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    const target = new URL(event.notification.data?.url || './index.html#journal', self.location.origin).href;
+    const existing = list.find(client => client.url === target);
+    if (existing?.focus) return existing.focus();
+    return clients.openWindow(target);
+  }));
 });
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
