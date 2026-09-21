@@ -4,6 +4,7 @@
   const backdrop = document.getElementById('sidebarBackdrop');
   const more = document.getElementById('mobileMore');
   const dailyReport = document.getElementById('mobileDailyReport');
+  const acceptance = document.getElementById('mobileAcceptance');
   const mobile = matchMedia('(max-width: 1024px)');
   let previouslyOpen = false;
   function syncMenu() {
@@ -22,6 +23,7 @@
   backdrop.addEventListener('click', close);
   more?.addEventListener('click', () => sidebar.classList.toggle('sidebar-open'));
   dailyReport?.addEventListener('click', () => { window.location.href = './bao-cao-ngay.html'; });
+  acceptance?.addEventListener('click', () => { window.location.href = './dossier-editor.html?type=acceptance'; });
   new MutationObserver(syncMenu).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
   mobile.addEventListener('change', () => { if (!mobile.matches) close(); syncMenu(); });
   document.addEventListener('keydown', event => {
