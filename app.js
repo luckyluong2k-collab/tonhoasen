@@ -1225,22 +1225,39 @@ window.hshSyncMaterialToGoogleSheet = async function() {
     if (!Array.isArray(records)) throw Error('Dữ liệu vật tư chưa đúng định dạng.');
     showToast('Đang kết nối Google Sheet để đẩy vật tư...', 'info');
     const token = await getGoogleSheetToken();
+    const materialGroup = name => {
+      const normalized = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      if (/thep|rebar|sat|bulong|xago/.test(normalized)) return 'Kết cấu';
+      if (/cat|xi mang|be tong|da 1x2|da dam|gach/.test(normalized)) return 'Bê tông & xây';
+      if (/ton|alu|son|cua|kinh|chong tham/.test(normalized)) return 'Hoàn thiện';
+      if (/dien|cap|ong|pccc|nuoc/.test(normalized)) return 'MEP & PCCC';
+      return 'Khác';
+    };
     const rows = [
       ['DỰ ÁN CẢI TẠO HOA SEN HOME PHỦ LÝ - NHẬT KÝ VẬT TƯ'],
       ['Nguồn', 'Ứng dụng Hoa Sen Home Phủ Lý', 'Cập nhật', new Date().toLocaleString('vi-VN')],
-      ['Ngày nhập', 'Vật tư', 'Số lượng', 'Đơn vị', 'Nhà cung cấp / xe hàng', 'Ghi chú']
+      ['Ngày nhập', 'Nhóm', 'Vật tư', 'Số lượng', 'Đơn vị', 'Nhà cung cấp / xe hàng', 'Ghi chú']
     ];
     [...records].sort((a, b) => `${a.date}${a.createdAt || ''}`.localeCompare(`${b.date}${b.createdAt || ''}`)).forEach(record => rows.push([
-      record.date || '', record.material || '', Number(record.quantity) || 0, record.unit || '', record.supplier || '', record.note || ''
+      record.date || '', materialGroup(record.material), record.material || '', Number(record.quantity) || 0, record.unit || '', record.supplier || '', record.note || ''
     ]));
+    const dataEndRow = Math.max(rows.length, 3);
     const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${HSH_SHEET_ID}:batchUpdate`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ requests: [
-        { updateCells: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 0, endRowIndex: 2000, startColumnIndex: 0, endColumnIndex: 6 }, fields: 'userEnteredValue' } },
+        { clearBasicFilter: { sheetId: HSH_MATERIAL_SHEET_GID } },
+        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 0, endRowIndex: 2000, startColumnIndex: 0, endColumnIndex: 7 }, cell: { userEnteredValue: {}, userEnteredFormat: {} }, fields: 'userEnteredValue,userEnteredFormat' } },
         { updateCells: { start: { sheetId: HSH_MATERIAL_SHEET_GID, rowIndex: 0, columnIndex: 0 }, rows: rows.map(row => ({ values: row.map(sheetCell) })), fields: 'userEnteredValue' } },
-        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 0, endRowIndex: 3 }, cell: { userEnteredFormat: { textFormat: { bold: true } } }, fields: 'userEnteredFormat.textFormat.bold' } },
-        { autoResizeDimensions: { dimensions: { sheetId: HSH_MATERIAL_SHEET_GID, dimension: 'COLUMNS', startIndex: 0, endIndex: 6 } } }
+        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: 7 }, cell: { userEnteredFormat: { backgroundColor: { red: 0.04, green: 0.17, blue: 0.33 }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 14 } } }, fields: 'userEnteredFormat' } },
+        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 1, endRowIndex: 2, startColumnIndex: 0, endColumnIndex: 7 }, cell: { userEnteredFormat: { backgroundColor: { red: 0.94, green: 0.96, blue: 0.98 }, textFormat: { italic: true, foregroundColor: { red: 0.25, green: 0.32, blue: 0.4 } } } }, fields: 'userEnteredFormat' } },
+        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 2, endRowIndex: 3, startColumnIndex: 0, endColumnIndex: 7 }, cell: { userEnteredFormat: { backgroundColor: { red: 0.09, green: 0.5, blue: 0.22 }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 } }, horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE', wrapStrategy: 'WRAP' } }, fields: 'userEnteredFormat' } },
+        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 3, endRowIndex: dataEndRow, startColumnIndex: 0, endColumnIndex: 7 }, cell: { userEnteredFormat: { verticalAlignment: 'TOP', wrapStrategy: 'WRAP' } }, fields: 'userEnteredFormat' } },
+        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 3, endRowIndex: dataEndRow, startColumnIndex: 3, endColumnIndex: 4 }, cell: { userEnteredFormat: { numberFormat: { type: 'NUMBER', pattern: '#,##0.00' } } }, fields: 'userEnteredFormat.numberFormat' } },
+        { updateBorders: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 2, endRowIndex: dataEndRow, startColumnIndex: 0, endColumnIndex: 7 }, top: { style: 'SOLID', color: { red: 0.45, green: 0.55, blue: 0.65 } }, bottom: { style: 'SOLID', color: { red: 0.45, green: 0.55, blue: 0.65 } }, left: { style: 'SOLID', color: { red: 0.45, green: 0.55, blue: 0.65 } }, right: { style: 'SOLID', color: { red: 0.45, green: 0.55, blue: 0.65 } }, innerHorizontal: { style: 'SOLID', color: { red: 0.78, green: 0.83, blue: 0.88 } }, innerVertical: { style: 'SOLID', color: { red: 0.78, green: 0.83, blue: 0.88 } } } },
+        { setBasicFilter: { filter: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 2, endRowIndex: dataEndRow, startColumnIndex: 0, endColumnIndex: 7 } } } },
+        { updateSheetProperties: { properties: { sheetId: HSH_MATERIAL_SHEET_GID, gridProperties: { frozenRowCount: 3 } }, fields: 'gridProperties.frozenRowCount' } },
+        ...[[0, 110], [1, 130], [2, 220], [3, 110], [4, 90], [5, 230], [6, 320]].map(([startIndex, pixelSize]) => ({ updateDimensionProperties: { range: { sheetId: HSH_MATERIAL_SHEET_GID, dimension: 'COLUMNS', startIndex, endIndex: startIndex + 1 }, properties: { pixelSize }, fields: 'pixelSize' } }))
       ] })
     });
     if (!response.ok) {
