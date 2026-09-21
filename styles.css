@@ -1885,6 +1885,16 @@ body {
   color: #F1F5F9;
 }
 
+.tool-result-note {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.24);
+  color: #CBD5E1;
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
 /* Tool 10: Field gate checklist */
 .tool-card-fieldgate {
   border-color: #BFDBFE;

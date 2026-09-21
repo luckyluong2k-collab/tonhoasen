@@ -1813,8 +1813,18 @@ window.hshCalcBrick = function() {
   const totalBricks = Math.ceil(netArea * brickPerM2 * 1.03);
   const totalMortar = netArea * mortarPerM2;
 
-  const cementKg = totalMortar * (grade === 'M75' ? 247 : 320);
-  const sandM3 = totalMortar * 1.1;
+  // Hệ số tham khảo cho 1 m³ vữa xi măng cát vàng dùng PCB30:
+  // M50 = 246 kg XM + 1.201 m³ cát; M75 = 338 kg XM + 1.149 m³ cát;
+  // M100 = 430 kg XM + 1.097 m³ cát. Đây là hệ số bóc tách, không thay
+  // thế cấp phối thí nghiệm/được phê duyệt theo vật liệu thực tế.
+  const mortarMix = {
+    M50: { cementKgPerM3: 246, sandM3PerM3: 1.201, waterLPerM3: 276 },
+    M75: { cementKgPerM3: 338, sandM3PerM3: 1.149, waterLPerM3: 272 },
+    M100: { cementKgPerM3: 430, sandM3PerM3: 1.097, waterLPerM3: 270 }
+  }[grade] || { cementKgPerM3: 338, sandM3PerM3: 1.149, waterLPerM3: 272 };
+  const cementKg = totalMortar * mortarMix.cementKgPerM3;
+  const sandM3 = totalMortar * mortarMix.sandM3PerM3;
+  const waterL = totalMortar * mortarMix.waterLPerM3;
 
   const resEl = document.getElementById('t4_result');
   if (resEl) {
@@ -1822,8 +1832,10 @@ window.hshCalcBrick = function() {
       <div class="result-main-val">Gạch Tuynel 8x8x19: ${fmtNumber(totalBricks)} viên (Diện tích: ${fmtDecimal(netArea, 1)} m²)</div>
       <div class="result-breakdown">
         <div>• <strong>Vữa xây ${grade}:</strong> <span>${fmtDecimal(totalMortar, 2)} m³</span></div>
-        <div>• <strong>Xi măng PCB30/40:</strong> <span>${fmtNumber(cementKg)} kg</span> (${fmtDecimal(cementKg/50, 1)} bao)</div>
+        <div>• <strong>Xi măng PCB30:</strong> <span>${fmtNumber(cementKg)} kg</span> (${fmtDecimal(cementKg/50, 1)} bao)</div>
         <div>• <strong>Cát xây sạch:</strong> <span>${fmtDecimal(sandM3, 2)} m³</span></div>
+        <div>• <strong>Nước trộn tham khảo:</strong> <span>${fmtDecimal(waterL / 1000, 2)} m³</span> (${fmtNumber(waterL)} lít)</div>
+        <div class="tool-result-note">Hệ số bóc tách tham khảo; cần đối chiếu cấp phối được duyệt, mô đun cát và độ ẩm cát thực tế.</div>
       </div>
     `;
   }
