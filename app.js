@@ -1094,6 +1094,7 @@ window.hshExportBOQExcel = function() {
 const HSH_GOOGLE_CLIENT_ID = '205763163202-bjketnf7ajl4pdsoq1peadjhufbrjh0p.apps.googleusercontent.com';
 const HSH_SHEET_ID = '1QfMS1lw68LlCQCmaR0weB5WHq9DjfRg4HKrbTjRQ_3Y';
 const HSH_BOQ_SHEET_GID = 640537829;
+const HSH_MATERIAL_SHEET_GID = 718240107;
 
 async function getGoogleSheetToken() {
   if (googleSheetToken) return googleSheetToken;
@@ -1204,6 +1205,52 @@ window.hshSyncBOQToGoogleSheet = async function() {
     showToast(`Đã đẩy ${RAW_BOQ.length} dòng BOQ lên trang tính 2.`, 'success');
   } catch (error) {
     showToast(`Chưa đẩy được BOQ: ${error.message}`, 'error');
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = originalText;
+    }
+  }
+};
+
+window.hshSyncMaterialToGoogleSheet = async function() {
+  const button = document.getElementById('btnSyncMaterialSheet');
+  const originalText = button?.innerHTML;
+  try {
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đẩy...';
+    }
+    const records = JSON.parse(localStorage.getItem('hsh-material-receipts-v1') || '[]');
+    if (!Array.isArray(records)) throw Error('Dữ liệu vật tư chưa đúng định dạng.');
+    showToast('Đang kết nối Google Sheet để đẩy vật tư...', 'info');
+    const token = await getGoogleSheetToken();
+    const rows = [
+      ['DỰ ÁN CẢI TẠO HOA SEN HOME PHỦ LÝ - NHẬT KÝ VẬT TƯ'],
+      ['Nguồn', 'Ứng dụng Hoa Sen Home Phủ Lý', 'Cập nhật', new Date().toLocaleString('vi-VN')],
+      ['Ngày nhập', 'Vật tư', 'Số lượng', 'Đơn vị', 'Nhà cung cấp / xe hàng', 'Ghi chú']
+    ];
+    [...records].sort((a, b) => `${a.date}${a.createdAt || ''}`.localeCompare(`${b.date}${b.createdAt || ''}`)).forEach(record => rows.push([
+      record.date || '', record.material || '', Number(record.quantity) || 0, record.unit || '', record.supplier || '', record.note || ''
+    ]));
+    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${HSH_SHEET_ID}:batchUpdate`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests: [
+        { updateCells: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 0, endRowIndex: 2000, startColumnIndex: 0, endColumnIndex: 6 }, fields: 'userEnteredValue' } },
+        { updateCells: { start: { sheetId: HSH_MATERIAL_SHEET_GID, rowIndex: 0, columnIndex: 0 }, rows: rows.map(row => ({ values: row.map(sheetCell) })), fields: 'userEnteredValue' } },
+        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 0, endRowIndex: 3 }, cell: { userEnteredFormat: { textFormat: { bold: true } } }, fields: 'userEnteredFormat.textFormat.bold' } },
+        { autoResizeDimensions: { dimensions: { sheetId: HSH_MATERIAL_SHEET_GID, dimension: 'COLUMNS', startIndex: 0, endIndex: 6 } } }
+      ] })
+    });
+    if (!response.ok) {
+      let detail = '';
+      try { detail = (await response.json()).error?.message || ''; } catch (_) {}
+      throw Error(detail || `Google Sheet trả về lỗi ${response.status}.`);
+    }
+    showToast(`Đã đẩy ${records.length} lần nhập vật tư lên trang tính vật tư.`, 'success');
+  } catch (error) {
+    showToast(`Chưa đẩy được vật tư: ${error.message}`, 'error');
   } finally {
     if (button) {
       button.disabled = false;

@@ -1526,7 +1526,7 @@
                     <p id="materialQuickStatus" class="material-quick-status" role="status"></p>
                     <button class="btn btn-primary" type="submit"><i class="fas fa-plus"></i> Lưu lần nhập</button>
                 </form>
-                <div class="material-summary-head"><div><h3>Thống kê lũy kế</h3><p>Đã nhập <strong id="materialTotalEntries">0</strong> lần</p></div><button class="btn btn-outline btn-sm" type="button" onclick="window.hshExportMaterialSummary()"><i class="fas fa-file-csv"></i> Xuất CSV</button></div>
+                <div class="material-summary-head"><div><h3>Thống kê lũy kế</h3><p>Đã nhập <strong id="materialTotalEntries">0</strong> lần</p></div><div class="material-summary-actions"><button class="btn btn-primary btn-sm" id="btnSyncMaterialSheet" type="button" onclick="window.hshSyncMaterialToGoogleSheet()"><i class="fas fa-cloud-arrow-up"></i> Đẩy lên Sheet vật tư</button><button class="btn btn-outline btn-sm" type="button" onclick="window.hshExportMaterialSummary()"><i class="fas fa-file-csv"></i> Xuất CSV</button></div></div>
                 <div id="materialSummary" class="material-summary" aria-live="polite"></div>
                 <details class="material-recent-details"><summary>Xem các lần nhập gần đây</summary><div id="materialRecentList" class="material-recent-list"></div></details>
             </div>
