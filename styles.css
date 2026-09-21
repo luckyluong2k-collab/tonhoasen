@@ -3087,6 +3087,70 @@ body.lightbox-open {
   .boq-filters-bar {
     flex-direction: column;
   }
+  .boq-view-switch {
+    flex-wrap: wrap;
+  }
+  .boq-view-btn {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+    justify-content: center;
+    padding-inline: 10px;
+  }
+  .boq-work-btn {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+  .boq-mobile-card {
+    padding: 12px;
+  }
+  .boq-card-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .boq-card-meta > span,
+  .boq-card-money > span {
+    min-width: 0;
+    padding: 8px;
+    border-radius: 8px;
+    background: #f8fbff;
+    border: 1px solid #e2e8f0;
+    overflow-wrap: anywhere;
+  }
+  .boq-card-money {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .boq-table-wrap {
+    margin-inline: -2px;
+  }
+  .boq-table {
+    min-width: 1040px;
+    table-layout: fixed;
+  }
+  .boq-table th:nth-child(1),
+  .boq-table td:nth-child(1) { width: 50px; }
+  .boq-table th:nth-child(2),
+  .boq-table td:nth-child(2) { width: 86px; }
+  .boq-table th:nth-child(3),
+  .boq-table td:nth-child(3) { width: 340px; }
+  .boq-table th:nth-child(4),
+  .boq-table td:nth-child(4) { width: 68px; }
+  .boq-table th:nth-child(5),
+  .boq-table td:nth-child(5) { width: 88px; }
+  .boq-table th:nth-child(6),
+  .boq-table td:nth-child(6) { width: 120px; }
+  .boq-table th:nth-child(7),
+  .boq-table td:nth-child(7) { width: 140px; }
+  .boq-table th:nth-child(8),
+  .boq-table td:nth-child(8) { width: 102px; }
+  .boq-table th:nth-child(9),
+  .boq-table td:nth-child(9) { width: 76px; }
+  .boq-table td:nth-child(3) {
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
   .dossier-overview-grid,
   .dossier-note-grid {
     grid-template-columns: 1fr;
@@ -3102,6 +3166,12 @@ body.lightbox-open {
   }
   .dossier-kpi-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  .boq-card-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
