@@ -22,15 +22,15 @@ jobs:
       - uses: android-actions/setup-android@v4.0.3
       - name: Install Capacitor dependencies
         run: npm ci
-          - name: Generate Android project
-            run: npx cap add android
-          - name: Apply HSH app logo
-            run: >-
-              npx @capacitor/assets generate --android --assetPath assets
-              --iconBackgroundColor "#8f1826" --iconBackgroundColorDark "#8f1826"
-              --splashBackgroundColor "#8f1826" --splashBackgroundColorDark "#8f1826"
-          - name: Sync Android project
-            run: npx cap sync android
+      - name: Generate Android project
+        run: npx cap add android
+      - name: Apply HSH app logo
+        run: >-
+          npx @capacitor/assets generate --android --assetPath assets
+          --iconBackgroundColor "#8f1826" --iconBackgroundColorDark "#8f1826"
+          --splashBackgroundColor "#8f1826" --splashBackgroundColorDark "#8f1826"
+      - name: Sync Android project
+        run: npx cap sync android
       - name: Build debug APK
         working-directory: mobile/android
         run: ./gradlew assembleDebug
