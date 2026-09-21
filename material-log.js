@@ -6,6 +6,7 @@
   const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;", "'":"&#39;", '"':"&quot;"}[ch]));
   const numberText = value => new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(Number(value) || 0);
   const steelKgPerMetre = phi => (Number(phi) * Number(phi)) / 162;
+  const isPlainSteel = phi => [6, 8].includes(Number(phi));
   const materialPresets = {
     sand_yellow: { material: "Cát vàng", unit: "m³", group: "Bê tông & xây" },
     sand_black: { material: "Cát đen", unit: "m³", group: "Bê tông & xây" },
@@ -30,21 +31,27 @@
     $("materialSteelFields").hidden = !steel; $("materialOtherWrap").hidden = type !== "other";
     const unit = $("materialInputUnit");
     if (steel) {
-      unit.value = "cây"; unit.disabled = true;
-      const conversion = getSteelConversion(); $("materialInputKgPerPiece").value = `${numberText(conversion.kgPerPiece)} kg`;
+      const conversion = getSteelConversion(), plain = isPlainSteel(conversion.phi);
+      [...unit.options].forEach(option => { option.hidden = plain ? !["kg", "m"].includes(option.value) : option.value !== "cây"; });
+      unit.disabled = !plain; unit.value = plain ? (unit.value === "m" ? "m" : "kg") : "cây";
+      $("materialInputConversionLabel").textContent = plain ? "Khối lượng theo mét" : "Kg/cây tự tính";
+      $("materialInputKgPerPiece").value = plain ? `${numberText(steelKgPerMetre(conversion.phi))} kg/m` : `${numberText(conversion.kgPerPiece)} kg`;
       const quantity = Number($("materialInputQuantity")?.value || 0);
-      $("materialConversionHint").textContent = `Phi ${conversion.phi}: ${numberText(steelKgPerMetre(conversion.phi))} kg/m × ${String(conversion.length).replace(".", ",")} m = ${numberText(conversion.kgPerPiece)} kg/cây. ${quantity > 0 ? `Tổng hiện tại: ${numberText(quantity)} cây ≈ ${numberText(quantity * conversion.kgPerPiece)} kg.` : "Nhập số cây, hệ thống tự tính kg."}`;
+      if (plain) $("materialConversionHint").textContent = `Sắt trơn Phi ${conversion.phi}: ${numberText(steelKgPerMetre(conversion.phi))} kg/m. Nhập theo kg hoặc mét dài, không tính cây 11,7 m. ${quantity > 0 ? (unit.value === "kg" ? `Tổng hiện tại: ${numberText(quantity)} kg ≈ ${numberText(quantity / steelKgPerMetre(conversion.phi))} m.` : `Tổng hiện tại: ${numberText(quantity)} m ≈ ${numberText(quantity * steelKgPerMetre(conversion.phi))} kg.`) : "Nhập khối lượng kg hoặc mét dài."}`;
+      else $("materialConversionHint").textContent = `Thép Phi ${conversion.phi}: ${numberText(steelKgPerMetre(conversion.phi))} kg/m × ${String(conversion.length).replace(".", ",")} m = ${numberText(conversion.kgPerPiece)} kg/cây. ${quantity > 0 ? `Tổng hiện tại: ${numberText(quantity)} cây ≈ ${numberText(quantity * conversion.kgPerPiece)} kg.` : "Nhập số cây, hệ thống tự tính kg."}`;
     } else {
-      unit.disabled = false; if (preset) unit.value = preset.unit;
+      [...unit.options].forEach(option => { option.hidden = false; }); unit.disabled = false; if (preset) unit.value = preset.unit;
       $("materialConversionHint").textContent = preset ? `Đơn vị mặc định: ${preset.unit}. Có thể đổi nếu phiếu giao hàng dùng đơn vị khác.` : "Nhập vật tư và đơn vị theo phiếu giao hàng.";
     }
   }
   function getEntry() {
-    const type = $("materialInputType").value, quantity = Number($("materialInputQuantity").value), steel = type === "steel", conversion = steel ? getSteelConversion() : null, preset = materialPresets[type];
-    const material = steel ? `Thép Phi ${conversion.phi}` : type === "other" ? $("materialInputOther").value.trim() : preset.material;
-    const unit = steel ? "cây" : $("materialInputUnit").value;
+    const type = $("materialInputType").value, quantity = Number($("materialInputQuantity").value), steel = type === "steel", conversion = steel ? getSteelConversion() : null, plain = steel && isPlainSteel(conversion.phi), preset = materialPresets[type];
+    const material = plain ? `Sắt trơn Phi ${conversion.phi}` : steel ? `Thép Phi ${conversion.phi}` : type === "other" ? $("materialInputOther").value.trim() : preset.material;
+    const unit = steel ? (plain ? $("materialInputUnit").value : "cây") : $("materialInputUnit").value;
     if (!material || !unit || !Number.isFinite(quantity) || quantity <= 0) return null;
-    return { id: crypto.randomUUID(), date: $("materialInputDate").value || today(), tag: $("materialInputTag").value.trim(), material, group: steel ? "Kết cấu" : preset?.group || "Khác", specification: steel ? conversion.specification : "", quantity, unit, convertedQuantity: steel ? quantity * conversion.kgPerPiece : null, convertedUnit: steel ? "kg" : "", conversionNote: steel ? `${numberText(conversion.kgPerPiece)} kg/cây` : "", supplier: $("materialInputSupplier").value.trim(), note: $("materialInputNote").value.trim(), createdAt: new Date().toISOString() };
+    const convertedQuantity = !steel ? null : plain ? (unit === "kg" ? quantity / steelKgPerMetre(conversion.phi) : quantity * steelKgPerMetre(conversion.phi)) : quantity * conversion.kgPerPiece;
+    const convertedUnit = !steel ? "" : plain ? (unit === "kg" ? "m" : "kg") : "kg";
+    return { id: crypto.randomUUID(), date: $("materialInputDate").value || today(), tag: $("materialInputTag").value.trim(), material, group: steel ? "Kết cấu" : preset?.group || "Khác", specification: plain ? `${numberText(steelKgPerMetre(conversion.phi))} kg/m` : steel ? conversion.specification : "", quantity, unit, convertedQuantity, convertedUnit, conversionNote: steel ? (plain ? `${numberText(steelKgPerMetre(conversion.phi))} kg/m` : `${numberText(conversion.kgPerPiece)} kg/cây`) : "", supplier: $("materialInputSupplier").value.trim(), note: $("materialInputNote").value.trim(), createdAt: new Date().toISOString() };
   }
   function render() {
     const groups = new Map();
