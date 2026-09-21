@@ -2060,97 +2060,129 @@ window.hshCalcPCCC = function() {
   }
 };
 
-// Tool 10: Cổng kiểm tra trước nghiệm thu & bàn giao
-const FIELD_GATE_PRESETS = {
-  foundation: {
-    title: 'Móng, đà kiềng & bê tông',
-    drawings: ['foundation-2', 'foundation-3', 'foundation-4', 'foundation-5'],
-    qaqc: ['QC-01', 'QC-02', 'QC-03', 'QC-04', 'QC-06'],
-    boq: [16, 18, 19],
-    dossier: [10],
-    checks: ['Đối chiếu bản vẽ, tim trục, kích thước và cao độ đáy móng', 'Hố móng sạch, nền ổn định, có ảnh trước khi che khuất', 'Cốt thép, ván khuôn, lớp bảo vệ và lỗ chờ đã được kiểm tra', 'Biên bản nghiệm thu, phiếu độ sụt và mẫu bê tông đã sẵn sàng']
-  },
-  steel: {
-    title: 'Khung thép, bu lông & mối hàn',
-    drawings: ['design-24', 'design-35'],
-    qaqc: ['QC-05', 'QC-08', 'QC-09'],
-    boq: [23, 42, 43],
-    dossier: [6, 11],
-    checks: ['Đối chiếu mã cấu kiện, tiết diện, vật liệu và bản vẽ được duyệt', 'Tim trục, cao độ chân cột, bu lông neo và chiều dài ren chờ đạt yêu cầu', 'Mối hàn, biến dạng, lớp sơn bảo vệ và hồ sơ gia công đã kiểm tra', 'Có biên bản lắp dựng, siết bu lông và ảnh liên kết trước khi che khuất']
-  },
-  roof: {
-    title: 'Mái, vách tôn & máng xối',
-    drawings: ['design-5', 'design-35'],
-    qaqc: ['QC-12'],
-    boq: [71, 72, 83, 84, 88, 89, 90, 115],
-    dossier: [12],
-    checks: ['Đúng mã tôn, màu, độ dày, sóng và phụ kiện theo phê duyệt vật liệu', 'Xà gồ, vít, long đen, chồng mí, diềm và vị trí xuyên mái đã kiểm tra', 'Độ dốc mái/máng, hướng thoát và ống đứng đúng bản vẽ', 'Đã thử nước chống dột và chụp ảnh chi tiết các mối nối']
-  },
-  waterproofing: {
-    title: 'Bể tự hoại & chống thấm',
-    drawings: ['foundation-6'],
-    qaqc: ['QC-07'],
-    boq: [13, 34],
-    dossier: [10, 16],
-    checks: ['Đúng kích thước bể, cao độ ống vào/ra và vị trí các ngăn', 'Nền, cốt thép đáy, thành xây và cổ ống đã được kiểm tra', 'Lớp chống thấm, góc chân tường và mạch ngừng đã xử lý', 'Đã thử nước/thử thoát, lập ảnh và biên bản trước khi lấp đất']
-  },
-  mep: {
-    title: 'MEP: điện, nước & tiếp địa',
-    drawings: ['design-52'],
-    qaqc: ['QC-14'],
-    boq: [291, 294, 295],
-    dossier: [14],
-    checks: ['Vật tư, model, CO/CQ và mẫu được phê duyệt trước khi lắp đặt', 'Tuyến ống/cáp, cao độ, đánh dấu mạch và vị trí xuyên tường đúng thiết kế', 'Đã kiểm tra thử kín, thoát nước, cách điện và điện trở tiếp địa', 'Có sơ đồ hoàn công, biên bản thử nghiệm và ảnh trước khi che khuất']
-  },
-  pccc: {
-    title: 'PCCC & chạy thử liên động',
-    drawings: ['design-68'],
-    qaqc: ['QC-15'],
-    boq: [296, 297],
-    dossier: [15],
-    checks: ['Đối chiếu thiết kế PCCC được duyệt và đúng chủng loại thiết bị', 'Thiết bị, địa chỉ, nguồn cấp, tuyến cáp và biển báo đã kiểm tra', 'Đã thử từng thiết bị và chạy thử liên động theo kịch bản', 'Có biên bản thử nghiệm, cấu hình hệ thống và hồ sơ cơ quan chuyên ngành nếu áp dụng']
-  }
+// Tool 10: Tính khối lượng ván khuôn
+const FORMWORK_TYPES = {
+  foundation: { label: 'Móng', note: 'Tính 4 mặt bên móng: 2 × (L + B) × H' },
+  column: { label: 'Cột', note: 'Tính 4 mặt cột: 2 × (L + B) × H' },
+  beam: { label: 'Dầm', note: 'Tính 2 thành + đáy dầm: (2H + B) × L' },
+  slab: { label: 'Sàn', note: 'Tính đáy sàn: L × B' },
+  wall: { label: 'Tường', note: 'Tính 2 mặt tường: 2 × L × H' }
 };
 
-function getFieldGateState() {
-  try { return JSON.parse(localStorage.getItem('hsh_field_gate_state') || '{}'); } catch (error) { return {}; }
+function hshReadFormworkItems() {
+  try { return JSON.parse(localStorage.getItem('hsh_formwork_items') || '[]'); } catch (error) { return []; }
 }
 
-window.hshFieldGateToggle = function(index) {
-  const type = document.getElementById('t10_gate_type')?.value || 'foundation';
-  const state = getFieldGateState();
-  const checked = new Set(state[type] || []);
-  checked.has(index) ? checked.delete(index) : checked.add(index);
-  state[type] = [...checked].sort((a, b) => a - b);
-  localStorage.setItem('hsh_field_gate_state', JSON.stringify(state));
-  window.hshRenderFieldGate();
+function hshSaveFormworkItems(items) {
+  localStorage.setItem('hsh_formwork_items', JSON.stringify(items));
+}
+
+function hshPositiveNumber(id, fallback = 0) {
+  const value = parseFloat(document.getElementById(id)?.value || fallback);
+  return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+function hshCurrentFormworkInput() {
+  const type = document.getElementById('t10_formwork_type')?.value || 'foundation';
+  const name = document.getElementById('t10_formwork_name')?.value.trim() || FORMWORK_TYPES[type]?.label || 'Cấu kiện';
+  const length = hshPositiveNumber('t10_length');
+  const width = hshPositiveNumber('t10_width');
+  const height = hshPositiveNumber('t10_height');
+  const qty = Math.max(1, Math.round(hshPositiveNumber('t10_qty', 1)));
+  const waste = Math.max(0, parseFloat(document.getElementById('t10_waste')?.value || 0) || 0);
+  const sheetW = hshPositiveNumber('t10_sheet_w', 1.22) || 1.22;
+  const sheetL = hshPositiveNumber('t10_sheet_l', 2.44) || 2.44;
+  return { type, name, length, width, height, qty, waste, sheetW, sheetL };
+}
+
+function hshCalcFormworkArea(item) {
+  const { type, length, width, height, qty } = item;
+  let areaEach = 0;
+  if (type === 'slab') areaEach = length * width;
+  else if (type === 'wall') areaEach = 2 * length * height;
+  else if (type === 'beam') areaEach = (2 * height + width) * length;
+  else areaEach = 2 * (length + width) * height;
+  return { areaEach, areaTotal: areaEach * qty };
+}
+
+function hshFormatM2(value) {
+  return (Math.round(value * 100) / 100).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function hshRenderFormworkGeometry(item, areaTotal, sheetCount) {
+  const geometry = document.getElementById('t10_geometry');
+  if (!geometry) return;
+  const label = FORMWORK_TYPES[item.type]?.label || 'Cấu kiện';
+  geometry.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Tính ván khuôn ${aiEscape(label)}"><rect class="geo-fill" x="22" y="17" width="54" height="34"></rect><path class="geo-stroke" d="M22 17l14-10h54v34l-14 10M76 17l14-10M76 51V17"></path><path class="geo-accent" d="M18 58h84"></path><text class="geo-text" x="30" y="38">${aiEscape(label.slice(0, 2))}</text><text class="geo-text" x="80" y="28">H=${item.height}</text><text class="geo-text" x="39" y="66">A=${hshFormatM2(areaTotal)}</text></svg><div><strong>${aiEscape(label)} · ${hshFormatM2(areaTotal)} m²</strong><small>${aiEscape(FORMWORK_TYPES[item.type]?.note || '')}</small><div class="geo-key">Tạm tính ${sheetCount} tấm ván theo khổ ${item.sheetW} × ${item.sheetL} m</div></div>`;
+}
+
+window.hshAddFormworkItem = function() {
+  const item = hshCurrentFormworkInput();
+  const { areaTotal } = hshCalcFormworkArea(item);
+  if (!areaTotal) return window.hshCalcFormwork();
+  const items = hshReadFormworkItems();
+  items.push({ ...item, id: Date.now() });
+  hshSaveFormworkItems(items);
+  window.hshCalcFormwork();
 };
 
-window.hshRenderFieldGate = function() {
+window.hshRemoveFormworkItem = function(id) {
+  hshSaveFormworkItems(hshReadFormworkItems().filter(item => String(item.id) !== String(id)));
+  window.hshCalcFormwork();
+};
+
+window.hshClearFormworkItems = function() {
+  hshSaveFormworkItems([]);
+  window.hshCalcFormwork();
+};
+
+window.hshCalcFormwork = function() {
   const result = document.getElementById('t10_result');
   if (!result) return;
 
-  const type = document.getElementById('t10_gate_type')?.value || 'foundation';
-  const preset = FIELD_GATE_PRESETS[type] || FIELD_GATE_PRESETS.foundation;
-  const location = document.getElementById('t10_gate_location')?.value.trim() || 'Chưa nhập vị trí';
-  const state = getFieldGateState();
-  const checked = new Set(state[type] || []);
-  const done = preset.checks.filter((_, index) => checked.has(index)).length;
-  const geometry = document.getElementById('t10_geometry');
-  if (geometry) {
-    geometry.innerHTML = `<svg viewBox="0 0 120 70" role="img" aria-label="Cổng kiểm tra ${aiEscape(preset.title)}"><path class="geo-stroke" d="M16 35h88M29 35l10-12M52 35l10-12M75 35l10-12"></path><circle class="geo-fill" cx="16" cy="35" r="8"></circle><circle class="geo-fill" cx="39" cy="35" r="8"></circle><circle class="geo-fill" cx="62" cy="35" r="8"></circle><circle class="geo-accent" cx="85" cy="35" r="8"></circle><text class="geo-text" x="13" y="38">1</text><text class="geo-text" x="36" y="38">2</text><text class="geo-text" x="59" y="38">3</text><text class="geo-text" x="82" y="38">4</text><text class="geo-text" x="12" y="61">BV</text><text class="geo-text" x="35" y="61">VL</text><text class="geo-text" x="58" y="61">TC</text><text class="geo-text" x="81" y="61">HS</text></svg><div><strong>${aiEscape(preset.title)}</strong><small>Checklist 4 cổng trước nghiệm thu</small><div class="geo-key">Bản vẽ · vật liệu · thi công · hồ sơ</div></div>`;
-  }
-  if (window.HshToolVisuals) window.HshToolVisuals.render(10, { title: preset.title, done, total: preset.checks.length });
-  const drawingLinks = preset.drawings.map(id => COMPLETE_DRAWINGS.find(item => item.id === id)).filter(Boolean).map(drawing => `<button class="field-gate-link" onclick="window.hshOpenDrawingRelation('tab-gallery','${drawing.id}')"><i class="fas fa-drafting-compass"></i> BV p.${drawing.pageNumber}</button>`).join('');
-  const qaqcLinks = preset.qaqc.map(code => `<button class="field-gate-link" onclick="window.hshOpenQaQcSource('${code}')"><i class="fas fa-clipboard-check"></i> ${code}</button>`).join('');
-  const boqLinks = preset.boq.map(row => `<button class="field-gate-link" onclick="window.hshOpenBoqSource(${row})"><i class="fas fa-list-ol"></i> BOQ ${row}</button>`).join('');
-  const dossierLinks = preset.dossier.map(id => `<button class="field-gate-link" onclick="window.hshOpenDossierSource(${id})"><i class="fas fa-folder-open"></i> Hồ sơ ${String(id).padStart(2, '0')}</button>`).join('');
+  const current = hshCurrentFormworkInput();
+  const currentCalc = hshCalcFormworkArea(current);
+  const sheetArea = current.sheetW * current.sheetL;
+  const currentWithWaste = currentCalc.areaTotal * (1 + current.waste / 100);
+  const currentSheets = sheetArea > 0 ? Math.ceil(currentWithWaste / sheetArea) : 0;
+  const items = hshReadFormworkItems();
+  const totals = items.reduce((acc, item) => {
+    const calc = hshCalcFormworkArea(item);
+    const itemWithWaste = calc.areaTotal * (1 + (Number(item.waste) || 0) / 100);
+    const itemSheetArea = (Number(item.sheetW) || 1.22) * (Number(item.sheetL) || 2.44);
+    acc.raw += calc.areaTotal;
+    acc.withWaste += itemWithWaste;
+    acc.sheets += itemSheetArea > 0 ? Math.ceil(itemWithWaste / itemSheetArea) : 0;
+    return acc;
+  }, { raw: 0, withWaste: 0, sheets: 0 });
+
+  hshRenderFormworkGeometry(current, currentCalc.areaTotal, currentSheets);
+  const rows = items.map(item => {
+    const calc = hshCalcFormworkArea(item);
+    const withWaste = calc.areaTotal * (1 + (Number(item.waste) || 0) / 100);
+    const itemSheetArea = (Number(item.sheetW) || 1.22) * (Number(item.sheetL) || 2.44);
+    const sheets = itemSheetArea > 0 ? Math.ceil(withWaste / itemSheetArea) : 0;
+    return `<tr><td>${aiEscape(item.name)}</td><td>${aiEscape(FORMWORK_TYPES[item.type]?.label || item.type)}</td><td>${item.qty}</td><td>${hshFormatM2(calc.areaTotal)}</td><td>${item.waste || 0}%</td><td>${hshFormatM2(withWaste)}</td><td>${sheets}</td><td><button class="formwork-remove" onclick="window.hshRemoveFormworkItem('${item.id}')" aria-label="Xóa ${aiEscape(item.name)}"><i class="fas fa-xmark"></i></button></td></tr>`;
+  }).join('');
 
   result.innerHTML = `
-    <div class="field-gate-title">${preset.title} · ${done}/${preset.checks.length} điều kiện đạt</div>
-    <div class="field-gate-location"><i class="fas fa-location-dot"></i> Vị trí: <strong>${aiEscape(location)}</strong></div>
-    <div class="field-gate-checks">${preset.checks.map((check, index) => `<label class="field-gate-item ${checked.has(index) ? 'is-done' : ''}"><input type="checkbox" ${checked.has(index) ? 'checked' : ''} onchange="window.hshFieldGateToggle(${index})"><span>${aiEscape(check)}</span></label>`).join('')}</div>
-    <div class="field-gate-actions"><span class="field-gate-label">Mở đối chiếu:</span>${drawingLinks}${qaqcLinks}${boqLinks}${dossierLinks}<button class="field-gate-link" onclick="window.hshNavigateToTab('tab-progress')"><i class="fas fa-book"></i> Nhật ký</button></div>
+    <div class="result-main-val">Tạm tính: ${hshFormatM2(currentCalc.areaTotal)} m² · Sau hao hụt ${current.waste}%: ${hshFormatM2(currentWithWaste)} m² · ${currentSheets} tấm</div>
+    <div class="result-breakdown">
+      <div>• <strong>Công thức:</strong> <span>${aiEscape(FORMWORK_TYPES[current.type]?.note || '')}</span></div>
+      <div>• <strong>Diện tích/tấm:</strong> <span>${hshFormatM2(sheetArea)} m² (${current.sheetW} × ${current.sheetL} m)</span></div>
+      <div>• <strong>Dữ liệu nhập:</strong> <span>L=${current.length} m · B=${current.width} m · H=${current.height} m · SL=${current.qty}</span></div>
+    </div>
+    <div class="formwork-total-strip">
+      <span>Tổng chưa hao hụt: <strong>${hshFormatM2(totals.raw)} m²</strong></span>
+      <span>Tổng sau hao hụt: <strong>${hshFormatM2(totals.withWaste)} m²</strong></span>
+      <span>Tổng số tấm: <strong>${totals.sheets}</strong></span>
+    </div>
+    <div class="formwork-table-wrap">
+      <table class="formwork-table">
+        <thead><tr><th>Cấu kiện</th><th>Loại</th><th>SL</th><th>m² gốc</th><th>HH</th><th>m² tính</th><th>Tấm</th><th></th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="8">Chưa có cấu kiện trong danh sách. Nhập thông số rồi bấm “Thêm cấu kiện”.</td></tr>'}</tbody>
+      </table>
+    </div>
   `;
 };
 
@@ -2164,7 +2196,7 @@ function runAllCalculators() {
   window.hshCalcRoofHydraulics();
   window.hshCalcLightingAndPower();
   window.hshCalcPCCC();
-  window.hshRenderFieldGate();
+  window.hshCalcFormwork();
 }
 
 // ==========================================================================

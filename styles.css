@@ -1895,80 +1895,95 @@ body {
   line-height: 1.45;
 }
 
-/* Tool 10: Field gate checklist */
-.tool-card-fieldgate {
+/* Tool 10: Formwork quantity calculator */
+.tool-card-formwork {
   border-color: #BFDBFE;
 }
 
-.tool-card-fieldgate .tool-result-box {
+.tool-card-formwork .tool-result-box {
   background: linear-gradient(145deg, #0F172A, #132B4F);
   border: 1px solid #1E4E86;
 }
 
-.field-gate-title {
-  color: #38BDF8;
-  font-size: 14px;
-  font-weight: 800;
-  margin-bottom: 4px;
-}
-
-.field-gate-location {
-  color: #CBD5E1;
-  font-size: 11px;
-  margin-bottom: 10px;
-}
-
-.field-gate-location strong { color: #F8FAFC; }
-
-.field-gate-checks {
-  display: grid;
-  gap: 5px;
-}
-
-.field-gate-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-  padding: 6px 8px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 7px;
-  color: #E2E8F0;
-  font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  line-height: 1.35;
-  cursor: pointer;
-}
-
-.field-gate-item:hover { background: rgba(59, 130, 246, 0.12); }
-.field-gate-item.is-done { border-color: rgba(34, 197, 94, 0.45); color: #BBF7D0; }
-.field-gate-item input { margin-top: 2px; accent-color: #22C55E; }
-
-.field-gate-actions {
+.formwork-sheet-row {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.formwork-sheet-row span {
+  color: #475569;
+  font-weight: 800;
+}
+
+.formwork-total-strip {
+  display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 11px;
+  gap: 8px;
+  margin: 10px 0;
   font-family: 'Inter', sans-serif;
 }
 
-.field-gate-label {
-  color: #94A3B8;
-  font-size: 10px;
-  margin-right: 2px;
+.formwork-total-strip span {
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  border-radius: 7px;
+  padding: 6px 8px;
+  background: rgba(14, 165, 233, 0.1);
+  color: #CBD5E1;
+  font-size: 11px;
 }
 
-.field-gate-link {
-  border: 1px solid #42688F;
-  border-radius: 999px;
-  padding: 4px 7px;
-  background: #17365F;
-  color: #DBEAFE;
+.formwork-total-strip strong {
+  color: #F8FAFC;
+}
+
+.formwork-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+}
+
+.formwork-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
   font-size: 10px;
+}
+
+.formwork-table th,
+.formwork-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  color: #E2E8F0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.formwork-table th {
+  background: rgba(15, 23, 42, 0.72);
+  color: #93C5FD;
+  font-weight: 800;
+}
+
+.formwork-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.formwork-remove {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(248, 113, 113, 0.42);
+  border-radius: 6px;
+  background: rgba(127, 29, 29, 0.35);
+  color: #FECACA;
   cursor: pointer;
 }
 
-.field-gate-link:hover { background: #24558E; color: #FFFFFF; }
+.formwork-remove:hover {
+  background: rgba(220, 38, 38, 0.55);
+  color: #FFFFFF;
+}
 
 /* ==========================================================================
    ENHANCED CAD LIGHTBOX MODAL

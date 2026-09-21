@@ -317,9 +317,9 @@
                     <div class="metric-card metric-warning">
                         <div class="metric-icon"><i class="fas fa-list-check"></i></div>
                         <div class="metric-info">
-                            <div class="metric-lbl">CỔNG KIỂM TRA TRƯỚC NGHIỆM THU</div>
-                            <div class="metric-num">6 <span class="metric-unit">bộ kiểm tra</span></div>
-                            <div class="metric-trend text-warning"><i class="fas fa-route"></i> Bản vẽ → Vật liệu → Thi công → Hồ sơ</div>
+                            <div class="metric-lbl">TÍNH VÁN KHUÔN CẤU KIỆN</div>
+                            <div class="metric-num">5 <span class="metric-unit">loại cấu kiện</span></div>
+                            <div class="metric-trend text-warning"><i class="fas fa-vector-square"></i> Móng · Cột · Dầm · Sàn · Tường</div>
                         </div>
                     </div>
                 </div>
@@ -1251,35 +1251,48 @@
                         </div>
                     </div>
 
-                    <!-- TOOL 10: KIỂM TRA TRƯỚC NGHIỆM THU & BÀN GIAO -->
-                    <div class="tool-card tool-card-fieldgate">
+                    <!-- TOOL 10: TÍNH KHỐI LƯỢNG VÁN KHUÔN -->
+                    <div class="tool-card tool-card-formwork">
                         <div class="tool-card-head">
-                            <div class="tool-badge"><i class="fas fa-list-check"></i> TOOL 10</div>
-                            <h4>Kiểm Tra Trước Nghiệm Thu & Bàn Giao</h4>
+                            <div class="tool-badge"><i class="fas fa-vector-square"></i> TOOL 10</div>
+                            <h4>Tính Khối Lượng Ván Khuôn</h4>
                         </div>
-                        <p class="tool-desc">Chọn đúng nhóm công việc để nhận checklist ngắn, điểm dừng kiểm tra và các liên kết sang bản vẽ, QA/QC, BOQ và hồ sơ dự án.</p>
-                        <div id="t10_geometry" class="tool-geometry" aria-label="Chuỗi kiểm tra trước nghiệm thu">
-                            <svg viewBox="0 0 120 70" role="img"><path class="geo-stroke" d="M16 35h88M29 35l10-12M52 35l10-12M75 35l10-12"></path><circle class="geo-fill" cx="16" cy="35" r="8"></circle><circle class="geo-fill" cx="39" cy="35" r="8"></circle><circle class="geo-fill" cx="62" cy="35" r="8"></circle><circle class="geo-accent" cx="85" cy="35" r="8"></circle><text class="geo-text" x="13" y="38">1</text><text class="geo-text" x="36" y="38">2</text><text class="geo-text" x="59" y="38">3</text><text class="geo-text" x="82" y="38">4</text><text class="geo-text" x="12" y="61">BV</text><text class="geo-text" x="35" y="61">VL</text><text class="geo-text" x="58" y="61">TC</text><text class="geo-text" x="81" y="61">HS</text></svg>
-                            <div><strong>4 cổng kiểm soát</strong><small>Bản vẽ → vật liệu → thi công → hồ sơ</small><div class="geo-key">Chỉ nghiệm thu khi đủ bằng chứng và điểm dừng</div></div>
+                        <p class="tool-desc">Tính nhanh diện tích ván khuôn cho Móng/Cột/Dầm/Sàn/Tường, cộng nhiều cấu kiện, thêm hao hụt và quy đổi ra số tấm ván.</p>
+                        <div id="t10_geometry" class="tool-geometry" aria-label="Sơ đồ tính diện tích ván khuôn">
+                            <svg viewBox="0 0 120 70" role="img"><rect class="geo-fill" x="22" y="17" width="54" height="34"></rect><path class="geo-stroke" d="M22 17l14-10h54v34l-14 10M76 17l14-10M76 51V17"></path><path class="geo-accent" d="M18 58h84"></path><text class="geo-text" x="31" y="38">A</text><text class="geo-text" x="81" y="28">H</text><text class="geo-text" x="50" y="66">L</text></svg>
+                            <div><strong>Diện tích tiếp xúc bê tông</strong><small>Móng/Cột/Dầm/Sàn/Tường · cộng theo số lượng</small><div class="geo-key">Tổng m² = diện tích cấu kiện × số lượng × (1 + hao hụt)</div></div>
                         </div>
                         <div class="tool-form">
                             <div class="form-row-2">
                                 <div class="form-group">
-                                    <label>Nhóm công việc:</label>
-                                    <select id="t10_gate_type" class="form-control" onchange="window.hshRenderFieldGate()">
-                                        <option value="foundation">Móng, đà kiềng & bê tông</option>
-                                        <option value="steel">Khung thép, bu lông & mối hàn</option>
-                                        <option value="roof">Mái, vách tôn & máng xối</option>
-                                        <option value="waterproofing">Bể tự hoại & chống thấm</option>
-                                        <option value="mep">MEP: điện, nước & tiếp địa</option>
-                                        <option value="pccc">PCCC & chạy thử liên động</option>
+                                    <label>Loại cấu kiện:</label>
+                                    <select id="t10_formwork_type" class="form-control" onchange="window.hshCalcFormwork()">
+                                        <option value="foundation">Móng</option>
+                                        <option value="column">Cột</option>
+                                        <option value="beam">Dầm</option>
+                                        <option value="slab">Sàn</option>
+                                        <option value="wall">Tường</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Vị trí / khu vực:</label>
-                                    <input type="text" id="t10_gate_location" class="form-control" placeholder="VD: M1-M8 / Nhà NV D30" oninput="window.hshRenderFieldGate()">
+                                    <label>Tên / vị trí:</label>
+                                    <input type="text" id="t10_formwork_name" class="form-control" value="Móng M1" oninput="window.hshCalcFormwork()">
                                 </div>
                             </div>
+                            <div class="form-row-2">
+                                <div class="form-group"><label>Dài L (m):</label><input type="number" id="t10_length" class="form-control" value="2.4" min="0" step="0.1" oninput="window.hshCalcFormwork()"></div>
+                                <div class="form-group"><label>Rộng B / dày tường (m):</label><input type="number" id="t10_width" class="form-control" value="1.8" min="0" step="0.05" oninput="window.hshCalcFormwork()"></div>
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group"><label>Cao H / dày sàn (m):</label><input type="number" id="t10_height" class="form-control" value="0.6" min="0" step="0.05" oninput="window.hshCalcFormwork()"></div>
+                                <div class="form-group"><label>Số lượng cấu kiện:</label><input type="number" id="t10_qty" class="form-control" value="1" min="1" step="1" oninput="window.hshCalcFormwork()"></div>
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group"><label>Hao hụt (%):</label><input type="number" id="t10_waste" class="form-control" value="5" min="0" step="1" oninput="window.hshCalcFormwork()"></div>
+                                <div class="form-group"><label>Kích thước tấm ván (m):</label><div class="formwork-sheet-row"><input type="number" id="t10_sheet_w" class="form-control" value="1.22" min="0.1" step="0.01" oninput="window.hshCalcFormwork()"><span>×</span><input type="number" id="t10_sheet_l" class="form-control" value="2.44" min="0.1" step="0.01" oninput="window.hshCalcFormwork()"></div></div>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="window.hshAddFormworkItem()"><i class="fas fa-plus"></i> Thêm cấu kiện</button>
+                            <button type="button" class="btn btn-secondary" onclick="window.hshClearFormworkItems()"><i class="fas fa-rotate-left"></i> Xóa danh sách</button>
                         </div>
                         <div class="tool-result-box" id="t10_result">
                             <!-- Populated by JS -->
