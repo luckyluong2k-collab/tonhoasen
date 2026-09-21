@@ -1,4 +1,4 @@
-// Release 10.66. The page and worker share the same release source.
+// Release 10.68. The page and worker share the same release source.
 importScripts('./app-version.js');
 const CACHE_NAME = `hsh-phuly-v${self.APP_VERSION}`;
 const CORE = [
@@ -42,6 +42,7 @@ const CORE = [
   "./method-statement.js",
   "./responsive.css",
   "./responsive.js",
+  "./material-log.js",
   "./styles.css",
   "./vendor/fflate.min.js",
   "./vendor/html2canvas.min.js",

@@ -107,6 +107,12 @@
                     <span class="nav-badge badge-green">Copy + lưu Sheet</span>
                 </a>
 
+                <a href="#materials" class="nav-item material-menu-item" onclick="window.hshOpenMaterialQuickEntry(); return false;">
+                    <i class="fas fa-truck-ramp-box nav-icon" aria-hidden="true"></i>
+                    <span class="nav-text">Nhập vật tư nhanh</span>
+                    <span class="nav-badge badge-green">Theo ngày</span>
+                </a>
+
                 <a href="#qaqc" class="nav-item" data-tab="tab-qaqc" onclick="window.hshNavigateToTab('tab-qaqc'); return false;">
                     <i class="fas fa-clipboard-check nav-icon"></i>
                     <span class="nav-text">Nghiệm thu QA/QC</span>
@@ -205,6 +211,7 @@
 
                 <div class="field-actions" aria-label="Thao tác hiện trường">
                     <a class="field-action" href="./bao-cao-ngay.html"><i class="fas fa-copy" aria-hidden="true"></i><span><strong>Lập báo cáo ngày</strong><small>Điền mẫu, copy và lưu lên Sheet</small></span><b aria-hidden="true">→</b></a>
+                    <button class="field-action sheet-action material-action" onclick="window.hshOpenMaterialQuickEntry()"><i class="fas fa-truck-ramp-box" aria-hidden="true"></i><span><strong>Nhập vật tư hôm nay</strong><small>Thép, cát, xi măng, bê tông…</small></span><b aria-hidden="true">＋</b></button>
                     <button class="field-action" onclick="window.hshNavigateToTab('tab-gallery')"><i class="fas fa-layer-group" aria-hidden="true"></i><span><strong>Mở bản vẽ thi công</strong><small>Đối chiếu trực tiếp từ hồ sơ phát hành</small></span><b aria-hidden="true">→</b></button>
                     <a class="field-action sheet-action" href="https://docs.google.com/spreadsheets/d/1QfMS1lw68LlCQCmaR0weB5WHq9DjfRg4HKrbTjRQ_3Y/edit" target="_blank" rel="noopener"><i class="fas fa-table" aria-hidden="true"></i><span><strong>Mở Google Sheet báo cáo</strong><small>File dữ liệu đang đồng bộ</small></span><b aria-hidden="true">↗</b></a>
                     <a class="field-action sheet-action" href="https://docs.google.com/spreadsheets/d/1QfMS1lw68LlCQCmaR0weB5WHq9DjfRg4HKrbTjRQ_3Y/edit?gid=640537829#gid=640537829" target="_blank" rel="noopener"><i class="fas fa-file-invoice-dollar" aria-hidden="true"></i><span><strong>Mở Sheet BOQ</strong><small>Trang tính 2 trong file hiện tại</small></span><b aria-hidden="true">↗</b></a>
@@ -1496,6 +1503,37 @@
         </div>
     </div>
 
+    <!-- QUICK MATERIAL RECEIPT MODAL -->
+    <div id="materialQuickModal" class="custom-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="materialQuickTitle">
+        <div class="custom-modal-card material-quick-card">
+            <div class="modal-header">
+                <div class="modal-title" id="materialQuickTitle"><i class="fas fa-truck-ramp-box text-primary"></i> Nhập vật tư nhanh</div>
+                <button class="btn-close-modal" type="button" onclick="window.hshCloseMaterialQuickEntry()" aria-label="Đóng"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body material-quick-body">
+                <p class="entry-hint">Ghi số lượng vật tư thực nhập trong ngày. Hệ thống tự cộng dồn để thống kê cuối công trình.</p>
+                <form id="materialQuickForm" class="material-quick-form">
+                    <div class="form-row-2">
+                        <div class="form-group"><label for="materialInputDate">Ngày nhập *</label><input type="date" id="materialInputDate" class="form-control" required></div>
+                        <div class="form-group"><label for="materialInputName">Vật tư *</label><input type="text" id="materialInputName" class="form-control" list="materialQuickOptions" placeholder="Ví dụ: Thép" required><datalist id="materialQuickOptions"><option value="Thép"></option><option value="Cát"></option><option value="Xi măng"></option><option value="Bê tông thương phẩm"></option><option value="Đá 1x2"></option><option value="Tôn"></option><option value="Gạch"></option><option value="Khác"></option></datalist></div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label for="materialInputQuantity">Số lượng *</label><input type="number" id="materialInputQuantity" class="form-control" min="0" step="0.01" inputmode="decimal" placeholder="Ví dụ: 850" required></div>
+                        <div class="form-group"><label for="materialInputUnit">Đơn vị *</label><input type="text" id="materialInputUnit" class="form-control" list="materialUnitOptions" placeholder="kg, m³, tấn…" required><datalist id="materialUnitOptions"><option value="kg"></option><option value="tấn"></option><option value="m³"></option><option value="bao"></option><option value="m"></option><option value="cái"></option><option value="bộ"></option></datalist></div>
+                    </div>
+                    <div class="form-group"><label for="materialInputSupplier">Nhà cung cấp / xe hàng</label><input type="text" id="materialInputSupplier" class="form-control" placeholder="Ví dụ: Xe bê tông 01 · Hãng thép…"></div>
+                    <div class="form-group"><label for="materialInputNote">Ghi chú</label><textarea id="materialInputNote" class="form-control" rows="2" placeholder="Vị trí tập kết, phiếu giao hàng, số lô…"></textarea></div>
+                    <p id="materialQuickStatus" class="material-quick-status" role="status"></p>
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-plus"></i> Lưu lần nhập</button>
+                </form>
+                <div class="material-summary-head"><div><h3>Thống kê lũy kế</h3><p>Đã nhập <strong id="materialTotalEntries">0</strong> lần</p></div><button class="btn btn-outline btn-sm" type="button" onclick="window.hshExportMaterialSummary()"><i class="fas fa-file-csv"></i> Xuất CSV</button></div>
+                <div id="materialSummary" class="material-summary" aria-live="polite"></div>
+                <details class="material-recent-details"><summary>Xem các lần nhập gần đây</summary><div id="materialRecentList" class="material-recent-list"></div></details>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" type="button" onclick="window.hshCloseMaterialQuickEntry()">Đóng</button></div>
+        </div>
+    </div>
+
     <!-- EXPORT REPORT MODAL -->
     <div id="exportModal" class="custom-modal-overlay">
         <div class="custom-modal-card">
@@ -1571,6 +1609,7 @@
     <script src="https://accounts.google.com/gsi/client" async></script>
     <script src="dossier-drive.js"></script>
     <script src="field-workflow.js"></script>
+    <script src="material-log.js"></script>
     <!-- PWA Service Worker Registration -->
 
 </body>

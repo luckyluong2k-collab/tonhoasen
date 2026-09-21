@@ -2289,13 +2289,16 @@ window.hshSaveProjectConfig = function() {
 
 window.hshExportJSONBackup = async function() {
   showToast("Đang tạo gói sao lưu toàn bộ cơ sở dữ liệu...", "info");
+  let materialReceipts = [];
+  try { materialReceipts = JSON.parse(localStorage.getItem('hsh-material-receipts-v1') || '[]'); } catch (_) {}
   const backupData = {
     exportDate: new Date().toISOString(),
     config: PROJECT_CONFIG,
     boq: await db.boq.toArray(),
     qaqc: await db.qaqc.toArray(),
     dailyLogs: await db.dailyLogs.toArray(),
-    dossierState: getDossierState()
+    dossierState: getDossierState(),
+    materialReceipts
   };
 
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
@@ -2331,6 +2334,9 @@ window.hshImportJSONBackup = function(event) {
       }
       if (data.dossierState) {
         localStorage.setItem('hsh_dossier_state', JSON.stringify(data.dossierState));
+      }
+      if (Array.isArray(data.materialReceipts)) {
+        localStorage.setItem('hsh-material-receipts-v1', JSON.stringify(data.materialReceipts));
       }
       showToast("Khôi phục dữ liệu từ JSON thành công! Đang tải lại...", "success");
       setTimeout(() => location.reload(), 1200);
