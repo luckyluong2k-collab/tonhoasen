@@ -2350,22 +2350,88 @@ window.hshExportDossierChecklist = function() {
 };
 
 window.hshSaveProjectConfig = function() {
-  showToast("Đã lưu và đồng bộ toàn bộ thông số dự án thành công!", "success");
+  window.hshBackupOnline();
+};
+
+async function hshBuildBackupData() {
+  const localStorageData = {};
+  for (let i = 0; i < localStorage.length; i += 1) {
+    const key = localStorage.key(i);
+    if (key && (/^hsh[-_]/i.test(key) || key === 'hsh_active_tab')) localStorageData[key] = localStorage.getItem(key);
+  }
+  return {
+    backupVersion: 2,
+    exportDate: new Date().toISOString(),
+    appVersion: window.APP_VERSION || '10.82',
+    config: PROJECT_CONFIG,
+    boq: await db.boq.toArray(),
+    drawings: await db.drawings.toArray(),
+    qaqc: await db.qaqc.toArray(),
+    dailyLogs: await db.dailyLogs.toArray(),
+    dbConfig: await db.config.toArray(),
+    localStorage: localStorageData
+  };
+}
+
+async function hshApplyBackupData(data) {
+  const tables = ['boq', 'drawings', 'qaqc', 'dailyLogs', 'config'];
+  const sourceNames = { config: 'dbConfig' };
+  for (const tableName of tables) {
+    const rows = data[sourceNames[tableName] || tableName];
+    if (!Array.isArray(rows)) continue;
+    await db[tableName].clear();
+    if (rows.length) await db[tableName].bulkAdd(rows);
+  }
+  if (data.localStorage && typeof data.localStorage === 'object') {
+    Object.entries(data.localStorage).forEach(([key, value]) => localStorage.setItem(key, String(value ?? '')));
+  }
+  if (data.dossierState) localStorage.setItem('hsh_dossier_state', JSON.stringify(data.dossierState));
+  if (Array.isArray(data.materialReceipts)) localStorage.setItem('hsh-material-receipts-v1', JSON.stringify(data.materialReceipts));
+}
+
+window.hshBackupOnline = async function() {
+  if (!window.HSHDrive) { showToast('Chưa tải được kết nối Google Drive.', 'error'); return; }
+  const button = document.getElementById('btnCloudBackup');
+  if (button) button.disabled = true;
+  try {
+    showToast('Đang kết nối Google Drive để sao lưu toàn bộ dữ liệu...', 'info');
+    await window.HSHDrive.connect();
+    const data = await hshBuildBackupData();
+    const file = await window.HSHDrive.uploadBackup(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    const time = new Date(file.modifiedTime || Date.now()).toLocaleString('vi-VN');
+    const status = document.getElementById('cloudBackupStatus');
+    if (status) status.textContent = `Đã sao lưu online lúc ${time}.`;
+    showToast('Đã sao lưu toàn bộ dữ liệu lên Google Drive.', 'success');
+  } catch (error) {
+    showToast(`Chưa sao lưu online được: ${error.message}`, 'error');
+  } finally { if (button) button.disabled = false; }
+};
+
+window.hshRestoreOnline = async function() {
+  if (!window.HSHDrive) { showToast('Chưa tải được kết nối Google Drive.', 'error'); return; }
+  const button = document.getElementById('btnCloudRestore');
+  if (button) button.disabled = true;
+  try {
+    await window.HSHDrive.connect();
+    const backups = await window.HSHDrive.listBackups();
+    if (!backups.length) { showToast('Chưa có bản sao online trên Google Drive.', 'info'); return; }
+    const latest = backups[0];
+    const time = new Date(latest.modifiedTime || Date.now()).toLocaleString('vi-VN');
+    if (!confirm(`Khôi phục toàn bộ dữ liệu từ bản online lúc ${time}? Dữ liệu hiện tại trên máy sẽ được thay thế.`)) return;
+    const data = JSON.parse(await window.HSHDrive.downloadBackup(latest.id));
+    await hshApplyBackupData(data);
+    showToast('Đã khôi phục dữ liệu online. Đang tải lại...', 'success');
+    setTimeout(() => location.reload(), 1200);
+  } catch (error) {
+    showToast(`Chưa khôi phục online được: ${error.message}`, 'error');
+  } finally { if (button) button.disabled = false; }
 };
 
 window.hshExportJSONBackup = async function() {
   showToast("Đang tạo gói sao lưu toàn bộ cơ sở dữ liệu...", "info");
-  let materialReceipts = [];
-  try { materialReceipts = JSON.parse(localStorage.getItem('hsh-material-receipts-v1') || '[]'); } catch (_) {}
-  const backupData = {
-    exportDate: new Date().toISOString(),
-    config: PROJECT_CONFIG,
-    boq: await db.boq.toArray(),
-    qaqc: await db.qaqc.toArray(),
-    dailyLogs: await db.dailyLogs.toArray(),
-    dossierState: getDossierState(),
-    materialReceipts
-  };
+  const backupData = await hshBuildBackupData();
+  backupData.dossierState = getDossierState();
+  try { backupData.materialReceipts = JSON.parse(localStorage.getItem('hsh-material-receipts-v1') || '[]'); } catch (_) { backupData.materialReceipts = []; }
 
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
   const downloadAnchor = document.createElement('a');
@@ -2386,24 +2452,7 @@ window.hshImportJSONBackup = function(event) {
   reader.onload = async (e) => {
     try {
       const data = JSON.parse(e.target.result);
-      if (data.boq) {
-        await db.boq.clear();
-        await db.boq.bulkAdd(data.boq);
-      }
-      if (data.qaqc) {
-        await db.qaqc.clear();
-        await db.qaqc.bulkAdd(data.qaqc);
-      }
-      if (data.dailyLogs) {
-        await db.dailyLogs.clear();
-        await db.dailyLogs.bulkAdd(data.dailyLogs);
-      }
-      if (data.dossierState) {
-        localStorage.setItem('hsh_dossier_state', JSON.stringify(data.dossierState));
-      }
-      if (Array.isArray(data.materialReceipts)) {
-        localStorage.setItem('hsh-material-receipts-v1', JSON.stringify(data.materialReceipts));
-      }
+      await hshApplyBackupData(data);
       showToast("Khôi phục dữ liệu từ JSON thành công! Đang tải lại...", "success");
       setTimeout(() => location.reload(), 1200);
     } catch (err) {

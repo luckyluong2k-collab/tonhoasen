@@ -1339,10 +1339,20 @@
 
                     <!-- Database & Cache Controls -->
                     <div class="card p-4">
-                        <h4><i class="fas fa-database text-success"></i> Quản trị Dữ liệu Dexie IndexedDB & Offline</h4>
-                        <p class="text-muted">Cơ sở dữ liệu cục bộ tốc độ cao, hoạt động 100% không phụ thuộc Internet.</p>
-
+                        <h4><i class="fas fa-database text-success"></i> Quản trị dữ liệu &amp; sao lưu online</h4>
+                        <p class="text-muted">Bản làm việc vẫn lưu cục bộ để dùng khi mất mạng; bản sao toàn bộ có thể lưu và khôi phục trên Google Drive.</p>
                         <div class="db-action-list mt-3">
+                            <div class="db-action-item db-cloud-backup-item">
+                                <div>
+                                    <strong><i class="fas fa-cloud-arrow-up text-primary"></i> Sao lưu online toàn bộ dữ liệu</strong>
+                                    <p class="text-muted text-xs">Lưu một bản sao mới nhất lên Google Drive: BOQ, bản vẽ, QA/QC, nhật ký, vật tư, checklist và các thiết lập trên máy.</p>
+                                    <p id="cloudBackupStatus" class="text-xs" role="status">Chưa sao lưu online trong phiên này.</p>
+                                </div>
+                                <div class="settings-inline-actions">
+                                    <button class="btn btn-sm btn-primary" id="btnCloudBackup" type="button" onclick="window.hshBackupOnline()"><i class="fas fa-cloud-arrow-up"></i> Sao lưu online</button>
+                                    <button class="btn btn-sm btn-outline" id="btnCloudRestore" type="button" onclick="window.hshRestoreOnline()"><i class="fas fa-cloud-arrow-down"></i> Khôi phục online</button>
+                                </div>
+                            </div>
                             <div class="db-action-item">
                                 <div>
                                     <strong>Sao lưu Toàn bộ Hệ thống (JSON Backup)</strong>
