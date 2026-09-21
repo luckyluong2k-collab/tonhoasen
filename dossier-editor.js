@@ -40,6 +40,34 @@
   } catch (e) {
     $("status").textContent = "Không đọc được dữ liệu đã lưu.";
   }
+  function collapseAcceptanceRecords() {
+    const acceptanceRecords = state.records.filter((r) => r.type === "acceptance");
+    if (acceptanceRecords.length < 2) return;
+    const keep = structuredClone(
+      acceptanceRecords.find((r) => r.id === state.lastRecordId) || acceptanceRecords[acceptanceRecords.length - 1],
+    );
+    keep.fields ??= {};
+    keep.photos ??= {};
+    try {
+      localStorage.setItem(
+        `${storage}-before-single-acceptance`,
+        JSON.stringify({ savedAt: new Date().toISOString(), state }),
+      );
+    } catch (_) {}
+    for (const record of acceptanceRecords) {
+      for (const [key, value] of Object.entries(record.fields || {})) {
+        if (keep.fields?.[key] == null || keep.fields[key] === "") keep.fields[key] = value;
+      }
+      for (const [key, value] of Object.entries(record.photos || {})) {
+        if (!keep.photos?.[key]) keep.photos[key] = value;
+      }
+      keep.count = Math.max(Number(keep.count || 1), Number(record.count || 1));
+    }
+    state.records = state.records.filter((r) => r.type !== "acceptance");
+    state.records.push(keep);
+    if (acceptanceRecords.some((r) => r.id === state.lastRecordId)) state.lastRecordId = keep.id;
+  }
+  collapseAcceptanceRecords();
   const effectiveProject = () => active?.projectOverride || state.project;
   const measure = document.createElement("canvas").getContext("2d"),
     images = new Map();
@@ -71,6 +99,14 @@
     r.layout = 2;
   }
   function create(type) {
+    if (type === "acceptance") {
+      const existing = [...state.records].reverse().find((r) => r.type === "acceptance");
+      if (existing) {
+        active = existing;
+        render();
+        return;
+      }
+    }
     active = {
       id: crypto.randomUUID(),
       type,
@@ -434,6 +470,7 @@
         : active.type === "defect"
           ? "+ Thêm 5 dòng lỗi"
           : "+ Thêm bộ biên bản";
+    $("new").textContent = active.type === "acceptance" ? "Mở bản nghiệm thu hiện tại" : "+ Tạo hồ sơ mới";
     $("pages").replaceChildren();
     const blank = $("templateOnly").checked;
     for (let pi = 0; pi < plans.length; pi++) {
@@ -791,14 +828,19 @@
     const record = snapshot.record;
     if (!record || !titles[record.type] || !snapshot.project)
       throw Error("Bản lưu thiếu dữ liệu hồ sơ.");
+    const existingAcceptance = record.type === "acceptance"
+      ? [...state.records].reverse().find((r) => r.type === "acceptance")
+      : null;
     active = {
       ...structuredClone(record),
-      id: crypto.randomUUID(),
+      id: existingAcceptance?.id || crypto.randomUUID(),
       originRecordId: record.originRecordId || record.id,
       sourceExportId: exportId,
       projectOverride: structuredClone(snapshot.project),
     };
-    state.records.push(active);
+    if (existingAcceptance) {
+      state.records = state.records.map((r) => r.id === existingAcceptance.id ? active : r);
+    } else state.records.push(active);
     save();
     setMode("preview");
     await render();
