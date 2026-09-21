@@ -68,9 +68,11 @@ function button(label,fn){const b=document.createElement('button');b.textContent
 function render(highlightId=null){
   const search=$('archiveSearch').value.toLocaleLowerCase('vi'),type=$('archiveType').value,body=$('archiveList');
   body.replaceChildren();
-  const filtered=entries.filter(e=>(!type||e.type===type)&&`${e.projectName} ${e.number||''} ${e.id} ${e.recordDate} ${e.filename||''} ${e.exportedAt}`.toLocaleLowerCase('vi').includes(search)).sort((a,b)=>b.exportedAt.localeCompare(a.exportedAt));
-  $('showHistory').textContent=`Lịch sử (${entries.length})`;
-  $('archiveCount').textContent=`${filtered.length} / ${entries.length} lần xuất`;
+  const latestAcceptance=entries.filter(e=>e.type==='acceptance').sort((a,b)=>b.exportedAt.localeCompare(a.exportedAt))[0]?.id;
+  const visibleEntries=entries.filter(e=>e.type!=='acceptance'||e.id===latestAcceptance);
+  const filtered=visibleEntries.filter(e=>(!type||e.type===type)&&`${e.projectName} ${e.number||''} ${e.id} ${e.recordDate} ${e.filename||''} ${e.exportedAt}`.toLocaleLowerCase('vi').includes(search)).sort((a,b)=>b.exportedAt.localeCompare(a.exportedAt));
+  $('showHistory').textContent=`Lịch sử (${visibleEntries.length})`;
+  $('archiveCount').textContent=`${filtered.length} / ${visibleEntries.length} lần xuất`;
   if(!filtered.length){const p=document.createElement('p');p.textContent=entries.length?'Không tìm thấy hồ sơ phù hợp.':'Chưa có lần xuất nào được lưu. Các file đã xuất trước bản cập nhật này không tự xuất hiện.';body.append(p);return;}
   for(const e of filtered){
     const row=document.createElement('article');

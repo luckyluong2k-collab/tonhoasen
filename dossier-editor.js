@@ -42,7 +42,14 @@
   }
   function collapseAcceptanceRecords() {
     const acceptanceRecords = state.records.filter((r) => r.type === "acceptance");
-    if (acceptanceRecords.length < 2) return;
+    if (acceptanceRecords.length < 2) {
+      const only = acceptanceRecords[0];
+      if (only && only.count !== 1) {
+        only.count = 1;
+        try { localStorage.setItem(storage, JSON.stringify(state)); } catch (_) {}
+      }
+      return;
+    }
     const keep = structuredClone(
       acceptanceRecords.find((r) => r.id === state.lastRecordId) || acceptanceRecords[acceptanceRecords.length - 1],
     );
@@ -61,7 +68,7 @@
       for (const [key, value] of Object.entries(record.photos || {})) {
         if (!keep.photos?.[key]) keep.photos[key] = value;
       }
-      keep.count = Math.max(Number(keep.count || 1), Number(record.count || 1));
+      keep.count = 1;
     }
     state.records = state.records.filter((r) => r.type !== "acceptance");
     state.records.push(keep);
@@ -439,6 +446,7 @@
     $("coverPdf").hidden = active.type !== "diary";
     const run = ++epoch;
     migrate(active);
+    if (active.type === "acceptance") active.count = 1;
     save();
     plans = build();
     document
@@ -470,6 +478,7 @@
         : active.type === "defect"
           ? "+ Thêm 5 dòng lỗi"
           : "+ Thêm bộ biên bản";
+    $("add").hidden = active.type === "acceptance";
     $("new").textContent = active.type === "acceptance" ? "Mở bản nghiệm thu hiện tại" : "+ Tạo hồ sơ mới";
     $("pages").replaceChildren();
     const blank = $("templateOnly").checked;
@@ -796,6 +805,7 @@
     render();
   };
   $("add").onclick = () => {
+    if (active.type === "acceptance") return;
     active.count += active.type === "defect" ? 5 : 1;
     save();
     render();
