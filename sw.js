@@ -1,4 +1,4 @@
-// Release 10.64. The page and worker share the same release source.
+// Release 10.65. The page and worker share the same release source.
 importScripts('./app-version.js');
 const CACHE_NAME = `hsh-phuly-v${self.APP_VERSION}`;
 const CORE = [
