@@ -7,8 +7,8 @@
   const numberText = value => new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(Number(value) || 0);
   const steelKgPerMetre = phi => (Number(phi) * Number(phi)) / 162;
   const isPlainSteel = phi => [6, 8].includes(Number(phi));
-  const steelReferenceLength = 11.2;
-  const steelPieceWeightByPhi = { 10: 6.91, 12: 9.92, 14: 13.64, 16: 17.81, 18: 22.40, 20: 27.65, 22: 33.46, 25: 43.21, 28: 54.20, 32: 70.79 };
+  const steelReferenceLength = 11.7;
+  const steelPieceWeightByPhi = { 10: 7.22, 12: 10.40, 14: 14.16, 16: 18.49, 18: 23.40, 20: 28.89, 22: 34.96, 25: 45.14, 28: 56.62, 32: 73.96 };
   const steelWeightForLength = (phi, length) => Math.abs(Number(length) - steelReferenceLength) < 0.01 ? (steelPieceWeightByPhi[Number(phi)] || steelKgPerMetre(phi) * steelReferenceLength) : steelKgPerMetre(phi) * Number(length);
   const materialPresets = {
     sand_yellow: { material: "Cát vàng", unit: "m³", group: "Bê tông & xây" },
