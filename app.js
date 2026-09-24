@@ -1219,13 +1219,21 @@ window.hshSyncMaterialToGoogleSheet = async function() {
   try {
     if (button) {
       button.disabled = true;
-      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đẩy...';
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đồng bộ...';
     }
     const records = JSON.parse(localStorage.getItem('hsh-material-receipts-v1') || '[]');
-    if (!Array.isArray(records)) throw Error('Dữ liệu vật tư chưa đúng định dạng.');
-    showToast('Đang kết nối Google Sheet để đẩy vật tư...', 'info');
+    if (!Array.isArray(records)) throw Error('Dữ liệu vật tư trên thiết bị không đúng định dạng.');
     const token = await getGoogleSheetToken();
-    const materialGroup = name => {
+    const tab = "'Vật Tư '";
+    const endpoint = 'https://sheets.googleapis.com/v4/spreadsheets/' + HSH_SHEET_ID + '/values/';
+    const authHeaders = { Authorization: 'Bearer ' + token };
+    const readResponse = await fetch(endpoint + encodeURIComponent(tab + '!A4:M'), {
+      headers: authHeaders,
+      cache: 'no-store'
+    });
+    if (!readResponse.ok) throw Error('Không đọc được Sheet vật tư (' + readResponse.status + '). Chưa ghi gì để tránh mất dữ liệu.');
+    const remoteRows = (await readResponse.json()).values || [];
+    const groupOf = name => {
       const normalized = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
       if (/thep|rebar|sat|bulong|xago/.test(normalized)) return 'Kết cấu';
       if (/cat|xi mang|be tong|da 1x2|da dam|gach/.test(normalized)) return 'Bê tông & xây';
@@ -1233,43 +1241,100 @@ window.hshSyncMaterialToGoogleSheet = async function() {
       if (/dien|cap|ong|pccc|nuoc/.test(normalized)) return 'MEP & PCCC';
       return 'Khác';
     };
-    const rows = [
-      ['DỰ ÁN CẢI TẠO HOA SEN HOME PHỦ LÝ - NHẬT KÝ VẬT TƯ'],
-      ['Nguồn', 'Ứng dụng Hoa Sen Home Phủ Lý', 'Cập nhật', new Date().toLocaleString('vi-VN')],
-      ['STT', 'Ngày nhập', 'Tag / khu vực', 'Nhóm', 'Vật tư', 'Quy cách', 'Số lượng nhập', 'Đơn vị nhập', 'Khối lượng quy đổi', 'Đơn vị quy đổi', 'Nhà cung cấp / xe hàng', 'Ghi chú']
+    const number = value => {
+      if (value === '' || value == null) return '';
+      if (typeof value === 'number') return Number.isFinite(value) ? value.toFixed(2) : '';
+      const raw = String(value).replace(/\s/g, '');
+      const parsed = Number(raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw);
+      return Number.isFinite(parsed) ? parsed.toFixed(2) : raw;
+    };
+    const isoDate = value => {
+      const text = String(value ?? '').trim();
+      const match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      return match ? match[3] + '-' + match[2].padStart(2, '0') + '-' + match[1].padStart(2, '0') : text;
+    };
+    const signature = cells => JSON.stringify(cells.map((value, index) => {
+      if (index === 5 || index === 7) return number(value);
+      if (index === 0) return isoDate(value);
+      return String(value ?? '').trim().replace(/\s+/g, ' ');
+    }));
+    const fields = record => [
+      record.date || '', record.tag || '', record.group || groupOf(record.material),
+      record.material || '', record.specification || '', Number(record.quantity) || 0,
+      record.unit || '', record.convertedQuantity == null ? '' : Number(record.convertedQuantity),
+      record.convertedUnit || '', record.supplier || '', record.note || ''
     ];
-    [...records].sort((a, b) => `${a.date}${a.createdAt || ''}`.localeCompare(`${b.date}${b.createdAt || ''}`)).forEach((record, index) => rows.push([
-      index + 1, record.date || '', record.tag || '', record.group || materialGroup(record.material), record.material || '', record.specification || '', Number(record.quantity) || 0, record.unit || '', record.convertedQuantity == null ? '' : Number(record.convertedQuantity), record.convertedUnit || '', record.supplier || '', record.note || ''
-    ]));
-    const dataEndRow = Math.max(rows.length, 3);
-    const columnCount = 12;
-    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${HSH_SHEET_ID}:batchUpdate`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requests: [
-        { clearBasicFilter: { sheetId: HSH_MATERIAL_SHEET_GID } },
-        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 0, endRowIndex: 2000, startColumnIndex: 0, endColumnIndex: columnCount }, cell: { userEnteredValue: {}, userEnteredFormat: {} }, fields: 'userEnteredValue,userEnteredFormat' } },
-        { updateCells: { start: { sheetId: HSH_MATERIAL_SHEET_GID, rowIndex: 0, columnIndex: 0 }, rows: rows.map(row => ({ values: row.map(sheetCell) })), fields: 'userEnteredValue' } },
-        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: columnCount }, cell: { userEnteredFormat: { backgroundColor: { red: 0.04, green: 0.17, blue: 0.33 }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 14 } } }, fields: 'userEnteredFormat' } },
-        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 1, endRowIndex: 2, startColumnIndex: 0, endColumnIndex: columnCount }, cell: { userEnteredFormat: { backgroundColor: { red: 0.94, green: 0.96, blue: 0.98 }, textFormat: { italic: true, foregroundColor: { red: 0.25, green: 0.32, blue: 0.4 } } } }, fields: 'userEnteredFormat' } },
-        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 2, endRowIndex: 3, startColumnIndex: 0, endColumnIndex: columnCount }, cell: { userEnteredFormat: { backgroundColor: { red: 0.09, green: 0.5, blue: 0.22 }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 } }, horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE', wrapStrategy: 'WRAP' } }, fields: 'userEnteredFormat' } },
-        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 3, endRowIndex: dataEndRow, startColumnIndex: 0, endColumnIndex: columnCount }, cell: { userEnteredFormat: { verticalAlignment: 'TOP', wrapStrategy: 'WRAP' } }, fields: 'userEnteredFormat' } },
-        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 3, endRowIndex: dataEndRow, startColumnIndex: 6, endColumnIndex: 7 }, cell: { userEnteredFormat: { numberFormat: { type: 'NUMBER', pattern: '#,##0.00' } } }, fields: 'userEnteredFormat.numberFormat' } },
-        { repeatCell: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 3, endRowIndex: dataEndRow, startColumnIndex: 8, endColumnIndex: 9 }, cell: { userEnteredFormat: { numberFormat: { type: 'NUMBER', pattern: '#,##0.00' } } }, fields: 'userEnteredFormat.numberFormat' } },
-        { updateBorders: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 2, endRowIndex: dataEndRow, startColumnIndex: 0, endColumnIndex: columnCount }, top: { style: 'SOLID', color: { red: 0.45, green: 0.55, blue: 0.65 } }, bottom: { style: 'SOLID', color: { red: 0.45, green: 0.55, blue: 0.65 } }, left: { style: 'SOLID', color: { red: 0.45, green: 0.55, blue: 0.65 } }, right: { style: 'SOLID', color: { red: 0.45, green: 0.55, blue: 0.65 } }, innerHorizontal: { style: 'SOLID', color: { red: 0.78, green: 0.83, blue: 0.88 } }, innerVertical: { style: 'SOLID', color: { red: 0.78, green: 0.83, blue: 0.88 } } } },
-        { setBasicFilter: { filter: { range: { sheetId: HSH_MATERIAL_SHEET_GID, startRowIndex: 2, endRowIndex: dataEndRow, startColumnIndex: 0, endColumnIndex: columnCount } } } },
-        { updateSheetProperties: { properties: { sheetId: HSH_MATERIAL_SHEET_GID, gridProperties: { frozenRowCount: 3 } }, fields: 'gridProperties.frozenRowCount' } },
-        ...[[0, 55], [1, 110], [2, 150], [3, 130], [4, 220], [5, 210], [6, 110], [7, 100], [8, 150], [9, 110], [10, 230], [11, 320]].map(([startIndex, pixelSize]) => ({ updateDimensionProperties: { range: { sheetId: HSH_MATERIAL_SHEET_GID, dimension: 'COLUMNS', startIndex, endIndex: startIndex + 1 }, properties: { pixelSize }, fields: 'pixelSize' } }))
-      ] })
+    const counts = rows => {
+      const result = new Map();
+      rows.forEach(row => {
+        const key = signature(row);
+        result.set(key, (result.get(key) || 0) + 1);
+      });
+      return result;
+    };
+    const remote = remoteRows.filter(row => row.slice(1, 12).some(value => String(value ?? '').trim()));
+    const remoteIds = new Set(remote.map(row => String(row[12] || '').trim()).filter(Boolean));
+    const legacyCounts = counts(remote.filter(row => !String(row[12] || '').trim()).map(row => row.slice(1, 12)));
+    const pending = [];
+    records.forEach(record => {
+      if (!record.id) record.id = crypto.randomUUID();
+      if (remoteIds.has(String(record.id))) return;
+      const key = signature(fields(record));
+      const available = legacyCounts.get(key) || 0;
+      if (available) { legacyCounts.set(key, available - 1); return; }
+      pending.push(record);
     });
-    if (!response.ok) {
-      let detail = '';
-      try { detail = (await response.json()).error?.message || ''; } catch (_) {}
-      throw Error(detail || `Google Sheet trả về lỗi ${response.status}.`);
+    let nextNumber = Math.max(remote.length, ...remote.map(row => Number(row[0]) || 0), 0) + 1;
+    if (pending.length) {
+      const rows = pending.map(record => [nextNumber++, ...fields(record), String(record.id)]);
+      const appendResponse = await fetch(endpoint + encodeURIComponent(tab + '!A3:M') + ':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS', {
+        method: 'POST',
+        headers: { ...authHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ majorDimension: 'ROWS', values: rows })
+      });
+      if (!appendResponse.ok) {
+        let detail = '';
+        try { detail = (await appendResponse.json()).error?.message || ''; } catch (_) {}
+        throw Error(detail || 'Sheet chưa nhận dữ liệu (' + appendResponse.status + ').');
+      }
+      const verifyResponse = await fetch(endpoint + encodeURIComponent(tab + '!A4:M'), {
+        headers: authHeaders,
+        cache: 'no-store'
+      });
+      if (!verifyResponse.ok) throw Error('Đã gửi nhưng chưa kiểm tra được Sheet; bấm đồng bộ lại, mã bản ghi sẽ ngăn ghi trùng.');
+      const verifiedIds = new Set(((await verifyResponse.json()).values || []).map(row => String(row[12] || '').trim()));
+      if (pending.some(record => !verifiedIds.has(String(record.id)))) throw Error('Chưa xác nhận đủ dòng trên Sheet; bấm đồng bộ lại để kiểm tra.');
     }
-    showToast(`Đã đẩy ${records.length} lần nhập vật tư lên trang tính vật tư.`, 'success');
+    const localIds = new Set(records.map(record => String(record.id)));
+    const localCounts = counts(records.map(fields));
+    const imported = [];
+    remote.forEach((row, index) => {
+      const id = String(row[12] || '').trim();
+      if (id && localIds.has(id)) return;
+      const key = signature(row.slice(1, 12));
+      if (!id && (localCounts.get(key) || 0)) {
+        localCounts.set(key, localCounts.get(key) - 1);
+        return;
+      }
+      const parsed = value => {
+        const normalized = number(value);
+        return normalized === '' ? null : Number(normalized);
+      };
+      const entry = {
+        id: id || 'sheet-legacy-' + (index + 4), date: isoDate(row[1]), tag: row[2] || '',
+        group: row[3] || '', material: row[4] || '', specification: row[5] || '',
+        quantity: parsed(row[6]) || 0, unit: row[7] || '',
+        convertedQuantity: parsed(row[8]), convertedUnit: row[9] || '',
+        supplier: row[10] || '', note: row[11] || ''
+      };
+      imported.push(entry);
+      localIds.add(entry.id);
+    });
+    localStorage.setItem('hsh-material-receipts-v1', JSON.stringify([...records, ...imported]));
+    window.dispatchEvent(new Event('hsh-materials-updated'));
+    showToast('Đã giữ ' + remote.length + ' dòng trên Sheet, thêm ' + pending.length + ' dòng mới và tải ' + imported.length + ' dòng về máy.', 'success');
   } catch (error) {
-    showToast(`Chưa đẩy được vật tư: ${error.message}`, 'error');
+    showToast('Chưa đồng bộ được vật tư: ' + error.message, 'error');
   } finally {
     if (button) {
       button.disabled = false;
@@ -2451,6 +2516,28 @@ window.hshBackupOnline = async function() {
     showToast('Đang kết nối Google Drive để sao lưu toàn bộ dữ liệu...', 'info');
     await window.HSHDrive.connect();
     const data = await hshBuildBackupData();
+    const previousFiles = await window.HSHDrive.listBackups();
+    if (previousFiles.length) {
+      const previous = JSON.parse(await window.HSHDrive.downloadBackup(previousFiles[0].id));
+      const readMaterials = backup => {
+        if (Array.isArray(backup.materialReceipts)) return backup.materialReceipts;
+        try {
+          const rows = JSON.parse(backup.localStorage?.['hsh-material-receipts-v1'] || '[]');
+          return Array.isArray(rows) ? rows : [];
+        } catch (_) { return []; }
+      };
+      const merged = new Map();
+      [...readMaterials(previous), ...readMaterials(data)].forEach(record => {
+        if (!record || typeof record !== 'object') return;
+        const key = record.id ? 'id:' + record.id : 'legacy:' + JSON.stringify([
+          record.date, record.tag, record.material, record.specification,
+          record.quantity, record.unit, record.supplier, record.note
+        ]);
+        merged.set(key, record);
+      });
+      data.materialReceipts = [...merged.values()];
+      data.localStorage['hsh-material-receipts-v1'] = JSON.stringify(data.materialReceipts);
+    }
     const file = await window.HSHDrive.uploadBackup(new Blob([JSON.stringify(data)], { type: 'application/json' }));
     const time = new Date(file.modifiedTime || Date.now()).toLocaleString('vi-VN');
     const status = document.getElementById('cloudBackupStatus');

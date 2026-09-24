@@ -48,21 +48,27 @@ async function describe(entry){
  const r=await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(entry.driveFileId),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({appProperties})});if(!r.ok)throw Error('File đã lên Drive; chưa đồng bộ thông tin lịch sử ('+r.status+').');
 }
 async function listBackups(){
- const q="'"+folderId+"' in parents and trashed = false and name = 'HSH_Phuly_Online_Backup.json'";
- const r=await request('https://www.googleapis.com/drive/v3/files?'+new URLSearchParams({q,orderBy:'modifiedTime desc',pageSize:'20',fields:'files(id,name,size,modifiedTime,webViewLink)'}));
- if(!r.ok)throw Error('Chưa đọc được bản sao online ('+r.status+').');
- return (await r.json()).files||[];
+ const files=[];let pageToken='';
+ do{
+  const q="'"+folderId+"' in parents and trashed = false and name contains 'HSH_Phuly_Online_Backup'";
+  const params=new URLSearchParams({q,orderBy:'modifiedTime desc',pageSize:'1000',fields:'nextPageToken,files(id,name,size,modifiedTime,webViewLink)',...(pageToken?{pageToken}:{})});
+  const r=await request('https://www.googleapis.com/drive/v3/files?'+params);
+  if(!r.ok)throw Error('Chưa đọc được bản sao online ('+r.status+').');
+  const result=await r.json();files.push(...(result.files||[]));pageToken=result.nextPageToken||'';
+ }while(pageToken);
+ return files.sort((a,b)=>String(b.modifiedTime||'').localeCompare(String(a.modifiedTime||'')));
 }
 async function uploadBackup(blob){
- const existing=(await listBackups())[0];
- const metadata={name:'HSH_Phuly_Online_Backup.json',mimeType:'application/json',appProperties:{hshType:'project-backup',hshAppVersion:window.APP_VERSION||'10.83'}};
- if(!existing)metadata.parents=[folderId];
+ const name='HSH_Phuly_Online_Backup_'+new Date().toISOString().replace(/[:.]/g,'-')+'_'+crypto.randomUUID().slice(0,8)+'.json';
+ const metadata={name,parents:[folderId],mimeType:'application/json',appProperties:{hshType:'project-backup',hshAppVersion:window.APP_VERSION||'10.83'}};
  const boundary='hsh_backup_'+crypto.randomUUID();
- const body=new Blob([`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`,`--${boundary}\r\nContent-Type: application/json\r\n\r\n`,blob,`\r\n--${boundary}--`],{type:`multipart/related; boundary=${boundary}`});
- const endpoint=existing?'https://www.googleapis.com/upload/drive/v3/files/'+encodeURIComponent(existing.id)+'?uploadType=multipart&fields=id,name,size,modifiedTime,webViewLink':'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size,modifiedTime,webViewLink';
- const r=await request(endpoint,{method:existing?'PATCH':'POST',body});
+ const body=new Blob(['--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(metadata)+'\r\n','--'+boundary+'\r\nContent-Type: application/json\r\n\r\n',blob,'\r\n--'+boundary+'--'],{type:'multipart/related; boundary='+boundary});
+ const r=await request('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size,modifiedTime,webViewLink',{method:'POST',body});
  if(!r.ok)throw Error('Drive chưa nhận bản sao online ('+r.status+').');
- return r.json();
+ const file=await r.json();if(!file.id)throw Error('Drive chưa xác nhận mã file sao lưu.');
+ const sha=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))).map(value=>value.toString(16).padStart(2,'0')).join('');
+ await verify(file.id,sha);
+ return file;
 }
 async function downloadBackup(id){const r=await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?alt=media');if(!r.ok)throw Error('Chưa tải được bản sao online ('+r.status+').');return r.text();}
 async function download(id){const r=await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?alt=media');if(!r.ok)throw Error('Chưa tải được file trên Drive ('+r.status+').');return r.blob();}
