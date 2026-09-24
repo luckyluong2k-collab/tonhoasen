@@ -84,9 +84,17 @@
   function open() { const modal = $("materialQuickModal"); if (!modal) return; $("materialInputDate").value = today(); $("materialQuickStatus").textContent = ""; modal.classList.add("active"); syncForm(); render(); setTimeout(() => $("materialInputType")?.focus(), 80); }
   function close() { $("materialQuickModal")?.classList.remove("active"); }
   $("materialInputType")?.addEventListener("change", syncForm); $("materialInputPhi")?.addEventListener("change", syncForm); $("materialInputSteelLength")?.addEventListener("change", syncForm); $("materialInputQuantity")?.addEventListener("input", syncForm);
-  $("materialQuickForm")?.addEventListener("submit", event => { event.preventDefault(); const entry = getEntry(); if (!entry) { $("materialQuickStatus").textContent = "Nhập đủ loại vật tư, số lượng lớn hơn 0 và đơn vị."; return; } records.push(entry); if (!save()) { $("materialQuickStatus").textContent = "Chưa lưu được trên thiết bị. Hãy xuất CSV để giữ dữ liệu."; return; } $("materialQuickStatus").textContent = entry.convertedUnit ? `Đã lưu: ${numberText(entry.quantity)} ${entry.unit} = ${numberText(entry.convertedQuantity)} ${entry.convertedUnit}.` : "Đã lưu lần nhập vật tư."; $("materialInputQuantity").value = ""; $("materialInputTag").value = ""; $("materialInputSupplier").value = ""; $("materialInputNote").value = ""; render(); });
+  $("materialQuickForm")?.addEventListener("submit", event => { event.preventDefault(); const entry = getEntry(); if (!entry) { $("materialQuickStatus").textContent = "Nhập đủ loại vật tư, số lượng lớn hơn 0 và đơn vị."; return; } records.push(entry); if (!save()) { records.pop(); $("materialQuickStatus").textContent = "Chưa lưu được trên thiết bị. Hãy thử lại; dữ liệu chưa được xác nhận."; return; } $("materialQuickStatus").textContent = entry.convertedUnit ? `Đã lưu trên thiết bị: ${numberText(entry.quantity)} ${entry.unit} = ${numberText(entry.convertedQuantity)} ${entry.convertedUnit}. Bấm Đồng bộ Sheet (nối tiếp) để lưu chung.` : "Đã lưu trên thiết bị. Bấm Đồng bộ Sheet (nối tiếp) để lưu chung."; $("materialInputQuantity").value = ""; $("materialInputTag").value = ""; $("materialInputSupplier").value = ""; $("materialInputNote").value = ""; render(); });
   window.hshOpenMaterialQuickEntry = open; window.hshCloseMaterialQuickEntry = close;
   window.hshExportMaterialSummary = () => { const rows = [["STT", "Ngày nhập", "Tag", "Nhóm", "Vật tư", "Quy cách", "Số lượng nhập", "Đơn vị nhập", "Khối lượng quy đổi", "Đơn vị quy đổi", "Nhà cung cấp / xe hàng", "Ghi chú"]]; [...records].sort((a, b) => a.date.localeCompare(b.date)).forEach((record, index) => rows.push([index + 1, record.date, record.tag || "", record.group || "Khác", record.material, record.specification || "", record.quantity, record.unit, record.convertedQuantity ?? "", record.convertedUnit || "", record.supplier || "", record.note || ""])); const csv = "\ufeff" + rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n"); const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); const link = document.createElement("a"); link.href = url; link.download = `thong-ke-vat-tu-${today()}.csv`; link.click(); URL.revokeObjectURL(url); };
+  function reloadFromStorage() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      if (Array.isArray(saved)) { records = saved; render(); }
+    } catch (_) {}
+  }
+  window.addEventListener("hsh-materials-updated", reloadFromStorage);
+  window.addEventListener("storage", event => { if (event.key === storageKey) reloadFromStorage(); });
   document.addEventListener("keydown", event => { if (event.key === "Escape") close(); });
   syncForm(); render();
 })();
