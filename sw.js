@@ -53,9 +53,10 @@ const CORE = [
 ];
 self.addEventListener('install', event => {
   // A partial download must not replace the working release.
-  event.waitUntil(caches.open(CACHE_NAME).then(cache =>
-    cache.addAll(CORE.map(path => new Request(path, {cache:'reload'})))
-  ));
+  event.waitUntil(caches.open(CACHE_NAME)
+    .then(cache => cache.addAll(CORE.map(path => new Request(path, {cache:'reload'}))))
+    .then(() => self.skipWaiting())
+  );
 });
 self.addEventListener('message', event => {
   if (event.data?.type === 'ACTIVATE_RELEASE') self.skipWaiting();
