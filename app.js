@@ -1248,14 +1248,15 @@ window.hshSyncMaterialToGoogleSheet = async function() {
       const parsed = Number(raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw);
       return Number.isFinite(parsed) ? parsed.toFixed(2) : raw;
     };
+    const isoDate = value => {
+      const text = String(value ?? '').trim();
+      const match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      return match ? match[3] + '-' + match[2].padStart(2, '0') + '-' + match[1].padStart(2, '0') : text;
+    };
     const signature = cells => JSON.stringify(cells.map((value, index) => {
       if (index === 5 || index === 7) return number(value);
-      const text = String(value ?? '').trim().replace(/\s+/g, ' ');
-      if (index === 0 && /^\d{2}\/\d{2}\/\d{4}$/.test(text)) {
-        const parts = text.split('/');
-        return parts[2] + '-' + parts[1] + '-' + parts[0];
-      }
-      return text;
+      if (index === 0) return isoDate(value);
+      return String(value ?? '').trim().replace(/\s+/g, ' ');
     }));
     const fields = record => [
       record.date || '', record.tag || '', record.group || groupOf(record.material),
@@ -1320,7 +1321,7 @@ window.hshSyncMaterialToGoogleSheet = async function() {
         return normalized === '' ? null : Number(normalized);
       };
       const entry = {
-        id: id || 'sheet-legacy-' + (index + 4), date: row[1] || '', tag: row[2] || '',
+        id: id || 'sheet-legacy-' + (index + 4), date: isoDate(row[1]), tag: row[2] || '',
         group: row[3] || '', material: row[4] || '', specification: row[5] || '',
         quantity: parsed(row[6]) || 0, unit: row[7] || '',
         convertedQuantity: parsed(row[8]), convertedUnit: row[9] || '',
