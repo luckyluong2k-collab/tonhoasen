@@ -880,6 +880,8 @@ function applyBoqViewMode() {
   tableWrap?.toggleAttribute('hidden', useCards);
   cardBtn?.classList.toggle('active', useCards);
   tableBtn?.classList.toggle('active', !useCards);
+  cardBtn?.setAttribute('aria-pressed', String(useCards));
+  tableBtn?.setAttribute('aria-pressed', String(!useCards));
 }
 
 window.hshSetBoqViewMode = function(mode) {
@@ -2671,12 +2673,19 @@ window.hshOpenDrawingRelation = function(tabId, drawingId) {
 };
 
 window.hshOpenBoqSource = async function(rowNumber) {
-  const item = RAW_BOQ.find(row => Number(row.row) === Number(rowNumber));
-  switchTab('tab-boq');
+  const boqItems = await db.boq.toArray();
+  const item = (boqItems.length ? boqItems : RAW_BOQ).find(row => Number(row.row) === Number(rowNumber));
   const input = document.getElementById('boqSearchInput');
-  if (input && item) input.value = item.content.slice(0, 42);
+  const chapter = document.getElementById('boqChapterSelect');
+  const status = document.getElementById('boqStatusSelect');
+  if (chapter) chapter.value = 'all';
+  if (status) status.value = 'all';
+  if (input) input.value = item?.content?.slice(0, 42) || '';
+  if (matchMedia('(max-width: 768px)').matches) currentBoqViewMode = 'cards';
+  switchTab('tab-boq');
   await renderBOQTable();
-  const rowEl = document.querySelector(`[data-boq-row="${Number(rowNumber)}"]`);
+  const rowEl = [...document.querySelectorAll(`[data-boq-row="${Number(rowNumber)}"]`)]
+    .find(element => element.getClientRects().length);
   if (rowEl) {
     rowEl.classList.add('boq-source-highlight');
     rowEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -2699,6 +2708,10 @@ window.hshOpenQaQcSource = function(code) {
 };
 
 window.hshOpenDossierSource = function(itemId) {
+  const category = document.getElementById('dossierCategoryFilter');
+  const status = document.getElementById('dossierStatusFilter');
+  if (category) category.value = 'all';
+  if (status) status.value = 'all';
   switchTab('tab-dossier');
   setTimeout(() => {
     const row = document.getElementById(`dossier-item-${Number(itemId)}`);
@@ -2812,34 +2825,63 @@ window.hshOpenContractItem = function(itemId) {
 window.hshOpenQuickSearch = function() {
   const modal = document.getElementById('quickSearchModal');
   const input = document.getElementById('quickSearchModalInput');
+  window._quickSearchReturnFocus = document.activeElement;
   if (modal) modal.classList.add('active');
   if (input) {
     input.value = '';
     input.focus();
   }
+  window.hshSetQuickSearchType('all');
+  window.hshExecuteQuickSearch();
+};
+
+window.hshSetQuickSearchType = function(type) {
+  const allowed = ['all', 'Bản vẽ', 'BOQ Dự toán', 'Hợp đồng'];
+  window._quickSearchType = allowed.includes(type) ? type : 'all';
+  document.querySelectorAll('[data-search-type]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.searchType === window._quickSearchType));
+  });
+  window.hshExecuteQuickSearch();
 };
 
 window.hshCloseQuickSearch = function() {
   const modal = document.getElementById('quickSearchModal');
   if (modal) modal.classList.remove('active');
+  window._lastSearchResults = [];
+  if (window._quickSearchReturnFocus?.isConnected) window._quickSearchReturnFocus.focus();
 };
 
-window.hshExecuteQuickSearch = function() {
-  const kw = aiNormalize(document.getElementById('quickSearchModalInput')?.value || '').trim();
+window.hshExecuteQuickSearch = async function() {
+  const input = document.getElementById('quickSearchModalInput');
+  const kw = aiNormalize(input?.value || '').trim();
   const listEl = document.getElementById('quickSearchResultsList');
   if (!listEl) return;
 
   if (!kw) {
-    listEl.innerHTML = `<div class="search-empty-prompt">Nhập từ khóa để tra cứu siêu tốc trong toàn bộ dự án Hoa Sen Home...</div>`;
+    listEl.innerHTML = `<div class="search-empty-prompt">Nhập từ khóa để tìm ${window._quickSearchType && window._quickSearchType !== 'all' ? escapeHtml(window._quickSearchType) : 'trong toàn bộ dự án'}.</div>`;
+    window._lastSearchResults = [];
     return;
   }
 
-  let results = [];
+  const terms = kw.split(/\s+/);
+  const matches = value => {
+    const text = aiNormalize(value);
+    return terms.every(term => text.includes(term));
+  };
+  const rank = (title, code = '') => {
+    const label = aiNormalize(title);
+    const id = aiNormalize(code);
+    if (id === kw || label === kw) return 0;
+    if (id.startsWith(kw) || label.startsWith(kw)) return 1;
+    return label.includes(kw) ? 2 : 3;
+  };
+  const results = [];
 
   CONTRACT_LOOKUP_ITEMS.forEach(item => {
     const haystack = aiNormalize([item.group, item.title, item.summary, item.keywords].join(' '));
-    if (haystack.includes(kw)) {
+    if (matches(haystack)) {
       results.push({
+        rank: rank(item.title, item.id),
         type: "Hợp đồng",
         icon: "fa-file-signature text-primary",
         title: item.title,
@@ -2850,20 +2892,22 @@ window.hshExecuteQuickSearch = function() {
   });
 
   DOSSIER_ITEMS.forEach(item => {
-    if (aiNormalize([item.title, item.category, item.output].join(' ')).includes(kw)) {
+    if (matches([item.title, item.category, item.output].join(' '))) {
       results.push({
+        rank: rank(item.title, item.id),
         type: "Hồ sơ",
         icon: "fa-folder-open text-danger",
         title: `#${String(item.id).padStart(2, '0')} ${item.title}`,
         sub: `${item.category} • ${item.output}`,
-        action: () => { window.hshCloseQuickSearch(); switchTab('tab-dossier'); }
+        action: () => { window.hshCloseQuickSearch(); window.hshOpenDossierSource(item.id); }
       });
     }
   });
 
   COMPLETE_DRAWINGS.forEach(d => {
-    if (aiNormalize([d.title, d.desc, d.id].join(' ')).includes(kw)) {
+    if (matches([d.title, d.desc, d.id].join(' '))) {
       results.push({
+        rank: rank(d.title, d.id),
         type: "Bản vẽ",
         icon: "fa-layer-group text-primary",
         title: d.title,
@@ -2873,31 +2917,59 @@ window.hshExecuteQuickSearch = function() {
     }
   });
 
-  RAW_BOQ.slice(0, 100).forEach(b => {
-    if (aiNormalize([b.content, b.code, b.brand].join(' ')).includes(kw)) {
+  let boqItems = [];
+  let qaqcItems = [];
+  try {
+    [boqItems, qaqcItems] = await Promise.all([db.boq.toArray(), db.qaqc.toArray()]);
+  } catch (error) {
+    console.warn('Không đọc được dữ liệu tìm kiếm trên máy:', error);
+  }
+  if (aiNormalize(input?.value || '').trim() !== kw || !document.getElementById('quickSearchModal')?.classList.contains('active')) return;
+
+  (boqItems.length ? boqItems : RAW_BOQ).forEach(b => {
+    if (matches([b.content, b.code, b.brand, b.note, b.sec, b.subsec, b.row].join(' '))) {
       results.push({
+        rank: rank(b.content, b.code || b.row),
         type: "BOQ Dự toán",
         icon: "fa-file-invoice-dollar text-success",
         title: `[${b.stt || b.row}] ${b.content}`,
         sub: `Đơn giá: ${fmtNumber(b.price_total)} đ • Thành tiền: ${fmtCurrency(b.total_amt)}`,
-        action: () => { window.hshCloseQuickSearch(); switchTab('tab-boq'); }
+        action: () => { window.hshCloseQuickSearch(); window.hshOpenBoqSource(b.row); }
       });
     }
   });
 
-  if (results.length === 0) {
-    listEl.innerHTML = `<div class="search-empty-prompt">Không tìm thấy kết quả nào cho "${kw}"</div>`;
+  (qaqcItems.length ? qaqcItems : INITIAL_QAQC).forEach(item => {
+    if (matches([item.code, item.title, item.std, item.inspector].join(' '))) {
+      results.push({
+        rank: rank(item.title, item.code),
+        type: "QA/QC",
+        icon: "fa-clipboard-check text-primary",
+        title: `${item.code} ${item.title}`,
+        sub: `Tiêu chuẩn: ${item.std}`,
+        action: () => { window.hshCloseQuickSearch(); window.hshOpenQaQcSource(item.code); }
+      });
+    }
+  });
+
+  const visibleResults = window._quickSearchType && window._quickSearchType !== 'all'
+    ? results.filter(result => result.type === window._quickSearchType)
+    : results;
+  visibleResults.sort((a, b) => a.rank - b.rank);
+  window._lastSearchResults = visibleResults.slice(0, 30);
+
+  if (visibleResults.length === 0) {
+    listEl.innerHTML = `<div class="search-empty-prompt">Không tìm thấy kết quả nào cho "${escapeHtml(input.value)}"</div>`;
   } else {
-    listEl.innerHTML = results.slice(0, 10).map((r, i) => `
-      <div class="db-action-item" style="cursor:pointer; margin-bottom:8px;" onclick="window.hshExecuteSearchAction(${i})">
+    listEl.innerHTML = `<div class="search-result-count">${visibleResults.length} kết quả${visibleResults.length > 30 ? ' · hiển thị 30 kết quả đầu' : ''}</div>` + window._lastSearchResults.map((r, i) => `
+      <button class="db-action-item search-result-item" type="button" onclick="window.hshExecuteSearchAction(${i})">
         <div>
-          <strong style="display:flex; align-items:center; gap:8px;"><i class="fas ${r.icon}"></i> ${r.title}</strong>
-          <p class="text-muted text-xs" style="margin-top:2px;">${r.sub}</p>
+          <strong style="display:flex; align-items:center; gap:8px;"><i class="fas ${r.icon}" aria-hidden="true"></i> ${escapeHtml(r.title)}</strong>
+          <p class="text-muted text-xs" style="margin-top:2px;">${escapeHtml(r.sub)}</p>
         </div>
-        <span class="badge badge-outline">${r.type}</span>
-      </div>
+        <span class="badge badge-outline">${escapeHtml(r.type)}</span>
+      </button>
     `).join('');
-    window._lastSearchResults = results;
   }
 };
 

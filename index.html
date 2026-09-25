@@ -187,6 +187,9 @@
                 </div>
 
                 <div class="top-bar-right">
+                    <button class="btn-top-icon mobile-search-trigger" id="btnMobileSearch" type="button" aria-label="Tìm kiếm toàn dự án" title="Tìm kiếm" onclick="window.hshOpenQuickSearch()">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                    </button>
                     <div class="quick-status-pills">
                         <span class="status-pill pill-contract" title="Số Hợp đồng xây lắp">
                             <i class="fas fa-file-contract"></i> 01/2026/HĐXD/HSG-HG
@@ -218,6 +221,7 @@
                             <a class="field-action" href="./bao-cao-ngay.html"><i class="fas fa-copy" aria-hidden="true"></i><span><strong>Lập báo cáo ngày</strong><small>Điền mẫu, copy và lưu lên Sheet</small></span><b aria-hidden="true">→</b></a>
                             <button class="field-action sheet-action material-action" onclick="window.hshOpenMaterialQuickEntry()"><i class="fas fa-truck-ramp-box" aria-hidden="true"></i><span><strong>Nhập vật tư hôm nay</strong><small>Thép, cát, xi măng, bê tông…</small></span><b aria-hidden="true">＋</b></button>
                             <a class="field-action" href="./dossier-editor.html?type=acceptance"><i class="fas fa-file-signature" aria-hidden="true"></i><span><strong>Lập biên bản nghiệm thu</strong><small>Mở mẫu để điền hồ sơ</small></span><b aria-hidden="true">→</b></a>
+                            <a class="field-action" href="./loi-moi-nghiem-thu.html"><i class="fas fa-comment-dots" aria-hidden="true"></i><span><strong>Soạn tin mời nghiệm thu</strong><small>Soạn, sao chép hoặc chia sẻ sang Zalo</small></span><b aria-hidden="true">→</b></a>
                         </div>
                     </section>
                     <section class="quick-section quick-section-lookup" aria-labelledby="quickLookupTitle">
@@ -596,8 +600,8 @@
 
                 <!-- BOQ Table Container -->
                 <div class="boq-view-switch" aria-label="Chọn kiểu xem BOQ">
-                    <button type="button" id="boqCardViewBtn" class="boq-view-btn active" onclick="window.hshSetBoqViewMode('cards')"><i class="fas fa-id-card"></i> Thẻ</button>
-                    <button type="button" id="boqTableViewBtn" class="boq-view-btn" onclick="window.hshSetBoqViewMode('table')"><i class="fas fa-table"></i> Bảng</button>
+                    <button type="button" id="boqCardViewBtn" class="boq-view-btn active" aria-pressed="true" onclick="window.hshSetBoqViewMode('cards')"><i class="fas fa-id-card"></i> Thẻ</button>
+                    <button type="button" id="boqTableViewBtn" class="boq-view-btn" aria-pressed="false" onclick="window.hshSetBoqViewMode('table')"><i class="fas fa-table"></i> Bảng</button>
                     <button type="button" id="boqInProgressBtn" class="boq-view-btn boq-work-btn" onclick="window.hshFilterBoqInProgress()"><i class="fas fa-person-digging"></i> Đang làm</button>
                 </div>
                 <div id="boqCardsList" class="boq-cards-list" aria-label="Danh sách BOQ dạng thẻ"></div>
@@ -705,6 +709,7 @@
                     </div>
                 </div>
 
+                <p><a class="btn btn-primary" href="./loi-moi-nghiem-thu.html"><i class="fas fa-comment-dots"></i> Soạn tin mời nghiệm thu</a></p>
                 <!-- QA/QC Checklist Cards Grid -->
                 <div class="qaqc-grid" id="qaqcCardsGrid">
                     <!-- Populated dynamically by app.js -->
@@ -1465,12 +1470,18 @@
     </div>
 
     <!-- QUICK SEARCH MODAL (Ctrl + K) -->
-    <div id="quickSearchModal" class="search-modal-overlay">
+    <div id="quickSearchModal" class="search-modal-overlay" role="dialog" aria-modal="true" aria-label="Tìm kiếm toàn dự án" onclick="if (event.target === this) window.hshCloseQuickSearch()">
         <div class="search-modal-box">
             <div class="search-modal-header">
                 <i class="fas fa-search"></i>
-                <input type="text" id="quickSearchModalInput" placeholder="Tìm bản vẽ, BOQ 328 dòng, QA/QC, tiêu chuẩn TCVN..." oninput="window.hshExecuteQuickSearch()">
-                <kbd onclick="window.hshCloseQuickSearch()">Esc</kbd>
+                <input type="search" id="quickSearchModalInput" aria-label="Nhập từ khóa tìm kiếm" autocomplete="off" placeholder="Tìm bản vẽ, BOQ, QA/QC, tiêu chuẩn TCVN..." oninput="window.hshExecuteQuickSearch()">
+                <button class="search-close-button" type="button" aria-label="Đóng tìm kiếm" onclick="window.hshCloseQuickSearch()">Đóng</button>
+            </div>
+            <div class="quick-search-filters" role="group" aria-label="Lọc loại tài liệu">
+                <button class="quick-search-filter" type="button" data-search-type="all" aria-pressed="true" onclick="window.hshSetQuickSearchType('all')">Tất cả</button>
+                <button class="quick-search-filter" type="button" data-search-type="Bản vẽ" aria-pressed="false" onclick="window.hshSetQuickSearchType('Bản vẽ')">Bản vẽ</button>
+                <button class="quick-search-filter" type="button" data-search-type="BOQ Dự toán" aria-pressed="false" onclick="window.hshSetQuickSearchType('BOQ Dự toán')">BOQ</button>
+                <button class="quick-search-filter" type="button" data-search-type="Hợp đồng" aria-pressed="false" onclick="window.hshSetQuickSearchType('Hợp đồng')">Hợp đồng</button>
             </div>
             <div class="search-results-list" id="quickSearchResultsList">
                 <div class="search-empty-prompt">Nhập từ khóa để tra cứu siêu tốc trong toàn bộ dự án Hoa Sen Home...</div>

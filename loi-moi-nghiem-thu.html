@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a2c54">
+  <title>Soạn tin mời nghiệm thu · Hoa Sen Home Phủ Lý</title>
+  <link rel="stylesheet" href="loi-moi-nghiem-thu.css">
+</head>
+<body>
+  <header class="invite-topbar">
+    <a href="index.html#qaqc">← Về công trình</a>
+    <span>HOA SEN HOME PHỦ LÝ</span>
+  </header>
+  <main class="invite-layout">
+    <div class="invite-intro">
+      <p class="invite-eyebrow">NGHIỆM THU HIỆN TRƯỜNG</p>
+      <h1>Soạn tin mời nghiệm thu</h1>
+      <p>Điền thông tin, xem lại nội dung rồi chia sẻ sang Zalo. Mẫu bên dưới dựa trên lời mời ngày 25/9/2026 của bạn; hãy sửa lại trước mỗi lần gửi.</p>
+    </div>
+    <div class="invite-columns">
+      <form id="inviteForm" class="invite-panel" autocomplete="off">
+        <h2>Thông tin lời mời</h2>
+        <label for="inviteRecipients">Người được mời <span>*</span></label>
+        <textarea id="inviteRecipients" name="recipients" rows="2" required>anh @Cường và các bộ phận liên quan @Bình @Việt Trần - Cửa hàng trưởng Tôn Hoa Sen</textarea>
+        <p class="invite-hint">Dấu @ trong bản nháp chỉ là chữ. Khi dán vào nhóm Zalo, hãy chọn người được gắn thẻ lại.</p>
+
+        <div class="invite-two-col">
+          <div><label for="inviteInspectionAt">Thời gian nghiệm thu <span>*</span></label><input id="inviteInspectionAt" name="inspectionAt" type="datetime-local" value="2026-09-25T16:30" required></div>
+          <div><label for="invitePourAt">Dự kiến đổ bê tông</label><input id="invitePourAt" name="pourAt" type="datetime-local" value="2026-09-26T07:00"></div>
+        </div>
+
+        <label for="inviteScope">Nội dung nghiệm thu <span>*</span></label>
+        <textarea id="inviteScope" name="scope" rows="3" required>Gia công, lắp dựng cốt thép và ván khuôn đài móng, đế bể tự hoại trước khi đổ bê tông.</textarea>
+
+        <label for="invitePourItems">Hạng mục dự kiến đổ</label>
+        <textarea id="invitePourItems" name="pourItems" rows="2">7 đài móng M1, M5, M7 và đế bể tự hoại</textarea>
+
+        <div class="invite-two-col">
+          <div><label for="inviteQuantity">Khối lượng dự kiến (m³)</label><input id="inviteQuantity" name="quantity" type="number" min="0" step="0.01" inputmode="decimal" value="5"></div>
+          <div><label for="inviteGrade">Mác bê tông</label><input id="inviteGrade" name="grade" type="text" value="M250" placeholder="Ví dụ: M250"></div>
+        </div>
+
+        <label for="inviteNote">Nội dung bổ sung</label>
+        <textarea id="inviteNote" name="note" rows="2" placeholder="Ví dụ: địa điểm tập trung, hồ sơ cần chuẩn bị..."></textarea>
+        <p class="invite-hint">Bản nháp chỉ lưu trên thiết bị này, không tự gửi lên Sheet, Drive hay Zalo.</p>
+      </form>
+
+      <section class="invite-panel invite-preview" aria-labelledby="invitePreviewTitle">
+        <h2 id="invitePreviewTitle">Tin nhắn xem trước</h2>
+        <p class="invite-check">Kiểm tra lại giờ hẹn, số đài móng, khối lượng, mác bê tông và người nhận trước khi gửi.</p>
+        <textarea id="inviteMessage" rows="13" readonly aria-label="Nội dung tin nhắn xem trước"></textarea>
+        <p id="inviteStatus" class="invite-status" role="status" aria-live="polite">Đang tạo nội dung…</p>
+        <div class="invite-actions">
+          <button type="button" id="inviteCopy">Sao chép tin</button>
+          <button type="button" id="inviteShare" class="invite-primary">Chia sẻ qua điện thoại</button>
+          <a href="https://id.zalo.me/" target="_blank" rel="noopener noreferrer">Mở Zalo Web ↗</a>
+        </div>
+        <p class="invite-hint">Trên điện thoại, bấm “Chia sẻ”, chọn Zalo rồi chọn đúng nhóm. Trên máy tính, sao chép tin, mở Zalo Web và dán vào nhóm. Trang này không tự bấm gửi thay bạn.</p>
+      </section>
+    </div>
+  </main>
+  <script src="loi-moi-nghiem-thu.js"></script>
+</body>
+</html>

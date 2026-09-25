@@ -1,0 +1,30 @@
+:root { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #10243e; background: #f3f6fb; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.invite-topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; padding: 10px max(16px, calc((100vw - 1120px) / 2)); background: #0a2c54; color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .04em; }
+.invite-topbar a { color: #fff; font-size: 14px; text-decoration: none; letter-spacing: 0; }
+.invite-layout { max-width: 1120px; margin: 0 auto; padding: 26px 16px 48px; }
+.invite-intro { margin-bottom: 20px; }
+.invite-eyebrow { color: #c8102e; font-size: 12px; font-weight: 800; letter-spacing: .1em; }
+h1 { margin: 4px 0 8px; font-size: clamp(25px, 4vw, 36px); }
+.invite-intro > p:last-child { max-width: 720px; color: #526176; line-height: 1.55; }
+.invite-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: 18px; align-items: start; }
+.invite-panel { min-width: 0; padding: 22px; border: 1px solid #d7e2ef; border-radius: 16px; background: #fff; box-shadow: 0 6px 20px #0a2c540d; }
+h2 { margin: 0 0 18px; font-size: 19px; }
+label { display: block; margin: 14px 0 6px; font-size: 13px; font-weight: 800; }
+label span { color: #c8102e; }
+input, textarea { width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid #b9cce0; border-radius: 9px; background: #fff; color: #10243e; font: inherit; font-size: 16px; line-height: 1.45; }
+textarea { resize: vertical; }
+input:focus, textarea:focus, button:focus-visible, a:focus-visible { outline: 3px solid #7db3ee; outline-offset: 2px; }
+.invite-two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.invite-hint { margin: 8px 0 0; color: #607086; font-size: 12px; line-height: 1.5; }
+.invite-preview { position: sticky; top: 16px; }
+.invite-check { padding: 10px 12px; border-radius: 8px; background: #fff8e9; color: #68450a; font-size: 13px; line-height: 1.5; }
+#inviteMessage { min-height: 320px; background: #f9fbfe; white-space: pre-wrap; }
+.invite-status { min-height: 20px; margin: 8px 0 14px; color: #0d663c; font-size: 13px; font-weight: 700; }
+.invite-status.error { color: #b42338; }
+.invite-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.invite-actions button, .invite-actions a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 14px; border: 1px solid #b9cce0; border-radius: 9px; background: #fff; color: #0a2c54; font: inherit; font-size: 13px; font-weight: 800; text-align: center; text-decoration: none; cursor: pointer; }
+.invite-actions .invite-primary { border-color: #0a2c54; background: #0a2c54; color: #fff; }
+.invite-actions button:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 760px) { .invite-layout { padding: 20px 12px 32px; } .invite-columns, .invite-two-col { grid-template-columns: minmax(0, 1fr); } .invite-two-col { gap: 0; } .invite-panel { padding: 16px; } .invite-preview { position: static; } .invite-actions button, .invite-actions a { flex: 1 1 100%; } #inviteRecipients { min-height: 110px; } }
