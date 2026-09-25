@@ -1,4 +1,4 @@
-// Release 10.89. The page and worker share the same release source.
+// Release 10.90. The page and worker share the same release source.
 importScripts('./app-version.js');
 const CACHE_NAME = `hsh-phuly-v${self.APP_VERSION}`;
 const CORE = [
@@ -7,6 +7,9 @@ const CORE = [
   "./sheet-diary.js",
   "./nhat-ky-cong-trinh.html",
   "./bao-cao-ngay.html",
+  "./loi-moi-nghiem-thu.html",
+  "./loi-moi-nghiem-thu.css",
+  "./loi-moi-nghiem-thu.js",
   "./chi-tiet-thep.html",
   "./field-workflow.js", "./field-workflow.css",
   ...['Regular','Bold','Italic','BoldItalic'].map(style => `./vendor/fonts/Tinos-${style}.ttf`),
