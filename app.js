@@ -1223,8 +1223,29 @@ window.hshSyncMaterialToGoogleSheet = async function() {
       button.disabled = true;
       button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đồng bộ...';
     }
-    const records = JSON.parse(localStorage.getItem('hsh-material-receipts-v1') || '[]');
-    if (!Array.isArray(records)) throw Error('Dữ liệu vật tư trên thiết bị không đúng định dạng.');
+    const storedRecords = JSON.parse(localStorage.getItem('hsh-material-receipts-v1') || '[]');
+    if (!Array.isArray(storedRecords)) throw Error('Dữ liệu vật tư trên thiết bị không đúng định dạng.');
+    const materialFingerprint = record => [
+      record.date || '',
+      record.tag || '',
+      record.group || '',
+      record.material || '',
+      record.specification || '',
+      Number(record.quantity) || 0,
+      record.unit || '',
+      record.convertedQuantity == null ? '' : Number(record.convertedQuantity) || 0,
+      record.convertedUnit || '',
+      record.supplier || '',
+      record.note || ''
+    ].map(value => String(value).trim()).join('|||');
+    const seenMaterialRows = new Set();
+    const records = storedRecords.filter(record => {
+      const key = materialFingerprint(record);
+      if (seenMaterialRows.has(key)) return false;
+      seenMaterialRows.add(key);
+      return true;
+    });
+    if (records.length !== storedRecords.length) localStorage.setItem('hsh-material-receipts-v1', JSON.stringify(records));
     const token = await getGoogleSheetToken();
     const tab = "'Vật Tư '";
     const endpoint = 'https://sheets.googleapis.com/v4/spreadsheets/' + HSH_SHEET_ID + '/values/';

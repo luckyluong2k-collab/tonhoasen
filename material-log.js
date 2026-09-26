@@ -21,9 +21,33 @@
     brick: { material: "Gạch", unit: "viên", group: "Bê tông & xây" },
     roof: { material: "Tôn", unit: "m²", group: "Hoàn thiện" },
   };
+  const materialFingerprint = record => [
+    record.date || "",
+    record.tag || "",
+    record.group || "",
+    record.material || "",
+    record.specification || "",
+    Number(record.quantity) || 0,
+    record.unit || "",
+    record.convertedQuantity == null ? "" : Number(record.convertedQuantity) || 0,
+    record.convertedUnit || "",
+    record.supplier || "",
+    record.note || ""
+  ].map(value => String(value).trim()).join("|||");
+  function dedupeRecords(list) {
+    const seenIds = new Set(), seenRows = new Set(), next = [];
+    for (const record of Array.isArray(list) ? list : []) {
+      const id = String(record.id || "").trim(), rowKey = materialFingerprint(record);
+      if ((id && seenIds.has(id)) || seenRows.has(rowKey)) continue;
+      if (id) seenIds.add(id);
+      seenRows.add(rowKey);
+      next.push(record);
+    }
+    return next;
+  }
   let records = [];
-  try { const saved = JSON.parse(localStorage.getItem(storageKey) || "[]"); if (Array.isArray(saved)) records = saved; } catch (_) {}
-  function save() { try { localStorage.setItem(storageKey, JSON.stringify(records)); return true; } catch (_) { return false; } }
+  try { const saved = JSON.parse(localStorage.getItem(storageKey) || "[]"); if (Array.isArray(saved)) records = dedupeRecords(saved); } catch (_) {}
+  function save() { try { records = dedupeRecords(records); localStorage.setItem(storageKey, JSON.stringify(records)); return true; } catch (_) { return false; } }
   function migrateSteelRecords() {
     let changed = false;
     records = records.map(record => {
@@ -84,13 +108,13 @@
   function open() { const modal = $("materialQuickModal"); if (!modal) return; $("materialInputDate").value = today(); $("materialQuickStatus").textContent = ""; modal.classList.add("active"); syncForm(); render(); setTimeout(() => $("materialInputType")?.focus(), 80); }
   function close() { $("materialQuickModal")?.classList.remove("active"); }
   $("materialInputType")?.addEventListener("change", syncForm); $("materialInputPhi")?.addEventListener("change", syncForm); $("materialInputSteelLength")?.addEventListener("change", syncForm); $("materialInputQuantity")?.addEventListener("input", syncForm);
-  $("materialQuickForm")?.addEventListener("submit", event => { event.preventDefault(); const entry = getEntry(); if (!entry) { $("materialQuickStatus").textContent = "Nhập đủ loại vật tư, số lượng lớn hơn 0 và đơn vị."; return; } records.push(entry); if (!save()) { records.pop(); $("materialQuickStatus").textContent = "Chưa lưu được trên thiết bị. Hãy thử lại; dữ liệu chưa được xác nhận."; return; } $("materialQuickStatus").textContent = entry.convertedUnit ? `Đã lưu trên thiết bị: ${numberText(entry.quantity)} ${entry.unit} = ${numberText(entry.convertedQuantity)} ${entry.convertedUnit}. Bấm Đồng bộ Sheet (nối tiếp) để lưu chung.` : "Đã lưu trên thiết bị. Bấm Đồng bộ Sheet (nối tiếp) để lưu chung."; $("materialInputQuantity").value = ""; $("materialInputTag").value = ""; $("materialInputSupplier").value = ""; $("materialInputNote").value = ""; render(); });
+  $("materialQuickForm")?.addEventListener("submit", event => { event.preventDefault(); const entry = getEntry(); if (!entry) { $("materialQuickStatus").textContent = "Nhập đủ loại vật tư, số lượng lớn hơn 0 và đơn vị."; return; } if (records.some(record => materialFingerprint(record) === materialFingerprint(entry))) { $("materialQuickStatus").textContent = "Phiếu vật tư này đã có, không lưu trùng."; render(); return; } records.push(entry); if (!save()) { records.pop(); $("materialQuickStatus").textContent = "Chưa lưu được trên thiết bị. Hãy thử lại; dữ liệu chưa được xác nhận."; return; } $("materialQuickStatus").textContent = entry.convertedUnit ? `Đã lưu trên thiết bị: ${numberText(entry.quantity)} ${entry.unit} = ${numberText(entry.convertedQuantity)} ${entry.convertedUnit}. Bấm Đồng bộ Sheet (nối tiếp) để lưu chung.` : "Đã lưu trên thiết bị. Bấm Đồng bộ Sheet (nối tiếp) để lưu chung."; $("materialInputQuantity").value = ""; $("materialInputTag").value = ""; $("materialInputSupplier").value = ""; $("materialInputNote").value = ""; render(); });
   window.hshOpenMaterialQuickEntry = open; window.hshCloseMaterialQuickEntry = close;
   window.hshExportMaterialSummary = () => { const rows = [["STT", "Ngày nhập", "Tag", "Nhóm", "Vật tư", "Quy cách", "Số lượng nhập", "Đơn vị nhập", "Khối lượng quy đổi", "Đơn vị quy đổi", "Nhà cung cấp / xe hàng", "Ghi chú"]]; [...records].sort((a, b) => a.date.localeCompare(b.date)).forEach((record, index) => rows.push([index + 1, record.date, record.tag || "", record.group || "Khác", record.material, record.specification || "", record.quantity, record.unit, record.convertedQuantity ?? "", record.convertedUnit || "", record.supplier || "", record.note || ""])); const csv = "\ufeff" + rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n"); const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); const link = document.createElement("a"); link.href = url; link.download = `thong-ke-vat-tu-${today()}.csv`; link.click(); URL.revokeObjectURL(url); };
   function reloadFromStorage() {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
-      if (Array.isArray(saved)) { records = saved; render(); }
+      if (Array.isArray(saved)) { records = dedupeRecords(saved); save(); render(); }
     } catch (_) {}
   }
   window.addEventListener("hsh-materials-updated", reloadFromStorage);
