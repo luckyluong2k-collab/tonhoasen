@@ -1,4 +1,4 @@
-// Release 10.90. The page and worker share the same release source.
+// Release 10.91. The page and worker share the same release source.
 importScripts('./app-version.js');
 const CACHE_NAME = `hsh-phuly-v${self.APP_VERSION}`;
 const CORE = [
@@ -52,7 +52,13 @@ const CORE = [
   "./styles.css",
   "./vendor/fflate.min.js",
   "./vendor/html2canvas.min.js",
-  "./vendor/jspdf.umd.min.js"
+  "./vendor/jspdf.umd.min.js",
+  "./nang-cap.css",
+  "./nang-cap.js",
+  "./mo-hinh-3d-xuong.html",
+  "./vendor/three/three.min.js",
+  "./vendor/three/OrbitControls.js",
+  "./assets/hoa-sen/mo-hinh-3d-xuong-preview.jpg"
 ];
 self.addEventListener('install', event => {
   // A partial download must not replace the working release.

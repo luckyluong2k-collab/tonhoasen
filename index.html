@@ -30,6 +30,7 @@
 <link rel="stylesheet" href="field-workflow.css">
 <script src="sync-overview.js" defer></script><link rel="stylesheet" href="interface-polish.css">
     <link rel="stylesheet" href="tool-visuals.css">
+    <link rel="stylesheet" href="nang-cap.css">
 </head>
 <body class="theme-light">
     <!-- Offline & Network Status Notification Bar -->
@@ -128,6 +129,12 @@
                 </a>
 
                 <div class="nav-section-title">KỸ THUẬT HIỆN TRƯỜNG</div>
+
+                <a href="./mo-hinh-3d-xuong.html" class="nav-item nav-3d-xuong">
+                    <i class="fas fa-cube nav-icon" aria-hidden="true"></i>
+                    <span class="nav-text">Mô hình 3D xưởng</span>
+                    <span class="nav-badge badge-yellow" data-3d-open-count title="Số điểm kết cấu thép còn cần chốt">24</span>
+                </a>
 
                 <a href="#tools" class="nav-item" data-tab="tab-tools" onclick="window.hshNavigateToTab('tab-tools'); return false;">
                     <i class="fas fa-calculator nav-icon"></i>
@@ -231,6 +238,7 @@
                             <button class="field-action" onclick="window.hshNavigateToTab('tab-boq')"><i class="fas fa-file-invoice-dollar" aria-hidden="true"></i><span><strong>Mở BOQ</strong><small>Tra khối lượng, mã hiệu và tiến độ</small></span><b aria-hidden="true">→</b></button>
                             <button class="field-action" onclick="window.hshNavigateToTab('tab-qaqc')"><i class="fas fa-clipboard-check" aria-hidden="true"></i><span><strong>Kiểm tra QA/QC</strong><small>Mở checklist nghiệm thu</small></span><b aria-hidden="true">→</b></button>
                             <button class="field-action contract-action" onclick="window.hshOpenContractLookup()"><i class="fas fa-file-signature" aria-hidden="true"></i><span><strong>Tra cứu hợp đồng</strong><small>Tìm thanh toán, tiến độ, bảo hành</small></span><b aria-hidden="true">⌕</b></button>
+                            <a class="field-action action-3d" href="./mo-hinh-3d-xuong.html"><i class="fas fa-cube" aria-hidden="true"></i><span><strong>Xem 3D nhà xưởng</strong><small>Xoay mô hình, bấm thanh thép xem quy cách</small></span><b aria-hidden="true">→</b></a>
                         </div>
                     </section>
                     <section class="quick-section quick-section-cloud" aria-labelledby="quickCloudTitle">
@@ -288,6 +296,29 @@
                         <span class="perspective-image-hint"><i class="fas fa-expand"></i> Bấm để xem lớn</span>
                     </a>
                 </div>
+
+                <!-- Workshop steel structure 3D model -->
+                <section class="xuong3d-card" aria-labelledby="xuong3dTitle">
+                    <div class="xuong3d-copy">
+                        <p class="xuong3d-kicker"><i class="fas fa-cube" aria-hidden="true"></i> Mô hình 3D nhà xưởng</p>
+                        <h3 id="xuong3dTitle">Kết cấu thép xưởng, canopy và khung treo trần</h3>
+                        <p>Dựng từ bản vẽ HS.Dw, TKTC 23/05/2026, bản điều chỉnh mái 10.30 và các bảng bóc tách đặt hàng. Bấm vào từng thanh thép để xem quy cách và khối lượng; chế độ đi bộ cho phép đứng dưới nền nhìn lên.</p>
+                        <dl class="xuong3d-facts">
+                            <div><dt>Điểm cần chốt</dt><dd><strong data-3d-open-count>24</strong> mục</dd></div>
+                            <div><dt>Lưới trục</dt><dd>1–4 × A–E'</dd></div>
+                            <div><dt>Xem được</dt><dd>Thép hình, xà gồ, bản mã, bu lông</dd></div>
+                        </dl>
+                        <div class="xuong3d-actions">
+                            <a class="btn xuong3d-primary" href="./mo-hinh-3d-xuong.html"><i class="fas fa-cube" aria-hidden="true"></i> Mở mô hình 3D</a>
+                            <a class="btn xuong3d-secondary" href="./mo-hinh-3d-xuong.html#can-chot"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Xem điểm cần chốt</a>
+                            <a class="btn xuong3d-secondary" href="./mo-hinh-3d-xuong.html#vat-tu"><i class="fas fa-list-check" aria-hidden="true"></i> Bản mã &amp; bu lông</a>
+                        </div>
+                    </div>
+                    <a class="xuong3d-visual" href="./mo-hinh-3d-xuong.html" aria-label="Mở mô hình 3D nhà xưởng">
+                        <img src="./assets/hoa-sen/mo-hinh-3d-xuong-preview.jpg" alt="Mô hình 3D kết cấu thép nhà xưởng Hoa Sen Home Phủ Lý: cột I-250, canopy, khung treo trần G-1 và lưới trục A–E'" loading="lazy" width="960" height="737">
+                        <span class="xuong3d-visual-hint"><i class="fas fa-hand-pointer" aria-hidden="true"></i> Bấm để xoay mô hình</span>
+                    </a>
+                </section>
 
                 <!-- 4 High-Impact KPI Metrics -->
                 <div class="metrics-grid">
@@ -1693,6 +1724,7 @@
     <script src="field-workflow.js"></script>
     <script src="material-log.js"></script>
     <script src="notification-reminder.js"></script>
+    <script src="nang-cap.js"></script>
     <!-- PWA Service Worker Registration -->
 
 </body>

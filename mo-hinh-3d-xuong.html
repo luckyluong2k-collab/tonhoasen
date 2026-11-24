@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><script src="app-version.js"></script><script src="app-release.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D nhà xưởng · Hoa Sen Home Phủ Lý</title>
+<meta name="theme-color" content="#0A2C54">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="assets/app/icon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/app/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/*
+VOICE: bàn giao kỹ thuật ngoài công trường – rõ, chắc, không trang trí thừa.
+IDEA: bản vẽ shop-drawing kết cấu thép biến thành mô hình xoay được, mỗi thanh bấm vào là ra phiếu quy cách.
+PICTURE: mô hình 3D chiếm gần trọn màn hình, bảng lớp + phiếu cấu kiện ở cạnh trái.
+COLOUR and TYPE: nền giấy can xám nhạt / đêm xanh than; mỗi nhóm cấu kiện một màu đặc; chữ Be Vietnam Pro.
+LAYOUT: thanh trái 340px (màn hẹp: ngăn kéo dưới), canvas phần còn lại, nút góc nhìn nổi phía trên.
+*/
+:root{color-scheme:light dark;--bg:light-dark(#eef0f2,#10151c);--panel:light-dark(#ffffff,#161d26);--ink:light-dark(#141a22,#e8edf3);--mute:light-dark(#5b6673,#93a0b0);--line:light-dark(#d9dee4,#273241);--acc:#d1121f;--chip:light-dark(#f3f5f7,#1d2632)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Be Vietnam Pro",system-ui,sans-serif;overflow:hidden;display:flex}
+#side{width:350px;flex:none;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;height:100%;z-index:3}
+#side header{padding:16px 18px 12px;border-bottom:3px solid var(--acc)}
+h1{font-size:19px;line-height:1.2;margin:0 0 4px;font-weight:800;text-wrap:balance}
+.sub{color:var(--mute);font-size:13px;margin:0}
+#scroll{overflow-y:auto;flex:1;padding:10px 14px 24px}
+h2{font-size:13px;margin:16px 4px 8px;color:var(--mute);font-weight:600}
+.lay{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 8px;border-radius:8px;cursor:pointer;user-select:none;min-height:44px}
+.lay:hover{background:var(--chip)}
+.lay input{width:18px;height:18px;margin:0;accent-color:var(--acc)}
+.lay .nm{font-size:14px;line-height:1.25}
+.lay .nm small{display:block;color:var(--mute);font-size:12px}
+.lay .kg{font-size:12px;color:var(--mute);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:0}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+#tabs{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0 2px}
+#tabs button{flex:1 1 auto;min-height:36px;font-size:12px;padding:6px 4px}
+#tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pane[hidden]{display:none}
+table.st{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.st th{font-weight:600;color:var(--mute);font-size:11.5px;text-align:right;padding:4px 3px;border-bottom:1px solid var(--line)}
+.st td{padding:4px 3px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+.st th:first-child,.st td:first-child{text-align:left}
+.st tr.h td{font-weight:700;background:var(--chip)}
+.st tr.s td:first-child{padding-left:12px;color:var(--mute);font-weight:400}
+.st tr.t td{font-weight:800;border-top:2px solid var(--line)}
+.stn{font-size:12px;color:var(--mute);margin:6px 2px 10px}
+button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:8px;padding:8px 11px;min-height:40px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#card{display:none;border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:12px 14px;margin:6px 0 4px;background:var(--chip)}
+#card.show{display:block}
+#card h3{margin:0 0 2px;font-size:16px;line-height:1.3}
+#card .spec{font-weight:800;font-size:18px;margin:2px 0 8px}
+#card table{width:100%;border-collapse:collapse;font-size:13px}
+#card td{padding:3px 0;border-top:1px solid var(--line);vertical-align:top}
+#card td:first-child{color:var(--mute);width:38%;padding-right:8px}
+#card .note{font-size:12.5px;color:var(--mute);margin:8px 0 0}
+.warn{font-size:13px;margin:0;padding-left:18px}
+.warn li{margin:0 0 8px}
+.tot{display:flex;justify-content:space-between;font-weight:800;padding:8px;border-top:2px solid var(--ink);margin-top:6px;font-variant-numeric:tabular-nums}
+#stage{position:relative;flex:1;height:100%}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none}
+#views{position:absolute;top:10px;left:10px;pointer-events:none;z-index:5}
+#vbtn{pointer-events:auto;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(4px)}
+#vlist{display:none;pointer-events:auto;margin-top:6px;width:268px;max-height:64vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:5px;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+#vlist.open{display:block}
+#vlist button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:6px 8px;border-radius:6px;font-size:13px;color:var(--ink)}
+#vlist button:hover{background:var(--chip)}
+#vlist .vsep{font-size:11px;color:var(--mute);padding:8px 8px 3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+#vlist{width:min(268px,calc(100vw - 32px))}
+#wbtn{pointer-events:auto;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(4px);margin-left:6px}
+#views .row{display:flex;flex-wrap:wrap;align-items:flex-start}
+#pad{position:absolute;right:12px;bottom:14px;display:none;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(2,52px);gap:8px;z-index:6}
+body.walk #pad{display:grid}
+#pad button{width:52px;height:52px;border-radius:12px;font-size:20px;line-height:1;background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);color:var(--ink);touch-action:none;-webkit-user-select:none;user-select:none}
+#pad .sp{visibility:hidden}
+body.walk #hint{display:none}
+#wtip{position:absolute;left:10px;bottom:14px;display:none;font-size:12px;color:var(--mute);background:color-mix(in srgb,var(--panel) 88%,transparent);padding:5px 9px;border-radius:7px;max-width:min(300px,42vw);z-index:6}
+body.walk #wtip{display:block}
+@media(max-width:760px){#pad{grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,56px)}#pad button{width:56px;height:56px}}
+#tip{position:absolute;pointer-events:none;background:#141a22;color:#fff;font-size:12.5px;padding:4px 8px;border-radius:6px;display:none;white-space:nowrap;z-index:4}
+#hint{position:absolute;bottom:10px;left:10px;font-size:12px;color:var(--mute);background:color-mix(in srgb,var(--panel) 80%,transparent);padding:4px 8px;border-radius:6px}
+#load{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute)}
+#tog{display:none}
+@media(max-width:760px){
+ body{flex-direction:column-reverse}
+ #side{width:100%;height:auto;max-height:46vh;border-right:0;border-top:1px solid var(--line)}
+ #side.min{max-height:64px}
+ #side header{padding:10px 14px 8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+ h1{font-size:16px}.sub{display:none}
+ #tog{display:block;flex:none}
+ #stage{flex:1;min-height:0}
+}
+.hsh-back{display:inline-flex;align-items:center;gap:6px;margin:0 0 8px;padding:6px 10px;border-radius:999px;background:var(--chip);color:var(--ink);text-decoration:none;font-size:12.5px;font-weight:600;border:1px solid var(--line);min-height:32px}
+.hsh-back:hover{border-color:var(--acc);color:var(--acc)}
+.hsh-ver{font-size:11px;color:var(--mute);margin-top:4px}
+</style>
+</head>
+<body>
+<aside id="side">
+ <header>
+  <div><a class="hsh-back" href="./index.html#dashboard" aria-label="Về trang tổng quan dự án">← Trang dự án</a><h1>Kết cấu thép – Hoa Sen Home Phủ Lý</h1>
+  <p class="sub">Mô hình dựng từ bản vẽ HS.Dw, TKTC 23/05/2026, bản 10.30 và các bảng bóc tách đặt hàng. Bấm vào thanh thép để xem quy cách. Nút <b>Đi bộ</b> cho phép đứng dưới đất ngước lên nhìn.</p></div>
+  <button id="tog" aria-label="Thu gọn bảng">▾</button>
+ </header>
+ <div id="scroll">
+  <div id="card" aria-live="polite"></div>
+  <nav class="tabs" id="tabs"><button data-p="lay" class="on">Cấu kiện</button><button data-p="hinh">Thép hình</button><button data-p="xg">Xà gồ</button><button data-p="vt">Vật tư</button><button data-p="warn">Cần chốt</button></nav>
+  <section class="pane" id="p-lay">
+  <h2>Nhóm cấu kiện (bật/tắt)</h2>
+  <div id="layers"></div>
+  <div class="tot"><span>Tổng thép trong mô hình</span><span id="total"></span></div>
+  <div class="row" style="margin-top:10px">
+   <button id="bAll">Hiện tất cả</button>
+   <button id="bHouse" class="on">Nhà hiện hữu</button>
+   <button id="bAxis" class="on">Lưới trục</button>
+  </div>
+  </section>
+  <section class="pane" id="p-hinh" hidden></section>
+  <section class="pane" id="p-xg" hidden></section>
+  <section class="pane" id="p-vt" hidden></section>
+  <section class="pane" id="p-warn" hidden>
+  <h2>Cần chốt trước khi cắt / lắp</h2>
+  <ol class="warn">
+   <li><b>6 dầm ngang I-400 nâng cote:</b> HS.Dw tr.4 NỘI DUNG NÂNG CẤP ghi "DỜI DẦM THÉP NGANG TRỤC D, E LÊN COTE +5.100". Hiện trường chốt lại <b>+4.850</b>, đo từ ±0.000 đến <b>đỉnh dầm</b> (chủ đầu tư xác nhận 24/11). Mô hình dựng 6 dầm: 3 nhịp trên trục D và 3 nhịp trên trục E, giữa 4 cột trục 1–2–3–4. <b>CHƯA CHỐT:</b> bản vẽ không ghi tiết diện, tạm dùng I-400×200×8×13.</li>
+   <li><b>Cầu trục 5 tấn hiện hữu:</b> HS.Dw tr.4 ghi "GIAN TRUYỀN THỐNG – HIỆN TRẠNG: S = 260 M2, CẨU TRỤC 5 TẤN CHẠY TRÊN". Mô hình thể hiện 2 dầm đường ray chạy dọc trục 1→4 tại trục A và D (đỉnh ray ≈ +5.40) và dầm cầu bắc ngang 20 m ở +5.85, kèm pa lăng. Cao độ đo trên MẶT CẮT 1-1 tr.6 tỉ lệ 1/100; <b>tiết diện ray, dầm cầu và khẩu độ thật CHƯA CHỐT</b> – vẽ để hình dung không gian, không dùng để đặt hàng.</li>
+   <li><b>Vì kèo mái hiện hữu – chỉ là minh hoạ:</b> bộ bản vẽ nâng cấp không vẽ lại kết cấu mái cũ. Mô hình dựng 4 khung kèo tại trục 1–4, mái dốc 2 phía với nóc <b>+8.400</b> tại y ≈ 11,0 m và diềm <b>+6.950</b>, đọc từ MẶT CẮT 1-1 tr.6. Đỉnh các cột hiện hữu đã bám theo đường mái này nên không còn cột nhô cao hơn mái. <b>CHƯA CHỐT</b> tiết diện kèo, xà gồ, vị trí nóc – cần đo tại hiện trường.</li>
+   <li><b>Khung G-2 – ĐÃ SỬA 24/11:</b> chi tiết tr.42 vẽ khung G-2 điển hình dài <b>5.800</b> (1.100 + 3×1.200 + 1.100) nhưng lại ghi <b>"LK HÀN VÀO KHUNG"</b> ở cả hai đầu, trong khi hai khung G-1 cách nhau 6.600–6.700. Trước đây mô hình để giàn 5.800 treo lơ lửng, hở ≈ 450 mm mỗi đầu. Nay kéo hết nhịp, giữ khoang đầu 1.100 và chia đều 4 khoang giữa ≈ 1.100. Tiết diện giữ đúng bản vẽ: biên trên và dưới []30×60×1,4, thanh đứng đầu []30×60×1,4, thanh đứng giữa và thanh xiên []30×30×1,4, cao 750. <b>CẦN CHỐT</b> số khoang với thiết kế.</li>
+   <li><b>Cột hộp đứng đỡ đầu nam khung G-1:</b> hiện trường là <b>[]100×100×1,8</b> (chủ đầu tư xác nhận 24/11), khớp với <b>CT-2</b> trong BẢNG THỐNG KÊ TIẾT DIỆN của HS.Dw tr.34. Chi tiết tr.42 chỉ ghi chung "CỘT THÉP HỘP". Mô hình đã đổi từ []50×100×1,4 sang []100×100×1,8 – khối lượng nhóm này tăng từ 110 kg lên 189 kg.</li>
+   <li><b>Cao độ dầm canopy – ĐÃ SỬA 24/11:</b> trước đây mô hình hiểu +5.100 là đỉnh dầm canopy. Đọc lại BV DẦM CANOPY (10/11) và MẶT CẮT A-A kiến trúc tr.22 thì <b>+5.100 là ĐÁY dầm</b>: hộp đua xếp từ dưới lên gồm alu +5.000 → hộp 50×100 → dầm I-250 (+5.100 → +5.350) → hộp 50×100 → tôn. Mô hình đã nâng toàn bộ dầm canopy, dầm chính I-350, xà gồ canopy và chân cột biển lên <b>250 mm</b>. Hệ quả: cột biển CT4-1 rút từ 5,70 m còn <b>5,44 m</b> (chân +5.362, đỉnh +10.800) – bảng đặt hàng đã cập nhật.</li>
+   <li><b>Canopy vươn 7.300 chứ không phải 7.000:</b> BV DẦM CANOPY (10/11) ghi 6.000 (trục 1 → cột ngoài) + 1.070 + mũi bo 230 = 7.300. Kiến trúc tr.22 (23/05) ghi 225 + 6.775 = 7.000. Lấy theo bản mới hơn. Mỏ đua I-150×75×4×6 do đó dài <b>1,30 m</b> chứ không phải 1,00 m; đầu hàn PL-140×70×10, gốc hàn vào dầm I-250 qua PL-200×75×10 (CHI TIẾT LIÊN KẾT).</li>
+   <li><b>Hoàn thiện canopy:</b> hộp đua cao 800 tại trục 1 (+5.000 → +5.800) thu về 460 tại mũi, đáy alu phẳng, dốc i ≈ 5%; mũi bo nửa tròn R230 bằng hộp 20×20×1,2 uốn nóng rải cách đều 600. Khung đỡ là <b>7 hộp dọc 50×100 ở đáy và 7 hộp dọc 50×100 ở đỉnh</b>, bước ≈ 1.100 đo trên mặt cắt – bản vẽ không ghi con số bước này. Chưa dựng: tôn 11 sóng 0,45 đỏ BRL33, alu ngoài trời đỏ 3 mm, diềm tôn V50×50, thép V30×30×3, hộp 40×40×1,4 của chi tiết ốp mặt hông.</li>
+   <li><b>Cột thép hiện hữu trong nhà:</b> 11 cột lấy vị trí từ HS.Dw tr.34 "MẶT BẰNG CỘT THÉP" (trục 2 và 3 tại A, D, E; trục 4 tại A, B, C, D, E). <b>CHƯA CHỐT:</b> bản vẽ không ghi tiết diện và chiều cao cột hiện hữu; mô hình tạm dùng I-250×125×6×9 cao +6.950. Cần đo tại hiện trường.</li>
+   <li><b>Khung treo trần G-1 – chia nhịp tại cột:</b> theo hiện trường (chủ đầu tư xác nhận 24/11) giàn <b>không chạy suốt 14.200</b> như chi tiết tr.42 vẽ, mà <b>dừng tại mỗi cột và liên kết vào cột</b>. Mô hình đã tách mỗi khung thành 3 nhịp: trục C→D (≈7,0 m), D→E (≈5,0 m), E→mép mái E' (≈2,3 m), hở 60 mm mỗi bên cột. <b>CHƯA CHỐT:</b> bản vẽ không có chi tiết gối giàn lên cột – bản mã PL-220×160×8 (21 tấm) trong mô hình là kích thước tạm theo bề rộng 2 thanh biên, cần thiết kế xác nhận; khoang giàn cũng chia đều lại theo từng nhịp thay vì 1.100 + 1.200 như bản vẽ.</li>
+   <li><b>Cột I-250 trên trục 1:</b> theo hiện trường, cả <b>7 vị trí</b> (E', E, D, C, B, A+995, A') đều là I-250 cao <b>+10.800</b>, đỉnh có thanh ngang liên kết ra khung biển. Bản vẽ TKTC tr.34 chỉ ký hiệu 2 cột CT-1 ở góc – bảng đặt hàng (2 cột 10,5 m) và bản mã A (5 tấm) cần tăng theo. Quy cách thanh ngang đỉnh cột chưa có trên bản vẽ – mô hình tạm vẽ I-200.</li>
+   <li><b>Cột biển hiệu CT4-1:</b> chủ đầu tư xác nhận <b>I-200×100×5,5×8</b> (bản vẽ ghi lẫn I-200×200×6×8 / I-250×125×6×9 / I-250×200×6×8). Mỗi cột I-250 trên trục 1 (7 vị trí) có 1 cột biển song song, cách 285 mm, nối bằng giằng ngắn I-200 L=285 tại <b>+7,00</b> (đo trên MC HS.Dw tr.3; bản mã PL-220×200×12 + 4 M20, sườn PL-8). <b>Bản đế chân cột đọc từ Chi tiết 5 – A1-A1: PL-400×125×12, 8 M20 (8.8) L=60, 2 sườn 1/2 PL-100×100×6</b>. Bản vẽ không vẽ bản bịt đỉnh nên mô hình không có. Bảng đặt hàng ghi 2 cột + 4 giằng (2 giằng/cột) nhưng chỉ vẽ 1 giằng và không ghi cao độ giằng thứ hai – cần chốt vị trí giằng thứ hai trước khi thêm vào.</li>
+   <li><b>I-200×100×5,5×8 dọc trục 1:</b> mặt bằng ghi dầm chạy dọc trục 1 đoạn E–E' và A–A'; nay đã có cột biển CT4-1 – cần chốt hai hạng mục này có trùng nhau không.</li>
+   <li><b>Vách đầu hồi mới (xà gồ C150 @1200):</b> đọc từ HS.Dw (13/11) tr.3 Chi tiết 5: C rộng 150 nằm ngang trong khe 285 giữa cột I-250 và cột biển, cánh xuống, 2 bu lông cách nhau 70 xuyên bụng và pát phẳng 140 theo phương x, tôn vách bắn vào cánh ngoài. 5 đường (mặt trên bụng +5,65 → +10,45) chạy A→E, 4 đoạn 7/6/7/5 m, thay 2 đường hộp 50×100 × 25 m (161,8 kg) của bóc tách cũ. Chưa có trong bản vẽ: chiều dày/môi C150 (tạm lấy họ C250×50×10×2,0), cỡ và cấp bền bu lông (lấy M12 theo TKTC tr.47), chiều dài pát 267 và dày 6 (theo pát chuẩn TKTC tr.47). Nhịp 5–7 m: đặt cây 12 m hoặc nối tại cột.</li>
+   <li><b>Vách hông trục E và vách sau trục 4 (mới):</b> TKTC tr.38–39: tường gạch cao +2,0, vách tôn bắn mới lên +6,45. Theo chỉ đạo dùng <b>C150 bước ≈ 1,2 m</b>: 5 đường mặt trên bụng +2,20 / 3,40 / 4,60 / 5,80 / 6,33 (đường đỉnh dưới dầm theo bóc tách cũ). Vách hông chạy trục 1 → 4 + 1,5 m (≈ 21,5 m), vách sau chỉ chạy từ trục C đến E theo tường tây xiên (≈ 12,6 m, mái xây mới phía sau chỉ đến trục C). Bóc tách cũ chỉ có vách hông bằng []30×60 và không có vách sau. Chưa có trong bản vẽ: tiết diện C150, chi tiết liên kết C150 vào cột hiện hữu (mô hình không vẽ pát), cột hiện hữu dọc 2 tường này (mô hình chỉ có 3 cột hộp biên E và 2 cột khung D4, D5).</li>
+   <li><b>Xà gồ C250 biển hiệu:</b> 7 đường nằm ngang, <b>bụng C nằm ngang</b> (sâu 250 vuông góc mặt biển), cao độ +5,40 → +10,55 theo MC HS.Dw tr.3. <b>Liên kết C250 với cột biển</b> lấy từ TKTC tr.47 (Pát liên kết xà gồ): <b>PL-267×234×6, 4 M12</b> (lỗ cách 70 × 150), bảng bóc tách ghi "nối đối đầu tại cột bằng pát PL6 + 4M12". Bản vẽ không ghi cấp bền / chiều dài bu lông và chiều cao đường hàn.</li>
+   <li><b>Giằng ROD Ø20:</b> không có ở khoang E'–E.</li>
+   <li><b>Điểm nối dầm I-350:</b> bản vẽ ghi 3 điểm nối CT2 cách E' 12,0 / 16,5 / 25,5 m; bảng đặt hàng ghi 3 đoạn × 10,03 m.</li>
+   <li><b>Khung G-1:</b> 5 khung nằm trên trục 4, 3, 2, 1 + 1 khung theo tường tây xiên; chạy từ trục C đến mép E' nên dài khác nhau 12,6–14,3 m. Ty treo ở nút 8.300 tính từ đầu trục C, dài ≈ 1,2 m.</li>
+   <li><b>Thiếu trong bảng bóc tách G-1:</b> 5 cột hộp 50×100 đỡ đầu khung phía trục C (≈ 4,2 m/cột) ; thanh chống xiên 50×50 "cách khoảng" (MC 1-1 tr.42) <b>chưa đưa vào mô hình</b> vì bản vẽ không ghi vị trí/bước – cần thiết kế chốt.</li>
+   <li><b>Khung G-2:</b> chạy dọc mép trục C, hàn vào G-1 hai đầu; biên trên là <b>30×60</b> (bảng bóc tách ghi 50×100). Dài 5.800 nhưng nhịp giữa các khung G-1 ≈ 6,5–6,6 m → hở ≈ 0,35 m mỗi đầu. Mô hình vẽ 3 khung.</li>
+   <li><b>Cột hộp biên E:</b> TKTC tr.34 chỉ thấy 3 vị trí (góc tây, trục 3, trục 2); bảng đặt hàng ghi 4.</li>
+   <li><b>Mái giáp nhà NV (bản 10.30):</b> phần dài chỉ còn <b>4 xà gồ 50×100 chạy dọc</b> (cách trục A 71 / 1270 / 2472 / 3671), bỏ hết vì kèo. <b>Mái cũ hạ cote theo chỉ đạo hiện trường: +4,70 (xà gồ sát trục A) → +4,00 (xà gồ mép nam)</b> – bản vẽ 10.30 chỉ ghi cote mái điều chỉnh ở đầu nhà (+6,95…+7,55), cần chốt lại cote thật bằng máy. Phần đầu nhà NV (ô 4,25 × 3,15): <b>kèo 02</b> tại x = −4,25, <b>kèo 01</b> dọc mép nam tới cột CT1, <b>2 cột cấy 100×100×1,8</b> (PL-160×160×6, 4 nở M12) trên trụ BT +4,20, xà gồ vách +4,2 / +5,6 / +5,5. Lệch bản vẽ: MC 2-2 vẽ đỉnh kèo 01 ở +7,60, MC 1-1 vẽ +6,95; kèo 02/01 ghi dài 4.100/4.000 nhưng mặt bằng 3,15/4,25 m – mô hình theo mặt bằng và MC 1-1.</li>
+   <li><b>Chiều cao đường hàn:</b> bản vẽ không ghi hf; mô hình thể hiện vị trí hàn (màu vàng) và ghi hf theo nguyên tắc chung – cần thiết kế xác nhận.</li>
+  </ol>
+  <p class="sub" style="margin-top:12px">Khối lượng tính theo chiều dài hình học trong mô hình × đơn trọng trong bảng đặt hàng; dùng để đối chiếu, không thay bảng bóc tách.</p>
+  </section>
+ </div>
+</aside>
+<main id="stage">
+ <div id="load">Đang tải mô hình 3D…</div>
+ <div id="views"></div>
+ <div id="pad"><button class="sp"></button><button data-m="f">▲</button><button class="sp"></button><button data-m="l">◀</button><button data-m="b">▼</button><button data-m="r">▶</button></div>
+ <div id="wtip">Kéo màn hình để nhìn quanh · nút mũi tên để đi · chạm vào thanh thép để xem quy cách</div>
+ <div id="tip"></div>
+ <div id="hint">Kéo: xoay · Chuột phải / 2 ngón: dời · Lăn / chụm: phóng to</div>
+</main>
+<script src="vendor/three/three.min.js"></script>
+<script src="vendor/three/OrbitControls.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s);
+const T=THREE;
+// ---------- toạ độ: x = phương trục 1→ra ngoài canopy (m), y = phương trục A→E (m), z = cao độ ----------
+const W=(x,y,z)=>new T.Vector3(x,z,-y);
+const UP=new T.Vector3(0,1,0), PX=new T.Vector3(1,0,0), PY=new T.Vector3(0,0,-1);
+
+// ---------- nhóm cấu kiện ----------
+const L={
+ col:{n:'Cột thép I-250 (7 cột trục 1 + 3 cột ngoài sân)',c:'#c2410c'},
+ i350:{n:'Dầm chính canopy I-350',c:'#1d4ed8'},
+ i250:{n:'Dầm canopy I-250 (7 dầm)',c:'#2563eb'},
+ i150:{n:'Mỏ đua I-150 đỡ mũi canopy (7 đoạn × 1,30 m)',c:'#0891b2'},
+ rod:{n:'Giằng chéo ROD Ø20',c:'#64748b'},
+colo:{n:'Cột thép HIỆN HỮU trong nhà (11 cột – quy cách tạm)',c:'#78350f'},
+i400:{n:'Dầm ngang I-400 hiện hữu nâng lên +4.850 (6 dầm, trục D và E)',c:'#b45309'},
+ crane:{n:'Cầu trục 5 tấn hiện hữu (đường ray + dầm cầu)',c:'#475569'},
+ roof:{n:'Vì kèo mái hiện hữu (minh hoạ, 4 khung)',c:'#8b5a2b'},
+ cano:{n:'Hoàn thiện canopy: hộp dọc 50×100 + mũi bo 20×20 (vươn 7.300)',c:'#0891b2'},
+ xgc:{n:'Xà gồ canopy hộp 50×100',c:'#65a30d'},
+ sign:{n:'Khung biển hiệu (7 đường C250, xương 40×40)',c:'#9333ea'},
+ i200:{n:'Thanh ngang đỉnh cột, dầm biên I-200, giằng ngắn CT4',c:'#4f46e5'},
+ post:{n:'Cột biển I-150 CT4-1 (7 cột, song song 7 cột I-250)',c:'#0ea5e9'},
+ g1:{n:'Khung treo trần G-1 (5 khung × 3 nhịp)',c:'#db2777'},
+ g2:{n:'Khung treo trần G-2 (3 nhịp, hàn vào khung G-1)',c:'#e11d48'},
+ ngang:{n:'13 thanh ngang 50×100 gác trên G-1',c:'#f59e0b'},
+ vach:{n:'Vách đầu hồi trục 1, gian Home lạnh C→E (C150 @1200)',c:'#f59e0b'},
+ vachE:{n:'Vách hông trục E mới (C150 ≈1200, +2,0 → +6,45)',c:'#ea580c'},
+ vachS:{n:'Vách sau trục 4 mới (C150 ≈1200, +2,0 → +6,45)',c:'#be123c'},
+ nv:{n:'Mái giáp nhà NV (bản 10.30): 4 xà gồ dọc + đầu nhà (kèo 01, 02, 2 cột cấy)',c:'#0d9488'},
+ sau:{n:'Mái dôi sau trục 4 (khung D4, D5)',c:'#7c3aed'},
+ hop:{n:'Cột hộp đỡ khung treo trần (biên E + đầu trục C)',c:'#a16207'},
+ plate:{n:'Bản mã & sườn gia cường',c:'#ea580c'},
+ bolt:{n:'Bu lông (thân, mũ, long đen, đai ốc)',c:'#1f2937'},
+ weld:{n:'Đường hàn (màu vàng)',c:'#facc15'}
+};
+const KGM={'I-250×125×6×9':29.6,'I-400×200×8×13':66.0,'I-300×150×6,5×9':36.7,'I-350×175×7×11':49.6,'I-200×100×5,5×8':21.3,'H-200×200×6×8':33.8,'I-150×75×5×7':14.0,'Hộp 50×100×1,4':3.235,'Hộp 50×50×1,4':2.136,'Hộp 30×60×1,4':1.917,'Hộp 30×30×1,4':1.257,'Hộp 40×80×1,4':2.58,'Hộp 40×40×1,4':1.68,'Hộp 20×20×1,2':0.666,'Hộp 100×100×1,8':5.48,'C-250×50×10×2,0':6.05,'C-150×50×10×2,0':4.41,'Ống Ø42×2':1.973,'Thép tròn Ø20':2.47};
+
+// ---------- tiết diện ----------
+function shI(h,b,tw,tf){const s=new T.Shape(),H=h/2,B=b/2,w=tw/2;
+ [[-B,-H],[B,-H],[B,-H+tf],[w,-H+tf],[w,H-tf],[B,H-tf],[B,H],[-B,H],[-B,H-tf],[-w,H-tf],[-w,-H+tf],[-B,-H+tf]].forEach((p,i)=>i?s.lineTo(...p):s.moveTo(...p));return s}
+function rect(b,h){const s=new T.Shape();s.moveTo(-b/2,-h/2);s.lineTo(b/2,-h/2);s.lineTo(b/2,h/2);s.lineTo(-b/2,h/2);s.closePath();return s}
+function shBox(b,h,t){const s=rect(b,h);t=Math.max(t,.003);const p=new T.Path(),bi=b/2-t,hi=h/2-t;p.moveTo(-bi,-hi);p.lineTo(-bi,hi);p.lineTo(bi,hi);p.lineTo(bi,-hi);p.closePath();s.holes.push(p);return s}
+function shC(h,b,c,t){t=Math.max(t,.003);const s=new T.Shape(),H=h/2;
+ [[0,-H],[b,-H],[b,-H+c],[b-t,-H+c],[b-t,-H+t],[t,-H+t],[t,H-t],[b-t,H-t],[b-t,H-c],[b,H-c],[b,H],[0,H]].forEach((p,i)=>i?s.lineTo(p[0]-b/2,p[1]):s.moveTo(p[0]-b/2,p[1]));return s}
+function shO(d,t){const s=new T.Shape();s.absarc(0,0,d/2,0,Math.PI*2);if(t){const p=new T.Path();p.absarc(0,0,d/2-Math.max(t,.002),0,Math.PI*2,true);s.holes.push(p)}return s}
+const PR={
+ 'I-400×200×8×13':()=>shI(.4,.2,.008,.013),'I-300×150×6,5×9':()=>shI(.3,.15,.0065,.009),
+ 'I-250×125×6×9':()=>shI(.25,.125,.006,.009),
+ 'I-350×175×7×11':()=>shI(.35,.175,.007,.011),
+ 'I-200×100×5,5×8':()=>shI(.2,.1,.0055,.008),'H-200×200×6×8':()=>shI(.2,.2,.006,.008),
+ 'I-150×75×5×7':()=>shI(.15,.075,.005,.007),
+ 'Hộp 20×20×1,2':()=>shBox(.02,.02,.0012),'Hộp 50×100×1,4':()=>shBox(.05,.1,.0014),'Hộp 50×50×1,4':()=>shBox(.05,.05,.0014),
+ 'Hộp 30×60×1,4':()=>shBox(.03,.06,.0014),'Hộp 30×30×1,4':()=>shBox(.03,.03,.0014),
+ 'Hộp 40×80×1,4':()=>shBox(.04,.08,.0014),'Hộp 40×40×1,4':()=>shBox(.04,.04,.0014),
+ 'Hộp 100×100×1,8':()=>shBox(.1,.1,.0018),
+ 'C-250×50×10×2,0':()=>shC(.25,.05,.01,.002),'C-150×50×10×2,0':()=>shC(.15,.05,.01,.002),
+ 'Ống Ø42×2':()=>shO(.042,.002),'Thép tròn Ø20':()=>shO(.02,0)
+};
+
+// ---------- scene ----------
+const stage=$('#stage');
+const cs=getComputedStyle(document.body);
+const dark=matchMedia('(prefers-color-scheme: dark)').matches&&document.documentElement.dataset.theme!=='light'||document.documentElement.dataset.theme==='dark';
+const MOB=matchMedia('(max-width:760px)').matches||matchMedia('(pointer:coarse)').matches;
+const R=new T.WebGLRenderer({antialias:!MOB,powerPreference:'high-performance'});
+R.setPixelRatio(Math.min(devicePixelRatio,MOB?1.5:2));
+stage.appendChild(R.domElement);
+const S=new T.Scene();S.background=new T.Color(dark?'#10151c':'#e9edf1');
+const C=new T.PerspectiveCamera(42,1,.05,600);
+const O=new T.OrbitControls(C,R.domElement);O.enableDamping=true;O.dampingFactor=.12;O.maxPolarAngle=Math.PI*.985;   // cho phép hạ máy xuống đất và ngước lên
+S.add(new T.HemisphereLight(0xffffff,dark?0x223040:0x9aa5b1,.85));
+const sun=new T.DirectionalLight(0xffffff,.75);sun.position.set(30,50,25);S.add(sun);
+const sun2=new T.DirectionalLight(0xffffff,.25);sun2.position.set(-30,20,-20);S.add(sun2);
+
+const groups={},mats={},stats={};
+for(const k in L){groups[k]=new T.Group();S.add(groups[k]);mats[k]=new T.MeshStandardMaterial({color:L[k].c,metalness:.25,roughness:.55,side:T.DoubleSide});stats[k]={n:0,m:0,kg:0}}
+const boltMat=new T.MeshStandardMaterial({color:'#1f2937',metalness:.6,roughness:.4});
+const selMat=new T.MeshStandardMaterial({color:'#22d3ee',emissive:'#0e7490',emissiveIntensity:.5,side:T.DoubleSide});
+const pick=[];
+
+function basis(a,b,up){const z=new T.Vector3().subVectors(b,a).normalize();let u=up.clone();if(Math.abs(u.dot(z))>.98)u=Math.abs(z.dot(PX))<.9?PX.clone():PY.clone();const x=new T.Vector3().crossVectors(u,z).normalize(),y=new T.Vector3().crossVectors(z,x);return new T.Matrix4().makeBasis(x,y,z).setPosition(a)}
+function extr(shape,a,b,up,mat,grp){const len=a.distanceTo(b);const g=new T.ExtrudeGeometry(shape,{depth:len,bevelEnabled:false,curveSegments:10});const m=new T.Mesh(g,mat);m.applyMatrix4(basis(a,b,up));grp.add(m);return m}
+// thanh thép: p1,p2 dạng [x,y,z] theo mặt bằng
+function bar(layer,spec,p1,p2,name,o={}){
+ const a=W(...p1),b=W(...p2),len=a.distanceTo(b);
+ const m=extr(PR[spec](),a,b,o.up||UP,mats[layer],groups[layer]);
+ const kg=len*(KGM[spec]||0);stats[layer].n++;stats[layer].m+=len;stats[layer].kg+=kg;
+ m.userData={layer,name,spec,len,kg,where:o.where||'',note:o.note||'',A:p1,B:p2,up:o.up||UP};pick.push(m);return m}
+// bản mã: tâm [x,y,z], kích thước w (theo trục u), h (theo trục v), dày t (theo pháp tuyến n)
+function plate(c,w,h,t,n,u,name,o={}){
+ const ctr=W(...c),nv=n.clone().normalize();
+ const a=ctr.clone().addScaledVector(nv,-t/2),b=ctr.clone().addScaledVector(nv,t/2);
+ // tiết diện rect(w,h): w theo trục x cục bộ, h theo trục y cục bộ (= up). Ta muốn h theo u?
+ const m=extr(rect(w,h),a,b,u,mats.plate,groups.plate);
+ const kg=w*h*t*7850;stats.plate.n++;stats.plate.kg+=kg;
+ m.userData={layer:'plate',name,spec:o.spec||`PL-${Math.round(w*1000)}×${Math.round(h*1000)}×${Math.round(t*1000)}`,kg,where:o.where||'',note:o.note||'',bolt:o.bolt||''};pick.push(m);
+ (o.holes||[]).forEach(([du,dv])=>{bolt(ctr,nv,u,du,dv,o.bd||.02,o.bl||t+.06,o.boff||0,{name:(o.bolt?o.bolt.split(',')[0]:'Bu lông')+' – '+name,spec:o.bolt||'',where:o.where||'',host:m.userData.spec})});
+ return m}
+function bolt(ctr,nv,u,du,dv,d,len,off,info={}){const uy=u.clone().normalize(),ux=new T.Vector3().crossVectors(uy,nv).normalize();
+ const p=ctr.clone().addScaledVector(ux,du).addScaledVector(uy,dv).addScaledVector(nv,off);
+ const parts=[],add=(g,y)=>{g.translate(0,y,0);parts.push(g)},hw=d*.95;
+ add(new T.CylinderGeometry(d/2,d/2,len,10),0);                       // thân bu lông
+ add(new T.CylinderGeometry(hw,hw,d*.65,6),-len/2+d*.325);            // mũ lục giác
+ add(new T.CylinderGeometry(hw*1.2,hw*1.2,d*.15,16),len/2-d*.95);      // long đen
+ add(new T.CylinderGeometry(hw,hw,d*.8,6),len/2-d*.45);               // đai ốc
+ const m=new T.Mesh(mergeGeos(parts),boltMat);m.position.copy(p);m.quaternion.setFromUnitVectors(UP,nv);groups.bolt.add(m);
+ const M=d>=.019?'M20':d>=.0115?'M12':'M'+Math.round(d*1000);
+ m.userData={layer:'bolt',M,host:info.host||'',name:info.name||('Bu lông '+M),spec:info.spec||M,where:info.where||'',note:info.note||'Gồm thân, mũ lục giác, long đen và đai ốc. Siết đủ lực, ren thừa ≥ 2 bước ren.'};pick.push(m);stats.bolt.n++;return m}
+function mergeGeos(geos){let n=0;const gs=geos.map(g=>{const x=g.index?g.toNonIndexed():g;x.computeVertexNormals();n+=x.attributes.position.count;return x});
+ const P=new Float32Array(n*3),N=new Float32Array(n*3);let o=0;gs.forEach(g=>{P.set(g.attributes.position.array,o*3);N.set(g.attributes.normal.array,o*3);o+=g.attributes.position.count});
+ const m=new T.BufferGeometry();m.setAttribute('position',new T.BufferAttribute(P,3));m.setAttribute('normal',new T.BufferAttribute(N,3));return m}
+// ---- đường hàn: chuỗi hạt hàn màu vàng ----
+const weldMat=new T.MeshStandardMaterial({color:'#facc15',roughness:.55,metalness:.15,emissive:'#4a3700',emissiveIntensity:.6});
+function weldPath(pts,closed,info){const geos=[];let len=0;const n=pts.length;
+ for(let i=0;i<(closed?n:n-1);i++){const a=pts[i],b=pts[(i+1)%n],L=a.distanceTo(b);if(L<1e-4)continue;len+=L;
+  const g=new T.CylinderGeometry(.0065,.0065,L,6);g.applyMatrix4(new T.Matrix4().compose(a.clone().add(b).multiplyScalar(.5),new T.Quaternion().setFromUnitVectors(UP,b.clone().sub(a).normalize()),new T.Vector3(1,1,1)));geos.push(g)}
+ if(!geos.length)return;const m=new T.Mesh(mergeGeos(geos),weldMat);groups.weld.add(m);
+ m.userData={layer:'weld',name:info.name,spec:info.spec||'Hàn góc',len,kg:0,where:info.where||'',note:info.note||WNOTE};pick.push(m);stats.weld.n++;stats.weld.m+=len;return m}
+const WNOTE='Bản vẽ không ghi chiều cao đường hàn – theo nguyên tắc chung: thép hình/bản mã hf ≥ 6 mm (bản mã ≥ 12 mm: hf ≥ 8), thép hộp mỏng hf ≈ 3 mm; hàn kín chu vi, xong đánh xỉ, sơn chống rỉ / kẽm lạnh. Thiết kế xác nhận hf trước khi gia công.';
+const DIM={'I-250×125×6×9':['I',.25,.125,.006,.009],'I-350×175×7×11':['I',.35,.175,.007,.011],'I-200×100×5,5×8':['I',.2,.1,.0055,.008],'H-200×200×6×8':['I',.2,.2,.006,.008],'I-150×75×5×7':['I',.15,.075,.005,.007],
+ 'Hộp 50×100×1,4':['B',.05,.1],'Hộp 50×50×1,4':['B',.05,.05],'Hộp 30×60×1,4':['B',.03,.06],'Hộp 30×30×1,4':['B',.03,.03],'Hộp 40×80×1,4':['B',.04,.08],'Hộp 40×40×1,4':['B',.04,.04],'Hộp 100×100×1,8':['B',.1,.1],'Ống Ø42×2':['O',.042]};
+function outline(spec){const d=DIM[spec];if(!d)return[];if(d[0]==='I'){const[,h,b,tw,tf]=d,H=h/2,B=b/2,w=tw/2;return[[-B,-H],[B,-H],[B,-H+tf],[w,-H+tf],[w,H-tf],[B,H-tf],[B,H],[-B,H],[-B,H-tf],[-w,H-tf],[-w,-H+tf],[-B,-H+tf]]}
+ if(d[0]==='B'){const b=d[1]/2,h=d[2]/2;return[[-b,-h],[b,-h],[b,h],[-b,h]]}const r=d[1]/2;return [...Array(14)].map((_,i)=>[r*Math.cos(i/14*6.283),r*Math.sin(i/14*6.283)])}
+// hàn bao quanh tiết diện tại đầu thanh ('a' hoặc 'b'), lùi vào trong thanh 'off' m
+function weldEnd(m,end,info,off=.004){const u=m.userData,a=W(...u.A),b=W(...u.B),M=basis(a,b,u.up);const L=a.distanceTo(b),z=end==='a'?off:L-off;
+ const pts=outline(u.spec).map(([x,y])=>new T.Vector3(x*1.04,y*1.04,z).applyMatrix4(M));return weldPath(pts,true,{name:info.name,spec:info.spec||'Hàn góc bao quanh tiết diện '+u.spec,where:info.where||u.name,note:info.note})}
+// sườn tam giác: góc vuông tại c (plan [x,y,z]), cạnh 1 theo vector e1 dài l1, cạnh 2 theo e2 dài l2, dày t
+function rib(c,e1,e2,l1,l2,t,name,o={}){const s=new T.Shape();s.moveTo(0,0);s.lineTo(l1,0);s.lineTo(0,l2);s.closePath();
+ const g=new T.ExtrudeGeometry(s,{depth:t,bevelEnabled:false});g.translate(0,0,-t/2);const n=new T.Vector3().crossVectors(e1,e2).normalize();
+ const mm=new T.Mesh(g,mats.plate);mm.applyMatrix4(new T.Matrix4().makeBasis(e1.clone().normalize(),e2.clone().normalize(),n).setPosition(W(...c)));groups.plate.add(mm);
+ const kg=l1*l2/2*t*7850;stats.plate.n++;stats.plate.kg+=kg;mm.userData={layer:'plate',name,spec:o.spec||`1/2 PL-${Math.round(l1*1000)}×${Math.round(l2*1000)}×${Math.round(t*1000)}`,kg,where:o.where||'',note:o.note||'Sườn tam giác hàn 2 cạnh vuông góc, không khoan lỗ.'};pick.push(mm);
+ const p0=W(...c),p1=p0.clone().addScaledVector(e1.clone().normalize(),l1),p2=p0.clone().addScaledVector(e2.clone().normalize(),l2);
+ [[p0,p1],[p0,p2]].forEach(([a,b])=>[-1,1].forEach(sd=>weldPath([a.clone().addScaledVector(n,sd*(t/2+.004)),b.clone().addScaledVector(n,sd*(t/2+.004))],false,{name:'Hàn sườn '+name,spec:'Hàn góc 2 phía'})));return mm}
+
+// ======================= DỮ LIỆU HÌNH HỌC =======================
+const AX={x:{'1':0,'2':-6.7,'3':-13.3,'4':-20},y:{"A'":-2.811,'A':0,'B':7,'C':13,'D':20,'E':25,"E'":27.278}};
+const XC=6.0;                         // tuyến dầm chính I-350 (cách trục 1 = 6000)
+const ZT=5.35;                        // ĐỈNH dầm canopy. BV DẦM CANOPY (10/11) ghi +5.100 là ĐÁY dầm: MẶT CẮT A-A tr.22 xếp alu +5.000 → hộp 50×100 → dầm I-250 (5.100→5.350) → hộp 50×100
+const YS=-2.811,YN=27.278;            // A' và E' tại tuyến canopy (tổng 30.089 m)
+const BEAMS=[[27.278,"E'"],[25,'E'],[20,'D'],[13,'C'],[7,'B'],[0.995,'A + 995'],[-2.811,"A'"]];
+
+// --- 1. Dầm chính I-350, chia đoạn theo 3 điểm nối CT2 ---
+const SPL=[12.0,16.5,25.5].map(d=>YN-d);
+const cuts=[YN,...SPL,YS];
+for(let i=0;i<cuts.length-1;i++){
+ const y1=cuts[i]-(i?0.003:0),y2=cuts[i+1]+(i<cuts.length-2?0.003:0);
+ bar('i350','I-350×175×7×11',[XC,y1,ZT-.175],[XC,y2,ZT-.175],`Dầm chính I-350 – đoạn ${i+1}/4`,{where:`Tuyến canopy, cách trục 1 = 6.000; từ ${(YN-cuts[i]).toFixed(2)} đến ${(YN-cuts[i+1]).toFixed(2)} m tính từ E'`,note:'Nguồn: HS.Dw tr.1 (CT1, CT2, CT3). Tổng tuyến 30.089 mm, đỉnh dầm +5.100.'})}
+// bản mã nối CT2: 2 tấm (cánh trên + cánh dưới) / điểm nối
+SPL.forEach((y,i)=>{[ZT+.007,ZT-.35-.007].forEach((z,j)=>plate([XC,y,z],.175,.55,.014,UP,PY,`Bản mã nối CT2 – điểm nối ${i+1} (${j?'cánh dưới':'cánh trên'})`,{spec:'PL-550×175×14',bolt:'8 bu lông M20 cấp bền 8.8, lỗ Ø22',where:`Cách E' ${[12,16.5,25.5][i]} m`,note:'Kèm sườn tam giác 1/2 PL-100×85×6. Nguồn: HS.Dw tr.1, MC 2-2.',holes:[-.225,-.175,.175,.225].flatMap(v=>[[-.0475,v],[.0475,v]]),bl:.07,boff:j?.011:-.011}))});
+
+// --- 2. Cột I-250: 3 cột ngoài sân (A', C, E') + 2 cột góc trên trục 1 (E', A') – theo TKTC tr.34 "Mặt bằng cột thép" (CT-1) ---
+const colTop=ZT-.35-.032;
+[[YN,"E'",'CT1','PL-370×175×16',.37],[13,'C','CT3','PL-450×175×16',.45],[YS,"A'",'CT1','PL-370×175×16',.37]].forEach(([y,n,ct,sp,pl])=>{
+ bar('col','I-250×125×6×9',[XC,y,.016],[XC,y,colTop],`Cột ngoài sân trục ${n}`,{up:PY,where:`Tuyến canopy × trục ${n}, chân ±0.000 → đỉnh ${colTop.toFixed(3)} (đỡ I-350)`,note:'Bảng đặt hàng: L = 5,0 m. Chân hàn bản mã A, đỉnh 2 bản mã '+ct+'. Nguồn: TKTC tr.34, HS.Dw tr.1.'});
+ const holes=(pl>.4?[-.175,-.075,.075,.175]:[-.135,-.045,.07,.165]).flatMap(v=>[[-.0475,v],[.0475,v]]);
+ plate([XC,y,colTop+.008],.175,pl,.016,UP,PY,`Bản mã đỉnh cột ${ct} – tấm hàn đỉnh cột (${n})`,{spec:sp,bolt:'8 bu lông M20 cấp bền 8.8, lỗ Ø22',where:`Đỉnh cột trục ${n}`,note:'Kèm sườn tam giác 1/2 PL-100×100×6.',holes,bl:.08,boff:.016});
+ plate([XC,y,colTop+.024],.175,pl,.016,UP,PY,`Bản mã ${ct} – tấm hàn đáy dầm I-350 (${n})`,{spec:sp,where:`Đáy dầm I-350 tại trục ${n}`});
+});
+// Cột I-250 trục 1: theo thực tế hiện trường (ảnh 20/11/2026) – cả 7 vị trí đều là I-250 cao ±0.000 → +10.800,
+// đỉnh cột có thanh ngang liên kết ra khung biển hiệu.
+const ZTOP=10.8;
+BEAMS.forEach(([y,n])=>{const c=bar('col','I-250×125×6×9',[0,y,.016],[0,y,ZTOP],`Cột trục 1 × ${n}`,{up:PX,where:`Trục 1 × ${n}, cao ±0.000 → +10.800; đỡ dầm canopy (mặt bích CT5) và khung biển hiệu`,note:'Theo thực tế hiện trường: tất cả cột I-250 trên trục 1 cao 10,8 m, đỉnh có thanh ngang liên kết. Bản vẽ TKTC tr.34 chỉ ký hiệu CT-1 ở 2 góc E\' và A\' (các vị trí giữa ghi là cột hiện hữu) – đã cập nhật theo hiện trường.'});
+ 
+});
+[[XC,YN],[XC,13],[XC,YS],...BEAMS.map(b=>[0,b[0]])].forEach(([x,y],i)=>plate([x,y,.008],.2,.28,.016,UP,i<3?PY:PX,'Bản mã A – chân cột I-250',{spec:'PL-280×200×16',bolt:'Bu lông neo M20, lỗ Ø24 (lệch 4 mm để chỉnh tim)',where:`Chân cột ${i<3?'ngoài sân':'trục 1'}`,note:'Lỗ: 65-150-65 × 50-100-50. Nguồn: TKTC tr.33. (Bảng bản mã ghi 5 tấm – nay trục 1 có 7 cột, cần thêm tấm.)',holes:[[-.05,-.075],[.05,-.075],[-.05,.075],[.05,.075]],bl:.6,boff:-.22}));
+// Dầm biên I-200 dọc trục 1: E → E' và A → A' (TKTC tr.35 / HS.Dw tr.1)
+[[25.0+.06,YN-.0625,"E → E'"],[0+.0-.06,YS+.0625,"A → A'"]].forEach(([y1,y2,n])=>bar('i200','I-200×100×5,5×8',[0,y1,ZT-.1],[0,y2,ZT-.1],`Dầm biên I-200 dọc trục 1, đoạn ${n}`,{where:`Trục 1, nối cột hiện hữu sang cột góc mới; đỉnh dầm +5.100 (cao độ giả định ngang dầm canopy)`,note:'Mặt bằng HS.Dw tr.1 & TKTC tr.35 ghi I-200×100×5,5×8 chạy DỌC trục 1 ở 2 đầu (E–E\' và A–A\'). Bảng đặt hàng lại ghi I-200 là "2 cột biển L=5,7 m" – cần thiết kế xác nhận.'}));
+
+// --- 3. Dầm canopy I-250 + mặt bích CT5 + tai dầm + mỏ đua I-150 ---
+BEAMS.forEach(([y,n],i)=>{
+ bar('i250','I-250×125×6×9',[.137,y,ZT-.125],[XC-.0035-.004,y,ZT-.125],`Dầm canopy D${i+1} – trục ${n}`,{where:`Từ trục 1 ra dầm I-350, tại trục ${n}; đỉnh dầm +5.100`,note:'Nhịp 6.000. Đầu 1: mặt bích CT5 (8 M20). Đầu 2: tai dầm PL-200×83×8 (3 M20). Nguồn: HS.Dw tr.1, tr.2.'});
+ plate([.131,y,ZT-.125],.2,.4,.012,PX,UP,`Mặt bích CT5 – đầu dầm D${i+1}`,{spec:'PL-400×200×12',bolt:'8 bu lông M20 cấp bền 8.8, lỗ Ø22',where:`Đầu dầm tại trục 1 × ${n}`,note:'Tim lỗ đứng 50-50-200-50-50, ngang 45-110-45. Kèm sườn CT5 PL-230×55×8 hàn bụng cột. Nguồn: HS.Dw tr.3, TKTC tr.46.',holes:[-.15,-.1,.1,.15].flatMap(v=>[[-.055,v],[.055,v]]),bl:.07});
+ plate([XC-.0035-.045,y+.0069,ZT-.125],.083,.2,.008,PY,UP,`Tai dầm – đầu dầm D${i+1} vào I-350`,{spec:'PL-200×83×8',bolt:'3 bu lông M20, lỗ Ø22 (tim 50-50)',where:`Hàn bụng I-350, bắt vào bụng I-250 tại trục ${n}`,note:'Kèm sườn đệm đáy PL-90×83×8. Nguồn: HS.Dw tr.2.',holes:[[0,-.05],[0,0],[0,.05]],bl:.05});
+ bar('i150','I-150×75×5×7',[XC+.0035,y,ZT-.011-.075-.004],[XC+1.3,y,ZT-.011-.075-.004],`Mỏ đua I-150 – trục ${n}`,{where:'Nhô 1.300 ra ngoài cột I-350 (1.070 + mũi bo 230), đỡ mũi canopy',note:'BV DẦM CANOPY (10/11) – MẶT CẮT DẦM CANOPY: 6.000 + 1.070 + 230 = 7.300 tính từ trục 1. CHI TIẾT LIÊN KẾT: dầm I-150×75×4×6 hàn vào dầm I-250 qua PL-200×75×10 và PL-140×70×10.'});
+ plate([XC+1.005,y,ZT-.09],.07,.14,.01,PX,UP,`Bản bịt đầu mỏ đua – trục ${n}`,{spec:'PL-140×70×10',bolt:'Không khoan lỗ – hàn bịt',where:`Đầu I-150 trục ${n}`});
+});
+// --- 4. Giằng chéo ROD Ø20 (HS.Dw tr.1: có ở các khoang E→D→C→B→A+995→A', KHÔNG có ở khoang E'→E) ---
+for(let i=1;i<BEAMS.length-1;i++){const y1=BEAMS[i][0],y2=BEAMS[i+1][0],z=ZT-.06;
+ bar('rod','Thép tròn Ø20',[.15,y1,z],[XC-.1,y2,z],`Giằng chéo ROD Ø20 – khoang ${BEAMS[i][1]}→${BEAMS[i+1][1]}`,{where:'Mặt phẳng mái canopy'});
+ bar('rod','Thép tròn Ø20',[.15,y2,z],[XC-.1,y1,z],`Giằng chéo ROD Ø20 – khoang ${BEAMS[i][1]}→${BEAMS[i+1][1]}`,{where:'Mặt phẳng mái canopy'})}
+// --- 5. Xà gồ canopy hộp 50×100 (5 đường) ---
+[.6,1.95,3.3,4.65,5.85].forEach((x,i)=>{const ys=i?[[YS,YN]]:BEAMS.map(b=>b[0]).sort((a,b)=>a-b).slice(0,-1).map((y,m,ar)=>[y+.11,BEAMS.map(b=>b[0]).sort((a,b)=>a-b)[m+1]-.11]);
+ ys.forEach(([y1,y2],m)=>bar('xgc','Hộp 50×100×1,4',[x,y1,ZT+.05],[x,y2,ZT+.05],`Xà gồ canopy số ${i+1}${i?'':', đoạn '+(m+1)}`,{where:`Cách trục 1 = ${(x*1000).toFixed(0)}, chạy suốt A'→E' trên lưng dầm${i?'':' (ngắt tại 7 cột biển CT4-1)'}`,note:'Bảng phân khai: 5 đường, 25 cây 6 m. Nối so le trên dầm.'}))});
+
+// --- 5b. Hoàn thiện canopy (BV DẦM CANOPY 10/11 + kiến trúc HS.Dw tr.22) ---
+// Vươn 7.300 từ trục 1 = 6.000 (ra cột ngoài) + 1.070 + mũi bo 230. Đáy alu phẳng +5.000;
+// đỉnh tôn dốc i≈5% từ +5.800 tại trục 1 xuống +5.460 tại tâm mũi; mũi bo nửa tròn R230.
+const CTIP=7.30, CRN=.23, CXN=CTIP-CRN, CZB=5.000, CZT0=5.800, CZTN=CZB+2*CRN;
+const czTop=x=>CZT0-(CZT0-CZTN)*Math.min(x,CXN)/CXN;      // cao độ mặt tôn theo x
+const noC='BV DẦM CANOPY (10/11) MẶT CẮT DẦM CANOPY: 6.000 + 1.070 + 230 = 7.300. Kiến trúc HS.Dw tr.22: hộp đua cao 800 tại trục 1 (+5.000 → +5.800), cao 460 tại mũi, đáy alu phẳng +5.000, độ dốc i ≈ 5%.';
+// 7 đường hộp 50×100 chạy dọc A'→E' ở đáy (khung đỡ tấm alu trần canopy)
+const CXS=[0,1,2,3,4,5,6].map(k=>.5+k*1.075);
+CXS.forEach((x,k)=>{
+ bar('cano','Hộp 50×100×1,4',[x,YS,CZB+.05],[x,YN,CZB+.05],`Hộp dọc đáy canopy ${k+1}/7`,{where:`Cách trục 1 = ${(x*1000).toFixed(0)}, đáy +5.000 (mặt trên +5.100 = đáy dầm I-250)`,note:'Đo trên mặt cắt: các hộp 50×100 chạy dọc, bước ≈ 1.100. '+noC});
+ const zt=czTop(x);
+ bar('cano','Hộp 50×100×1,4',[x,YS,zt-.05],[x,YN,zt-.05],`Hộp dọc đỉnh canopy ${k+1}/7 (đỡ tôn)`,{where:`Cách trục 1 = ${(x*1000).toFixed(0)}, mặt tôn +${zt.toFixed(3)}`,note:'Nằm trên lưng dầm canopy, tạo mặt dốc i ≈ 5% cho tôn 11 sóng. '+noC});
+});
+// mũi bo: hộp 20×20×1,2 uốn nóng, nửa đường tròn R230, rải cách đều 600
+const CNY=Math.round((YN-YS)/.6), CSP=(YN-YS)/CNY, CZC=CZB+CRN, RNS=CRN-.012;
+for(let i=0;i<=CNY;i++){const y=YS+CSP*i;
+ const pt=[90,45,0,-45,-90].map(a=>a*Math.PI/180).map(a=>[CXN+RNS*Math.cos(a),y,CZC+RNS*Math.sin(a)]);
+ for(let k=0;k<4;k++)bar('cano','Hộp 20×20×1,2',pt[k],pt[k+1],`Mũi bo canopy 20×20 uốn nóng – sườn ${i+1}/${CNY+1}, đoạn ${k+1}/4`,{where:`Mũi canopy x = 7.070 → 7.300, nửa tròn R230 tâm (7.070, +5.230); y = ${y.toFixed(2)} m`,note:'Kiến trúc HS.Dw tr.22: "THÉP HỘP 20×20×1,2MM, UỐN NÓNG, RẢI CÁCH ĐỀU 600MM". Mô hình chia cung thành 4 đoạn thẳng, khai triển thật ≈ 0,69 m/cây.'});
+}
+// 2 hộp dọc 50×100 ôm mũi (đỉnh và đáy cung)
+[[czTop(CXN)-.05,'đỉnh mũi'],[CZB+.05,'đáy mũi']].forEach(([z,t])=>bar('cano','Hộp 50×100×1,4',[CXN,YS,z],[CXN,YN,z],`Hộp dọc 50×100 ${t} canopy`,{where:`x = 7.070, cao ${z.toFixed(3)}`,note:'Thanh dọc nối chân các sườn mũi bo 20×20. '+noC}));
+// --- 5c. Cột thép hiện hữu trong nhà (HS.Dw tr.34 "MẶT BẰNG CỘT THÉP" – vùng KẾT CẤU HIỆN HỮU) ---
+const COLD=[[-6.7,'2',[[0,'A'],[20,'D'],[25,'E']]],[-13.3,'3',[[0,'A'],[20,'D'],[25,'E']]],[-20.0,'4',[[0,'A'],[7,'B'],[13,'C'],[20,'D'],[25,'E']]]];
+const ZOLD_=y=>y<=11?6.95+1.45*y/11:6.95+1.45*(27.278-y)/(27.278-11);
+COLD.forEach(([x,t,ys])=>ys.forEach(([y,a])=>bar('colo','I-250×125×6×9',[x,y,.016],[x,y,ZOLD_(y)],`Cột thép hiện hữu – trục ${t} × ${a}`,{up:PX,where:`Trục ${t} × ${a}, ±0.000 → +${ZOLD_(y).toFixed(3)} (đỉnh cột đỡ kèo mái hiện hữu)`,note:'Vị trí lấy từ HS.Dw tr.34 "MẶT BẰNG CỘT THÉP", vùng gạch chéo KẾT CẤU HIỆN HỮU. CHƯA CHỐT: bản vẽ không ghi tiết diện và chiều cao cột hiện hữu – mô hình tạm dùng I-250×125×6×9 (bằng CT-1) và đỉnh cột bám theo đường mái đọc từ MẶT CẮT 1-1 (diềm +6.950, nóc +8.400). Cần đo tại hiện trường.'})));
+// --- 5d. Dầm ngang I-400 hiện hữu nâng cote, cầu trục 5T, vì kèo mái hiện hữu ---
+const TRX=[[0,'1'],[-6.7,'2'],[-13.3,'3'],[-20.0,'4']];
+// 6 dầm I-400: trục D và E, mỗi trục 3 nhịp giữa 4 cột (HS.Dw tr.4: "DỜI DẦM THÉP NGANG TRỤC D, E LÊN COTE +5.100";
+// hiện trường điều chỉnh về +4.850 đo từ ±0.000 đến đỉnh dầm)
+const Z400=4.85;
+[[20,'D'],[25,'E']].forEach(([y,a])=>{for(let i=0;i<3;i++){
+ const x1=TRX[i][0],x2=TRX[i+1][0];
+ bar('i400','I-400×200×8×13',[x1-.125,y,Z400-.2],[x2+.125,y,Z400-.2],`Dầm ngang I-400 hiện hữu – trục ${a}, nhịp trục ${TRX[i][1]}–${TRX[i+1][1]}`,{where:`Trục ${a} × (trục ${TRX[i][1]} → ${TRX[i+1][1]}), đỉnh dầm +4.850`,note:'HS.Dw tr.4 NỘI DUNG NÂNG CẤP ghi "DỜI DẦM THÉP NGANG TRỤC D, E LÊN COTE +5.100". Hiện trường chốt lại +4.850, đo từ ±0.000 đến ĐỈNH dầm (chủ đầu tư xác nhận 24/11). 6 dầm: 3 nhịp trên trục D và 3 nhịp trên trục E. CHƯA CHỐT: bản vẽ không ghi tiết diện – mô hình tạm dùng I-400×200×8×13 theo lời chủ đầu tư.'});
+}});
+// cầu trục 5 tấn hiện hữu: 2 đường ray chạy dọc trục 1→4 tại trục A và D, dầm cầu bắc ngang
+const ZRAIL=5.25, ZBRG=5.85, CRX=-9.5;
+[[0,'A'],[20,'D']].forEach(([y,a])=>bar('crane','I-300×150×6,5×9',[.0,y,ZRAIL],[-20.0,y,ZRAIL],`Dầm đường ray cầu trục – trục ${a}`,{where:`Trục ${a}, chạy từ trục 1 đến trục 4, đỉnh ray ≈ +5.40`,note:'Cầu trục 5 tấn HIỆN TRẠNG (HS.Dw tr.4: "GIAN TRUYỀN THỐNG – HIỆN TRẠNG: S = 260 M2, CẨU TRỤC 5 TẤN CHẠY TRÊN"). Vị trí và cao độ đo trên MẶT CẮT 1-1 tr.6 (tỉ lệ 1/100). CHƯA CHỐT tiết diện ray và dầm cầu – mô hình thể hiện minh hoạ để hình dung không gian.'}));
+bar('crane','I-400×200×8×13',[CRX,0,ZBRG],[CRX,20,ZBRG],'Dầm cầu trục 5 tấn (vị trí minh hoạ)',{where:'Bắc ngang trục A → D, nhịp 20 m, di chuyển dọc trục 1↔4',note:'Cầu trục 5 tấn hiện trạng trên gian truyền thống. Vị trí vẽ ở giữa nhà chỉ để minh hoạ – thực tế chạy dọc. Tiết diện chưa có trong bản vẽ.'});
+plate([CRX,10,ZBRG-.33],.5,.6,.35,UP,PY,'Xe con + pa lăng cầu trục (minh hoạ)',{spec:'Pa lăng 5 tấn',where:'Treo dưới dầm cầu, chạy ngang trục A↔D',note:'Khối hộp chỉ để nhận biết vị trí pa lăng, không phải kích thước thật.'});
+// vì kèo mái hiện hữu: 4 khung tại trục 1→4, mái dốc 2 phía, nóc +8.400 tại y = 11.0, diềm +6.950
+const ZEAVE=6.95, ZRIDGE=8.40, YRIDGE=11.0;
+const zRoof=y=>y<=YRIDGE?ZEAVE+(ZRIDGE-ZEAVE)*y/YRIDGE:ZEAVE+(ZRIDGE-ZEAVE)*(YN-y)/(YN-YRIDGE);
+TRX.forEach(([x,t])=>{
+ bar('roof','I-300×150×6,5×9',[x,0,ZEAVE],[x,YRIDGE,ZRIDGE],`Vì kèo mái hiện hữu – trục ${t}, cánh trục A → nóc`,{where:`Trục ${t}, từ trục A (+6.950) lên nóc tại y = 11,0 m (+8.400)`,note:'MINH HOẠ: hình dáng mái lấy từ MẶT CẮT 1-1 tr.6 (nóc +8.400, diềm +6.950). Bản vẽ nâng cấp không vẽ lại kết cấu mái hiện hữu nên tiết diện kèo, xà gồ và vị trí nóc chính xác CHƯA CHỐT – dựng để thấy quan hệ cột và mái, cần đo tại hiện trường.'});
+ bar('roof','I-300×150×6,5×9',[x,YRIDGE,ZRIDGE],[x,YN,ZEAVE],`Vì kèo mái hiện hữu – trục ${t}, nóc → mép E'`,{where:`Trục ${t}, từ nóc (+8.400) xuống mép mái E' (+6.950)`,note:'MINH HOẠ như trên.'});
+});
+// --- 6. Khung biển hiệu (HS.Dw tr.3 – MC kết cấu bảng hiệu điển hình) ---
+// 7 đường C-250 nằm ngang, ÚP: BỤNG NẰM NGANG Ở TRÊN (sâu 250 vuông góc mặt biển), cánh 50 hướng xuống (Chi tiết B); xương đứng hộp 40×40 phía ngoài.
+const SY1=YS+.12,SY2=YN-.12,SZ1=5.35,SZ2=10.8,CZ=[5.40,6.27,7.29,8.21,8.67,9.63,10.55].map(z=>5.40+(z-5.40)*(10.75-5.40)/(10.55-5.40));
+const PSTY=BEAMS.map(b=>b[0]).sort((a,b)=>a-b);   // 7 cột biển CT4-1 song song 7 cột I-250
+CZ.forEach((z,k)=>{for(let m=0;m<PSTY.length-1;m++)bar('sign','C-250×50×10×2,0',[.475,PSTY[m+1]-.0575,z],[.475,PSTY[m]+.0575,z],`Xà gồ C250 biển hiệu – đường ${k+1}/7, nhịp ${m+1}/6`,{up:PX,where:`Cao độ ≈ +${z.toFixed(2)} (đo trên MC HS.Dw tr.3), nhịp giữa 2 cột biển ${m+1}/6, dài ${(PSTY[m+1]-PSTY[m]-.115).toFixed(2).replace('.',',')} m`,note:'ÚP: bụng C nằm ngang ở phía TRÊN, 2 cánh 50 hướng XUỐNG (HS.Dw tr.3 "Chi tiết B": đầu bu lông nằm trên bụng). Bảng bóc tách: 6–7 đường chạy suốt 30,089 m, nối đối đầu tại cột bằng pát PL6 + 4M12 (tại cột biển CT4-1). Bảng phân khai: 7 đường, 35 cây 6 m.'})});
+for(let k=0;;k++){const y=YS+.5+1.2*k;if(y>YN-.5+.001)break;if(BEAMS.some(b=>Math.abs(b[0]-y)<.1))continue;bar('sign','Hộp 40×40×1,4',[.63,y,SZ1],[.63,y,SZ2],'Xương đứng biển hiệu hộp 40×40',{where:'Bước 1.200 (TKTC tr.44, cách mép biển 500), phía ngoài C250, cao +5.350 → +10.800',note:'Bắt tôn sóng mặt dựng. Hàn vào cánh ngoài các đường C250.'})}
+// --- 6b. CỘT BIỂN HIỆU CT4-1 (HS.Dw tr.3 Chi tiết 4, 5; bảng đặt hàng: 2 cột biển + 4 giằng CT4) ---
+// Theo hiện trường: MỖI cột I-250 trên trục 1 (7 vị trí) có 1 cột đứng I-200×100×5,5×8 dài 5,7 m (+5,100 → +10,800) song song, cách 285 mm,
+// nối với cột I-250 bằng 2 giằng ngắn I-200×100×5,5×8 (L = 285): 1 giằng ở +6,95 và 1 giằng sát đỉnh (+10,65).
+const PXC=.137,STUBL=.285,PXP=PXC+STUBL+.1;
+BEAMS.forEach(([y,n])=>{const sgs=n==="A'"?[1]:n==="E'"?[-1]:[-1,1];
+ const pst=bar('post','I-150×75×5×7',[PXP,y,ZT+.012],[PXP,y,ZTOP],`Cột biển hiệu CT4-1 – trục ${n}`,{up:PX,where:`Song song cột I-250 trục 1 × ${n}, cách mép cánh cột 285 mm; cao +5,100 → +10,800 (5,7 m)`,note:'Cột biển I-150×75×5×7 (14,0 kg/m), dài 5,7 m – theo hiện trường (chủ đầu tư xác nhận 21/11). Bản vẽ HS.Dw tr.3 Chi tiết 4 ghi nhãn "CT4-1 I-200×200×6×8" nhưng hiện trường là I-150 nên mô hình dùng I-150×75×5×7. CẢNH BÁO: bản đế PL-400×125×12, sườn 1/2PL-100×100×6 và bản mã giằng PL-220×200×12 trong bản vẽ vẽ cho cột I-200 – cần thiết kế xác nhận lại cho cột I-150. Hiện trường có 7 cột; bảng đặt hàng mới ghi 2 cột – cần đặt thêm 5 cột. Chân đặt trên dầm canopy I-250 (+5,100), đầu có bản bịt.'});
+ plate([PXP,y,ZT+.006],.125,.4,.012,UP,PX,`Bản mã đế cột biển – trục ${n}`,{spec:'PL-400×125×12',bolt:'8 bu lông M20 cấp bền 8.8, L=60 mm, lỗ Ø22',where:`Trên cánh trên dầm canopy tại trục ${n}, +5,100, dưới chân cột biển I-200`,note:'HS.Dw (13/11) tr.3, Chi tiết 5 – Mặt cắt A1-A1 (I-200×100×5,5×8): bản đế PL-400×125×12 (400 theo phương bụng, 125 = bề rộng cánh dầm canopy), 8 M20 (8.8) L=60: 2 hàng cách nhau 60 (33-60-33) × 4 hàng tim cách đầu bản 50-150-250-350. Hai sườn 1/2 PL-100×100×6 nằm trong mặt phẳng bụng, nhô 100 mỗi đầu.',holes:[[-.03,-.15],[.03,-.15],[-.03,-.05],[.03,-.05],[-.03,.05],[.03,.05],[-.03,.15],[.03,.15]],bd:.02,bl:.06,boff:-.015});
+ [-1,1].forEach(sd=>rib([PXP+sd*.1,y,ZT+.012],PX.clone().multiplyScalar(sd),UP,.1,.1,.006,`Sườn chân cột biển – trục ${n}`,{spec:'1/2 PL-100×100×6',where:`Chân cột biển CT4-1 trục ${n}, trong mặt phẳng bụng`,note:'HS.Dw tr.3 Chi tiết 5 / Mặt cắt A1-A1: 1/2 PL-100×100×6 hai đầu bản đế, hàn vào bản đế và bụng cột.'}));
+ 
+ weldEnd(pst,'a',{name:`Hàn chân cột biển vào bản mã đế – trục ${n}`});
+ [7.0].forEach((z,k)=>{const lb='giữa';
+  const st=bar('i200','I-200×100×5,5×8',[PXC,y,z],[PXC+STUBL,y,z],`Giằng ngắn CT4 (L=285) – trục ${n}, ${lb}`,{where:`Nối cột I-250 trục 1 × ${n} với cột biển CT4-1, cao +${z.toFixed(2).replace('.',',')} (${lb})`,note:'HS.Dw tr.3 Chi tiết 4: I-200×100×5,5×8, 285 mm giữa 2 cột. Đầu phía cột I-250: bản mã PL-220×200×12 + 4 M20, sườn PL-8. Đầu phía cột biển: hàn vào cánh cột CT4-1. 2 giằng / cột (bảng đặt hàng mới ghi 4 giằng cho 2 cột – cần đặt thêm).'});
+  plate([.131,y,z],.2,.22,.012,PX,UP,`Bản mã CT4 – trục ${n}, ${lb}`,{spec:'PL-220×200×12',bolt:'4 bu lông M20 cấp bền 8.8, lỗ Ø22',where:`Cánh cột I-250 trục 1 × ${n}, cao +${z.toFixed(2).replace('.',',')}`,note:'HS.Dw tr.3 Chi tiết bản mã: tim lỗ 50-100-50 × 50-100-50.',holes:[[-.05,-.05],[.05,-.05],[-.05,.05],[.05,.05]],bl:.07});
+  // sườn gia cường PL-8 trong bụng cột biển, ngang cánh trên/dưới của giằng (2 bên bụng)
+  [-.096,.096].forEach(dz=>[-1,1].forEach(sd=>plate([PXP,y+sd*.0263,z+dz],.0475,.184,.008,UP,PX,`Sườn PL-8 cột biển – trục ${n}, ${lb}`,{spec:'PL-184×47×8',where:`Trong cột biển CT4-1, ngang cánh giằng CT4 +${(z+dz).toFixed(2).replace('.',',')}`,note:'Chi tiết 4: "Sườn gia cường PL-8". Hàn kín 3 cạnh vào bụng và 2 cánh.'})));
+ });
+ // pát liên kết xà gồ C250 (TKTC tr.47 "Pát liên kết xà gồ" + "Chi tiết xà gồ bảng hiệu"): PL-267×234×6, 4 M12 (70 × 150); 157 mm đầu hàn vào cột, 110 mm đầu bắt vào bụng C
+ sgs.forEach(sg=>CZ.forEach((z,k)=>{const yc=y+sg*(.0375+.255/2),bx=[-sg*.0175,-sg*.0875];
+  plate([.475,yc,z+.0275],.255,.234,.006,UP.clone().negate(),PX,`Pát liên kết xà gồ C250 số ${k+1} – trục ${n}`,{spec:'PL-255×234×6',bolt:'4 bu lông M12 (cấp bền 8.8 – theo ghi chú chung), lỗ Ø14',where:`Đầu đường C250 số ${k+1} tại cột biển CT4-1 trục ${n}`,note:'TKTC tr.47 vẽ pát PL-267×234×6 cho cột biển I-200 (cánh 100): 157 mm hàn vào cột + 110 mm bắt 4 M12 (70 × 150, biên 40 và 42). Hiện trường cột biển là I-150 (cánh 75) nên mép trong pát lùi 12,5 mm mỗi bên, pát rút còn PL-255×234×6 (145 + 70 + 40); chiều cao 234 và cụm lỗ 70 × 150 giữ nguyên vì do bụng C250 quyết định. Pát nằm trên mặt bụng C250 (C úp), đầu bu lông ở phía trên (bản vẽ không ghi chiều dài/cấp bền bu lông). Bảng bóc tách: nối đối đầu tại cột bằng pát PL6 + 4M12.',holes:[[-bx[0],-.075],[-bx[0],.075],[-bx[1],-.075],[-bx[1],.075]],bd:.012,bl:.045});}));
+});
+
+// --- 6c. VÁCH ĐẦU HỒI MỚI (xà gồ C150, bước 1,2 m) – HS.Dw (13/11) tr.3 Chi tiết 5 "XÀ GỒ VÁCH ĐẦU HỒI" ---
+// Đọc từ bản vẽ: xà gồ C150 nằm trong khe 285 giữa cột I-250 và cột biển, bụng C nằm NGANG (150 theo phương x), cánh 50 hướng xuống,
+// cách mặt chuẩn 285 một đoạn 10 mm; 2 bu lông cách nhau 70 xuyên bụng C và pát phẳng phía trên; tôn vách bắn vào cánh ngoài (x ≈ +160 so với mặt chuẩn).
+const VX0=PXC+.010, VZ=[0,1,2,3,4].map(k=>5.65+1.2*k);   // mặt trên bụng C: +5,65 (đo MC: cao hơn tôn mái canopy ≈ 77 mm) rồi bước 1,2 m
+const VSUP=[[13,'C',2],[20,'D',4],[25,'E',1]];   // chỉ gian Home lạnh (trục C→E). cột đỡ: 2 = đầu mút phía C, 4 = nối đối đầu, 1 = đầu mút phía E
+const VSEG=[[13,20],[20,25]];   // gian Home lạnh G-1 (khung trần C→E', 270 m²) – đoạn A→C không bắn vách mới
+VZ.forEach((zt,k)=>VSEG.forEach(([y1,y2],m)=>{const a=y1+(m?.005:0),b=y2-(m<VSEG.length-1?.005:0);
+ bar('vach','C-150×50×10×2,0',[VX0+.075,b,zt-.025],[VX0+.075,a,zt-.025],`Xà gồ vách đầu hồi C150 – đường ${k+1}/5 (+${zt.toFixed(2).replace('.',',')}), đoạn ${m+1}/${VSEG.length}`,{up:PX,where:`Khe 285 giữa cột I-250 và cột biển, trục 1, y = ${y1} → ${y2} m (dài ${(b-a).toFixed(2).replace('.',',')} m), mặt trên bụng C +${zt.toFixed(2).replace('.',',')}`,note:'HS.Dw (13/11) tr.3 Chi tiết 5: xà gồ vách đầu hồi dạng C rộng 150 (đo trên bản vẽ), bụng nằm ngang, cánh xuống; bước 1,2 m theo chỉ đạo của chủ đầu tư; chỉ bắn trong gian Home lạnh G-1 (trục C→E, 12 m); bóc tách cũ ghi 25 m cho cả A→E. Chiều dày/môi của C150 không ghi trong bản vẽ – mô hình lấy cùng họ C-250×50×10×2,0 của biển hiệu. Nhịp 5–7 m: cần cây 12 m hoặc nối tại cột.'})}));
+VSUP.forEach(([y,n,mode])=>VZ.forEach((zt,k)=>{
+ const hs=mode===2?[[0,-.035],[0,.035]]:mode===4?[[-.075,-.035],[-.075,.035],[.075,-.035],[.075,.035]]:[[.075,-.035],[.075,.035]];   // du dọc theo -y
+ plate([VX0+.07,y,zt+.003],.267,.14,.006,UP,PX,`Pát xà gồ vách đầu hồi – cột trục 1 × ${n}, đường ${k+1}`,{spec:'PL-267×140×6',bolt:mode===4?'4 bu lông M12 (nối đối đầu tại cột)':'2 bu lông M12',where:`Trên bụng C150 tại cột I-250 trục 1 × ${n}, cao +${zt.toFixed(2).replace('.',',')}`,note:'Chi tiết 5: pát phẳng nằm trên bụng C150, 2 bu lông cách nhau 70 theo bề rộng bụng (đo trên bản vẽ), pát dài 140 theo phương x (đo). Chiều dày 6 và chiều dài 267 theo pát chuẩn "Pát liên kết xà gồ" TKTC tr.47 (bản vẽ Chi tiết 5 chỉ thấy mặt cắt, không ghi). Cỡ và cấp bền bu lông không ghi: dùng M12 như TKTC tr.47. Pát hàn mép vào cánh cột.',holes:hs,bd:.012,bl:.03,boff:-.004})}));
+// --- 7. Khung treo trần G-1, G-2, 13 thanh ngang (TKTC tr.41, tr.42) ---
+const GZB=4.2,GZT=4.95,YC=13.0;
+const yN=x=>27.278+x*(27.278-25.6)/21.6;           // mép mái phía E' (xiên): 27.278 tại trục 1 → 25.600 tại mép tây
+// 5 khung: khung 1 chạy theo tường tây xiên; khung 2–5 nằm trên trục 4, 3, 2, 1 (lệch ~150 né cột hiện hữu)
+const FR=[{n:'khung 1 (theo tường tây xiên)',a:[-20.78,YC],b:[-21.76,yN(-21.76)]},
+ ...[[-19.85,'trục 4'],[-13.18,'trục 3'],[-6.58,'trục 2'],[-0.15,'trục 1']].map(([x,t],i)=>({n:`khung ${i+2} (${t})`,a:[x,YC],b:[x,yN(x)]}))];
+const wdir=(a,b)=>new T.Vector3(b[0]-a[0],0,-(b[1]-a[1])).normalize();
+const lerp2=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+const GSUP=[[20,'trục D'],[25,'trục E']];   // giàn G-1 KHÔNG chạy suốt: dừng và liên kết vào cột tại mỗi trục
+const GGAP=.06;                              // nửa bề rộng cột, 2 nhịp đấu đầu hai bên cột
+FR.forEach((F,f)=>{
+ const Lf=Math.hypot(F.b[0]-F.a[0],F.b[1]-F.a[1]),dir=wdir(F.a,F.b),P=d=>lerp2(F.a,F.b,d/Lf);
+ F.L=Lf;
+ const cut=GSUP.map(([ys,t])=>[(ys-F.a[1])/(F.b[1]-F.a[1])*Lf,t]).filter(([d])=>d>1&&d<Lf-1);
+ const stn=[[0,'trục C'],...cut,[Lf,"mép mái E'"]];
+ const all=[];
+ for(let g=0;g<stn.length-1;g++){
+  const [dA,tA]=stn[g],[dB,tB]=stn[g+1];
+  const a0=dA+(g?GGAP:0),b0=dB-(g<stn.length-2?GGAP:0),Ls=b0-a0;
+  const np=Math.max(2,Math.round(Ls/1.2)),st=Ls/np;
+  const nd=[];for(let k=0;k<=np;k++)nd.push(a0+st*k);
+  all.push(...nd);
+  const A=P(a0),B=P(b0);
+  const nm=`G-1 ${F.n} – nhịp ${tA}→${tB}`;
+  const wh=`Nhịp ${tA} → ${tB}, dài ${(Ls*1000).toFixed(0)} mm, cao +4.200 → +4.950`;
+  const noC=`Giàn dừng tại cột ${tB==="mép mái E'"?tA:tB}, hai nhịp liền kề đấu đầu vào cột chứ không chạy suốt (theo hiện trường, chủ đầu tư xác nhận 24/11). Bản vẽ tr.42 vẽ khung dài 14.200 liền mạch – khác hiện trường.`;
+  bar('g1','Hộp 50×100×1,4',[...A,GZT-.05],[...B,GZT-.05],nm+' – thanh biên trên',{where:wh,note:noC+' Khoang chia đều '+(st*1000).toFixed(0)+' mm.'});
+  bar('g1','Hộp 50×100×1,4',[...A,GZB+.05],[...B,GZB+.05],nm+' – thanh biên dưới',{where:wh,note:noC});
+  nd.forEach((d,i)=>{const big=i===0||i===np,p=P(d);
+   bar('g1',big?'Hộp 50×100×1,4':'Hộp 50×50×1,4',[...p,GZB+.1],[...p,GZT-.1],nm+` – thanh đứng nút ${i+1}/${np+1}`,{up:dir,where:wh,note:'Cắt 550 mm (thông thủy giữa 2 thanh biên). '+(big?'Thanh đứng đầu nhịp, tại cột – hộp 50×100.':'Thanh đứng giữa – hộp 50×50.')});
+   if(i<np){const q=P(nd[i+1]),e=i===0||i===np-1,up=i%2===0;
+    bar('g1',e?'Hộp 50×100×1,4':'Hộp 50×50×1,4',[...p,up?GZB+.1:GZT-.1],[...q,up?GZT-.1:GZB+.1],nm+` – thanh xiên khoang ${i+1}/${np}`,{where:wh,note:(e?'Khoang đầu: hộp 50×100. ':'Khoang giữa: hộp 50×50. ')+'Chiều xiên xen kẽ như chi tiết tr.42; cắt vát 2 đầu.'})}});
+  // bản mã gối lên cột tại 2 đầu nhịp
+  [[a0,tA],[b0,tB]].forEach(([d,t],k)=>{if(t==="mép mái E'")return;const p=P(d);
+   plate([...p,GZB+.002],.22,.16,.008,UP,dir,`Bản mã gối giàn G-1 vào cột ${t} – ${F.n}`,{spec:'PL-220×160×8',where:`Đáy giàn +4.200 tại ${t}, khung ${F.n}`,note:'CHƯA CHỐT: bản vẽ không có chi tiết gối giàn G-1 lên cột (tr.42 vẽ khung liền mạch). Kích thước bản mã tạm lấy theo bề rộng 2 thanh biên 50×100 + biên hàn; cần thiết kế xác nhận.'})});
+ }
+ F.nd=all;
+ const it=all.reduce((b,d,i)=>Math.abs(d-8.3)<Math.abs(all[b]-8.3)?i:b,0),pt=P(all[it]);
+ bar('g1','Ống Ø42×2',[...pt,GZT],[...pt,GZT+1.2],`G-1 ${F.n} – ty treo Ø42×2 lên vì kèo`,{where:`Nút ${(all[it]*1000).toFixed(0)} tính từ đầu trục C`,note:'Chi tiết 2 & 3 tr.42: 2 đầu ống hàn 2×PL-30×60×6 + PL-60×200×6, bắt 1 M20 (8.8) vào bản mã PL-100×200×6 hàn kèo.'});
+ bar('hop','Hộp 100×100×1,8',[...F.a,0],[...F.a,GZB],`Cột hộp 100×100 đỡ đầu nam G-1 ${F.n}`,{up:dir,where:'Đầu khung phía trục C, từ nền ±0.000 lên đáy giàn +4.200',note:'Hiện trường (chủ đầu tư xác nhận 24/11): cột hộp đứng là []100×100×1,8 – khớp với CT-2 trong BẢNG THỐNG KÊ TIẾT DIỆN của HS.Dw tr.34 (MẶT BẰNG CỘT THÉP). Chi tiết khung G-1 tr.42 chỉ ghi chung "CỘT THÉP HỘP".'});
+});
+// 13 thanh ngang: vị trí đo trên mặt bằng tr.41 (tính từ trục C), gác trên biên trên các khung
+const NGY=[0.25,1.47,2.66,3.65,4.87,5.86,7.05,8.07,9.28,10.27,11.26,12.28,13.27];
+NGY.forEach((dy,i)=>{const y=YC+dy,f1=FR[0],t=(y-f1.a[1])/(f1.b[1]-f1.a[1]);
+ const xl=i===12?FR[2].a[0]:f1.a[0]+(f1.b[0]-f1.a[0])*t,xr=FR[4].a[0]+.1,Ln=xr-xl;
+ bar('ngang','Hộp 50×100×1,4',[xl,y,GZT+.05],[xr,y,GZT+.05],`Thanh ngang thứ ${i+1} (tính từ trục C)`,{where:`Cách trục C ${(dy*1000).toFixed(0)} mm; từ ${i===12?'khung trục 3':'khung tường tây'} tới khung trục 1, dài ≈ ${Ln.toFixed(2).replace('.',',')} m`,note:'Vị trí & chiều dài đo trên mặt bằng tr.41 (±5 cm). Thanh sát E\' ngắn vì mép mái xiên cắt. Nối từ cây 6 m, mối nối so le.'});
+});
+// G-2: dọc mép trục C, HÀN VÀO 2 KHUNG G-1 hai đầu (HS.Dw tr.42 "CHI TIẾT KHUNG G-2": cao 750,
+// biên trên & dưới []30×60×1,4, thanh xiên []30×30×1,4, khoang đầu 1.100, khoang giữa 1.200, "LK HÀN VÀO KHUNG").
+// Chi tiết vẽ điển hình dài 5.800; nhịp thật giữa 2 khung G-1 là 6,6–6,7 m nên giàn phải kéo hết nhịp, chia lại khoang.
+[[FR[1],FR[2],'trục 4–3'],[FR[2],FR[3],'trục 3–2'],[FR[3],FR[4],'trục 2–1']].forEach(([A,B,t],g)=>{
+ const xa=A.a[0]+.05, xb=B.a[0]-.05, L2=xb-xa, y=YC;
+ const np=Math.max(2,Math.round((L2-2.2)/1.15)), mid=(L2-2.2)/np;
+ const N2=[0,1.1]; for(let k=1;k<=np;k++)N2.push(1.1+mid*k); N2.push(L2);
+ const nE=N2.length-1;
+ const nm=`Khung G-2 nhịp ${t}`, wh=`Mép trục C, hàn vào 2 khung G-1 ${t}; nhịp thông thủy ${(L2*1000).toFixed(0)} mm, cao 750 (+4.200 → +4.950)`;
+ const no=`Chi tiết tr.42 vẽ khung G-2 điển hình dài 5.800 (1.100 + 3×1.200 + 1.100) nhưng ghi "LK HÀN VÀO KHUNG" ở cả 2 đầu, mà 2 khung G-1 cách nhau ${((B.a[0]-A.a[0])*1000).toFixed(0)} mm – nên giàn phải kéo hết nhịp. Mô hình giữ khoang đầu 1.100 và chia đều ${np} khoang giữa ${(mid*1000).toFixed(0)} mm. CẦN CHỐT số khoang với thiết kế.`;
+ bar('g2','Hộp 30×60×1,4',[xa,y,GZT-.03],[xb,y,GZT-.03],nm+' – thanh biên trên',{where:wh,note:no});
+ bar('g2','Hộp 30×60×1,4',[xa,y,GZB+.03],[xb,y,GZB+.03],nm+' – thanh biên dưới',{where:wh,note:no});
+ N2.forEach((d,i)=>{const e=i===0||i===nE;
+  bar('g2',e?'Hộp 30×60×1,4':'Hộp 30×30×1,4',[xa+d,y,GZB+.06],[xa+d,y,GZT-.06],nm+` – thanh đứng nút ${i+1}/${nE+1}`,{up:PX,where:wh,note:'Cắt 630 mm. '+(e?'Thanh đứng đầu nhịp, hàn vào khung G-1.':'')});
+  if(i<nE)bar('g2','Hộp 30×30×1,4',[xa+d,y,i%2?GZT-.06:GZB+.06],[xa+N2[i+1],y,i%2?GZB+.06:GZT-.06],nm+` – thanh xiên khoang ${i+1}/${nE}`,{where:wh,note:'Bảng bóc tách G-2: thanh xiên []30×30×1,4, cắt vát 2 đầu. '+no})});
+});
+// --- 8. Mái giáp nhà NV – theo bản 10.30 (MB tr.1, tr.2; MC 1-1, MC 2-2, CT vì kèo 01/02, CT cấy cột) ---
+// (a) Phần dài trục 4 → kèo 02: CHỈ có 4 xà gồ []50×100×1,4 chạy dọc (cách trục A 71 / 1270 / 2472 / 3671), không vì kèo.
+// (b) Phần đầu nhà NV (ô mái điều chỉnh 4,25 × 3,15 giáp trục 1): kèo 02, kèo 01, 2 cột cấy 100×100 lên trụ BT, xà gồ vách.
+// Cao độ theo MC 1-1: mép nam mái +6,95; mặt mái dốc ≈14,3 % lên phía trục A (≈ +7,55) – cùng mặt phẳng với mái xưởng, KHÔNG phải mái +5,x như mô hình cũ.
+const ySE=x=>-2.811+x*0.0762;                 // mép nam xiên: A' (-2,811) tại trục 1 → -4,335 tại trục 4
+const ZR=y=>7.555+0.143*y;                    // cao độ mặt tôn mái NV theo y
+const XK=-4.25, ZB=6.45, ZW=4.2;              // kèo 02 cách trục 1 = 4250; cánh hạ kèo +6,45; đỉnh trụ BT / tường gạch +4,20
+const YK1=ySE(XK)-.0, YK2=-.06;               // đầu nam / đầu bắc của kèo 02
+// giàn phẳng tổng quát dọc đường a→b (mặt bằng), cánh hạ cao zb, cánh thượng zt(d)
+function truss(layer,a,b,zb,zt,nodes,nm,o={}){const L=Math.hypot(b[0]-a[0],b[1]-a[1]),P=d=>[a[0]+(b[0]-a[0])*d/L,a[1]+(b[1]-a[1])*d/L],dir=new T.Vector3(b[0]-a[0],0,-(b[1]-a[1])).normalize(),ch=o.ch||'Hộp 40×80×1,4',wb=o.wb||'Hộp 40×40×1,4';
+ const bot=bar(layer,ch,[...a,zb+.04],[...b,zb+.04],nm+' – cánh hạ',{where:o.where,note:o.note});
+ const top=bar(layer,ch,[...a,zt(0)-.04],[...b,zt(L)-.04],nm+' – cánh thượng',{where:o.where,note:o.note});
+ nodes.forEach((d,j)=>{const p=P(d),v=bar(layer,wb,[...p,zb+.08],[...p,zt(d)-.08],nm+' – thanh đứng',{up:dir,where:o.where});
+  weldEnd(v,'a',{name:'Hàn thanh đứng vào cánh hạ – '+nm});weldEnd(v,'b',{name:'Hàn thanh đứng vào cánh thượng – '+nm});
+  if(j<nodes.length-1){const q=P(nodes[j+1]),up=o.alt?(j%2===0):(j<nodes.length/2-1);const dg=bar(layer,wb,[...p,up?zb+.08:zt(d)-.08],[...q,up?zt(nodes[j+1])-.08:zb+.08],nm+' – thanh xiên',{where:o.where});
+   weldEnd(dg,'a',{name:'Hàn thanh xiên – '+nm});weldEnd(dg,'b',{name:'Hàn thanh xiên – '+nm})}});
+ return {L,P,dir}}
+const NVX0=-19.43;
+// (a) 4 xà gồ dọc
+[.071,1.270,2.472,3.671].forEach((d,i)=>{const y=-d,z=4.7+(.7/3.6)*(y+.071)-.05;
+ const xe=i===3?(y+2.811)/0.0762:XK;      // xà gồ 4 dừng tại mép xiên ("mái hẹp dần")
+ bar('nv','Hộp 50×100×1,4',[NVX0,y,z],[xe,y,z],`Xà gồ mái NV đường ${i+1} (cách trục A ${Math.round(d*1000)})`,{where:`Chạy dọc từ trục 4 (x≈${NVX0}) ${i===3?'tới mép mái xiên':'tới kèo 02'}, dài ${Math.abs(xe-NVX0).toFixed(2).replace('.',',')} m, cao độ mặt trên xà gồ ≈ +${(z+.05).toFixed(2).replace('.',',')} (mái cũ: +4,70 phía trục A → +4,00 mép nam)`,note:'Cao độ mái cũ theo chỉ đạo hiện trường (+4,0 và +4,7). Bản 10.30 tr.2 + TKTC tr.36: 4 xà gồ []50×100×1,4 chạy dọc, không có vì kèo ở phần dài. Gác lên kết cấu nhà NV hiện hữu. Bảng bóc tách: 15,18 / 15,08 / 14,98 / 8,51 m.'})});
+// (b) phần đầu: 3 xà gồ trong ô mái điều chỉnh, từ kèo 02 tới khung trục 1
+[.071,1.270,2.472].forEach((d,i)=>{const y=-d,z=ZR(y)-.07;
+ bar('nv','Hộp 50×100×1,4',[XK,y,z],[-.14,y,z],`Xà gồ mái điều chỉnh đường ${i+1} (gác kèo 02 → khung trục 1)`,{where:`Ô mái điều chỉnh 4,25 × 3,15, cao độ mặt mái ≈ +${ZR(y).toFixed(2).replace('.',',')}`,note:'Bảng bóc tách: 3 đường × 4,25 m – bước 1.200, cần xác nhận số đường.'})});
+// 2 cột cấy hộp 100×100×1,8 lên trụ BT ở 2 đầu kèo 02; chân bản mã PL-160×160×6 + 4 nở M12 L=150
+[[YK1,'nam (góc tường)',ZR(YK1)-.12-.03],[YK2,'bắc (sát trục A)',ZR(YK2)-.12-.03]].forEach(([y,nm,zt],i)=>{
+ const c=bar('nv','Hộp 100×100×1,8',[XK,y,ZW+.006],[XK,y,zt],`Cột cấy đầu ${nm} kèo 02`,{up:PY,where:`x = ${XK} (cách trục 1 4,25 m), cấy lên cột trụ BT đỉnh +4,20, cao ${(zt-ZW).toFixed(2).replace('.',',')} m`,note:'CT cấy cột (10.30 tr.3): hộp 100×100×1,8 hàn lên bản mã PL-160×160×6, 4 bu lông nở M12 L=150 vào trụ BT. Bản vẽ MC 1-1 ghi cao 2.750; bảng đặt hàng ghi 2,6 m.'});
+ plate([XK,y,ZW+.003],.16,.16,.006,UP,PY,`Bản mã chân cột cấy – đầu ${nm}`,{spec:'PL-160×160×6',bolt:'4 bu lông nở M12 L=150, lỗ Ø14',where:'Đỉnh trụ BT +4,20',note:'Tim lỗ 20-120-20 (CT cấy cột, bản 10.30 tr.3).',holes:[[-.06,-.06],[.06,-.06],[-.06,.06],[.06,.06]],bd:.012,bl:.15,boff:-.05});
+ weldEnd(c,'a',{name:`Hàn chân cột cấy vào bản mã – đầu ${nm}`});});
+// kèo 02: từ cột nam tới cột bắc, cánh hạ +6,45, cánh thượng theo mặt mái
+{const L2=YK2-YK1-.1,a2=[XK,YK1+.05],b2=[XK,YK2-.05],Lk=Math.hypot(b2[0]-a2[0],b2[1]-a2[1]);
+ truss('nv',a2,b2,ZB,d=>ZR(a2[1]+(b2[1]-a2[1])*d/Lk)-.12,[0,.2317,.5,.7683,1].map(v=>v*Lk),'Kèo 02 (đầu nhà NV, x = −4,25)',{where:'Giữa 2 cột cấy, dọc theo trục Nam–Bắc tại x = −4,25',note:'CT vì kèo 02 (10.30 tr.3): cánh []40×80×1,4, bụng []40×40×1,4, khoang 950-1100-1100-950, cao 500 → 1.085; bản vẽ ghi dài 4.100 nhưng mặt bằng chỉ 3,15 m – mô hình vẽ theo mặt bằng. LK hàn vì kèo vào giằng cột.'});}
+// kèo 01: dọc mép nam xiên, từ cột nam của kèo 02 tới cột I-250 CT1 (trục 1 × A'), đỉnh nằm ngang theo MC 2-2
+{const a1=[XK+.05,ySE(XK+.05)],b1=[-.13,ySE(-.13)],L1=Math.hypot(b1[0]-a1[0],b1[1]-a1[1]);
+ truss('nv',a1,b1,ZB,()=>ZB+.6,[0,1,2,3,4,5].map(v=>v*L1/5),'Kèo 01 (mép nam) cột kèo 02 → CT1',{alt:true,where:'Dọc mép nam xiên, từ cột cấy kèo 02 tới cột I-250 CT1',note:'CT vì kèo 01 (10.30 tr.3): dài 4.000 (mặt bằng 4,25), cao 600, 5 khoang 800, cánh []40×80×1,4, bụng []40×40×1,4. MC 2-2 vẽ đỉnh kèo +7,60; MC 1-1 vẽ mép nam +6,95 – mô hình theo MC 1-1, CẦN ĐO LẠI tại công trường.'});
+ }
+// xà gồ vách (50×100×1,4): 2 đường +4,2 & +5,6 ngoài kèo 01; 1 đường +5,5 tại kèo 02
+[ZW,5.6].forEach((z,i)=>bar('nv','Hộp 50×100×1,4',[XK+.05,ySE(XK+.05)-.08,z],[-.13,ySE(-.13)-.08,z],`Xà gồ vách mặt ngoài dưới kèo 01 – đường ${i+1} (+${z.toFixed(1).replace('.',',')})`,{where:`Mặt ngoài mép nam, cao +${z.toFixed(1).replace('.',',')}, dài ≈ 4,25 m`,note:'MC 2-2 (10.30 tr.3), bóc tách V3: 2 đường × 4,25 m. Gá tôn vách.'}));
+bar('nv','Hộp 50×100×1,4',[XK+.08,YK1,5.5],[XK+.08,YK2,5.5],'Xà gồ vách tại kèo 02 (+5,5)',{up:UP,where:'Mặt trong ô mái điều chỉnh, sát kèo 02, cao +5,5, dài ≈ 3,1 m',note:'MC 1-1 (10.30 tr.3), bóc tách V4: 1 đường (bản vẽ ghi 4,2 m).'});
+// bản mã gá xà gồ lên cánh thượng kèo 02
+[.071,1.270,2.472].forEach((d,i)=>plate([XK,-d,ZR(-d)-.12+.0023],.06,.12,.0045,UP,PX,`Bản mã gá xà gồ đường ${i+1} lên kèo 02`,{spec:'PL-60×120×4,5',where:'Cánh thượng kèo 02',note:'Hàn gá lên cánh thượng, hàn vào thành xà gồ.'}));
+// --- 9. Mái dôi sau trục 4 (khung D4 trục D, D5 trục C – vị trí CT-2 trên TKTC tr.34, sát tường tây xiên) ---
+const xW=y=>-20.4+(y-13)/7*(-0.54);
+[[20,'D','D4'],[13,'C','D5']].forEach(([y,n,k])=>{const x=xW(y);
+ bar('sau','Hộp 100×100×1,8',[x,y,.006],[x,y,5.55],`Cột khung ${k} – trục ${n}`,{up:PY,where:`Tường tây × trục ${n} (CT-2, TKTC tr.34)`,note:'Bảng đặt hàng: trục D L = 5,55 m; trục C L = 6,5 m – mô hình vẽ cùng cao +5.550, cần chốt.'});
+ plate([x,y,.003],.16,.16,.006,UP,PY,`Bản mã B – chân cột ${k}`,{spec:'PL-160×160×6',bolt:'4 bu lông nở M12, lỗ Ø14',holes:[[-.05,-.05],[.05,-.05],[-.05,.05],[.05,.05]],bd:.012,bl:.15,boff:-.05});
+ bar('sau','Hộp 40×80×1,4',[x-.05,y,5.51],[x-1.55,y,5.51],`Tay đỡ công xôn ${k} – vươn 1,5 m`,{where:'Chìa ra ngoài tường tây'});
+});
+[-.2,-.85,-1.5].forEach((o,i)=>bar('sau','Hộp 50×100×1,4',[xW(13)+o,13,5.6],[xW(25)+o,25,5.6],`Xà gồ mái sau số ${i+1}`,{where:'Nhịp C → E (12 m)',note:'Nếu chạy suốt 25 m: 13 cây.'}));
+
+// --- 10. Cột hộp 100×100 biên E (CT-2 trên TKTC tr.34): góc tây, trục 3, trục 2 – đầu bắc khung G-1 hàn vào ---
+[[-21.36,'góc tây'],[-13.3,'trục 3'],[-6.65,'trục 2']].forEach(([x,t])=>bar('hop','Hộp 100×100×1,8',[x,yN(x)+.06,.45],[x,yN(x)+.06,GZT],`Cột hộp biên E – ${t}`,{up:PY,where:`Mép mái phía E' tại ${t}`,note:'TKTC tr.34 chỉ thể hiện 3 vị trí CT-2 ở biên E (góc tây, trục 3, trục 2); góc trục 1 × E\' là cột I-250. Bảng đặt hàng ghi 4 cột L=4,5 m – cần đối chiếu. Đầu bắc khung G-1 "LK hàn vào cột".'}));
+
+// --- 10b. VÁCH ĐỨNG MỚI BÊN HÔNG (trục E) VÀ PHÍA SAU (trục 4): xà gồ C150 bước ≈ 1,2 m ---
+// TKTC tr.38 (mặt đứng trục 1-4) + tr.39 (MC 2-2): tường gạch cao +2,0, vách tôn bắn mới từ +2,0 lên +6,45 (4 đường + 1 đường đỉnh dưới dầm ≈ +6,33).
+// Chỉ đạo: thay xà gồ []30×60 bằng C150 bước ≈ 1,2 m. Bụng C nằm ngang (150 theo phương vuông góc vách), cánh xuống, tôn bắn vào cánh ngoài – cùng dạng Chi tiết 5 HS.Dw tr.3.
+const WZ=[2.2,3.4,4.6,5.8,6.33];
+function wallC(layer,a,b,zt,nrm,off,name,where,note){
+ const P=(q)=>[q[0]+nrm[0]*off,q[1]+nrm[1]*off,zt-.025];
+ let p1=P(a),p2=P(b);const upv=new T.Vector3(nrm[0],0,-nrm[1]).normalize();
+ if(new T.Vector3().crossVectors(upv,W(...p2).sub(W(...p1))).y>0){const t=p1;p1=p2;p2=t}   // cánh C hướng xuống
+ return bar(layer,'C-150×50×10×2,0',p1,p2,name,{up:upv,where,note})}
+const WOFF=.05+.01+.075;     // từ tim cột hộp 100×100 tới tim bụng C150: nửa cột 50 + khe 10 + nửa bụng 75
+{const s=(27.278-25.6)/21.6,nE=[-s/Math.hypot(1,s),1/Math.hypot(1,s)];
+ const xs=[0,-6.65,-13.3,-21.5];
+ WZ.forEach((zt,k)=>xs.slice(0,-1).forEach((x1,m)=>{const x2=xs[m+1];
+  wallC('vachE',[x1-(m?.005:0),yN(x1)+.06],[x2+(m<2?.005:0),yN(x2)+.06],zt,nE,WOFF,`Xà gồ vách hông trục E C150 – đường ${k+1}/5 (+${zt.toFixed(2).replace('.',',')}), đoạn ${m+1}/3`,
+   `Mép mái phía E, vách tôn bắn mới trục 1 → 4 (+1,5 m), x = ${x1} → ${x2} m, mặt trên bụng C +${zt.toFixed(2).replace('.',',')}`,
+   'TKTC tr.38: vách tôn trục E cao +2,0 → +6,45, bóc tách cũ 4 đường × 21,50 m (+1,93/2,93/4,13/5,33) + 1 đường đỉnh 20,09 m (+6,33) bằng []30×60×1,4. Theo chỉ đạo thay bằng C150 bước ≈ 1,2 m. Vị trí lấy theo cột hộp 100×100 biên E; bản vẽ chưa có chi tiết liên kết C150 vào cột hiện hữu và chưa ghi tiết diện C150.')}));
+ const d=Math.hypot(1,.54/7),nS=[-1/d,-(.54/7)/d],ys=[13,20,25.6];
+ WZ.forEach((zt,k)=>ys.slice(0,-1).forEach((y1,m)=>{const y2=ys[m+1];
+  wallC('vachS',[xW(y1),y1+(m?.005:0)],[xW(y2),y2-(m<1?.005:0)],zt,nS,WOFF,`Xà gồ vách sau trục 4 C150 – đường ${k+1}/5 (+${zt.toFixed(2).replace('.',',')}), đoạn ${m+1}/2`,
+   `Tường tây (sau trục 4), vách tôn bắn mới chỉ từ trục C đến E, y = ${y1} → ${y2} m, mặt trên bụng C +${zt.toFixed(2).replace('.',',')}`,
+   'TKTC tr.38/39: tường sau trục 4 cũng là tường gạch cao +2,0, phía trên vách tôn đến +6,45. Bóc tách cũ không có xà gồ vách mặt sau. Theo bản vẽ mặt bằng mái, phần mái/vách xây mới phía sau chỉ kéo từ trục C đến trục E. Theo chỉ đạo dùng C150 bước ≈ 1,2 m, 5 đường cùng cote với vách hông. Vị trí theo đường tường tây xiên (cột khung D4, D5 ở trục C, D); bản vẽ chưa có chi tiết liên kết vào cột hiện hữu.')}))}
+
+// --- 11. CHI TIẾT LIÊN KẾT: đường hàn, sườn gia cường, bản mã phụ ---
+{const list=pick.slice(),EY=new T.Vector3(0,0,-1),EX=new T.Vector3(1,0,0),DN=new T.Vector3(0,-1,0);
+ list.forEach(m=>{const u=m.userData,nm=u.name||'';
+  if(u.layer==='col'){weldEnd(m,'a',{name:'Hàn chân cột vào bản mã A – '+nm,note:'Hàn góc bao quanh tiết diện I-250 (cánh + bụng) lên bản mã PL-280×200×16. '+WNOTE});
+   if(nm.startsWith('Cột ngoài sân'))weldEnd(m,'b',{name:'Hàn đỉnh cột vào bản mã CT1/CT3 – '+nm})}
+  if(u.layer==='i250')weldEnd(m,'a',{name:'Hàn đầu dầm vào mặt bích CT5 – '+nm,note:'Hàn bao quanh tiết diện I-250 lên mặt bích PL-400×200×12; cánh dầm vát mép 30–45° hàn ngấu (TCVN 10307). '+WNOTE});
+  if(u.layer==='i150'){weldEnd(m,'a',{name:'Hàn gốc mỏ đua I-150 vào bụng I-350 – '+nm});weldEnd(m,'b',{name:'Hàn bản bịt PL-140×70×10 – '+nm})}
+  if(u.layer==='i200'){weldEnd(m,'a',{name:'Hàn đầu dầm I-200 – '+nm});weldEnd(m,'b',{name:'Hàn đầu dầm I-200 – '+nm})}
+  if(u.layer==='sau'&&nm.startsWith('Cột')){weldEnd(m,'a',{name:'Hàn chân cột vào bản mã B – '+nm});}
+  if(u.layer==='sau'&&nm.startsWith('Tay đỡ'))weldEnd(m,'a',{name:'Hàn công xôn vào cột – '+nm});
+  if(u.layer==='hop'){weldEnd(m,'b',{name:'Hàn đầu khung G-1 vào cột – '+nm});}
+  if((u.layer==='g1'||u.layer==='g2')&&/thanh đứng|thanh xiên|chống xiên/.test(nm)){weldEnd(m,'a',{name:'Hàn nút giàn – '+nm,note:'Hàn bao quanh đầu thanh vào thanh biên, hf ≈ 3 mm (thép hộp 1,4 mm), cắt vát khít trước khi hàn; sơn kẽm lạnh lại mối hàn.'});weldEnd(m,'b',{name:'Hàn nút giàn – '+nm,note:'Hàn bao quanh đầu thanh vào thanh biên, hf ≈ 3 mm.'})}
+  if(u.layer==='g1'&&/thanh biên/.test(nm)){weldEnd(m,'a',{name:'Hàn đầu nhịp giàn G-1 vào cột – '+nm,note:'Chi tiết G-1: "LK hàn vào cột". Mỗi nhịp giàn dừng tại cột, hàn vào bản mã gối trên cột.'});weldEnd(m,'b',{name:'Hàn đầu nhịp giàn G-1 vào cột – '+nm,note:'Chi tiết G-1: "LK hàn vào cột". Mỗi nhịp giàn dừng tại cột, hàn vào bản mã gối trên cột.'})}
+  if(u.layer==='g2'&&/thanh biên/.test(nm)){weldEnd(m,'a',{name:'Hàn đầu G-2 vào khung G-1 – '+nm});weldEnd(m,'b',{name:'Hàn đầu G-2 vào khung G-1 – '+nm})}
+  if(u.layer==='g1'&&u.spec==='Ống Ø42×2'){const [x,y,z]=u.A;
+   plate([x,y,GZT+.1],.06,.2,.006,EX,UP,'Bản mã chân ty treo (Chi tiết 2)',{spec:'PL-60×200×6',bolt:'Bu lông M20 cấp bền 8.8',where:nm,note:'Hàn lên thanh biên trên giàn; ống Ø42 kẹp 2×PL-30×60×6 bắt 1 M20 (8.8).',holes:[[0,-.04]],bl:.07});
+   [-1,1].forEach(sd=>plate([x+sd*.024,y,GZT+.2],.03,.06,.006,EX,UP,'Má kẹp đầu ống Ø42',{spec:'PL-30×60×6',where:nm}));
+   plate([x,y,GZT+1.15],.06,.2,.006,EX,UP,'Bản mã đầu ty treo (Chi tiết 3)',{spec:'PL-60×200×6',bolt:'Bu lông M20 cấp bền 8.8',where:nm,note:'Bắt 1 M20 (8.8) vào bản mã PL-100×200×6 hàn dưới cánh kèo hiện hữu.',holes:[[0,.04]],bl:.07});
+   plate([x,y,GZT+1.258],.1,.2,.006,UP,EY,'Bản mã hàn dưới kèo hiện hữu',{spec:'PL-100×200×6',where:nm});
+   weldEnd(m,'a',{name:'Hàn ống Ø42 vào má kẹp – '+nm},.12);weldEnd(m,'b',{name:'Hàn ống Ø42 vào má kẹp – '+nm},.12)}
+ });
+ // tai dầm: hàn 2 phía vào bụng I-350 + sườn đệm đáy PL-90×83×8
+ BEAMS.forEach(([y,n])=>{const x=XC-.0035-.006;[y+.0069-.008,y+.0069+.008].forEach(yy=>weldPath([W(x,yy,ZT-.225),W(x,yy,ZT-.025)],false,{name:`Hàn tai dầm PL-200×83×8 vào bụng I-350 – trục ${n}`,spec:'Hàn góc 2 phía suốt chiều cao 200'}));
+  plate([XC-.0035-.0415,y+.05,ZT-.229],.083,.09,.008,UP,PY,`Sườn đệm đáy tai dầm – trục ${n}`,{spec:'PL-90×83×8',where:`Trong bụng I-350 tại trục ${n}`,note:'Truyền lực từ tai dầm xuống cánh dưới I-350; hàn 2 cạnh vào bụng và cánh dưới.'})});
+ // CT1/CT3: hàn bản mã đáy dầm + sườn tam giác đỉnh cột và nách dầm I-350
+ [[YN,.37],[13,.45],[YS,.37]].forEach(([y,pl])=>{
+  [-1,1].forEach(sd=>weldPath([W(XC+sd*.0875,y-pl/2,colTop+.032),W(XC+sd*.0875,y+pl/2,colTop+.032)],false,{name:'Hàn bản mã CT vào cánh dưới I-350',spec:'Hàn góc 2 cạnh dài bản mã'}));
+  [-1,1].forEach(sd=>{rib([XC,y+sd*.125,colTop],EY.clone().multiplyScalar(-sd),DN,Math.min(.1,pl/2-.125),.1,.006,'Sườn tam giác đỉnh cột',{spec:'1/2 PL-100×100×6',where:'Ngoài cánh cột, dưới bản mã đỉnh cột'});
+   rib([XC+sd*.0035,y,ZT-.339],EX.clone().multiplyScalar(sd),UP,.08,.1,.006,'Sườn tam giác nách dầm I-350',{spec:'1/2 PL-100×100×6',where:'Hai bên bụng I-350 ngay trên đỉnh cột'})})});
+ // CT5: sườn tăng cứng bụng cột tại cao độ 2 cánh dầm canopy (cột hiện hữu & cột góc)
+ BEAMS.forEach(([y,n])=>[ZT-.0045,ZT-.25+.0045].forEach(z=>[-1,1].forEach(sd=>plate([0,y+sd*.0305,z],.23,.055,.008,UP,PY,`Sườn CT5 bụng cột – trục 1 × ${n}`,{spec:'PL-230×55×8',where:`Ngang cánh ${z>5?'trên':'dưới'} dầm canopy`,note:'Ép khít bụng cột, vát 2 góc 15×15 né đường hàn cánh. Bảng bản mã ghi 18 tấm (2 tấm/vị trí); mô hình đặt 2 bên bụng × 2 cánh = 4 tấm/vị trí – cần thiết kế xác nhận số tấm.'}))));
+}
+
+// ======================= NHÀ HIỆN HỮU & LƯỚI TRỤC =======================
+const house=new T.Group(),axis=new T.Group();S.add(house,axis);
+{const gm=new T.MeshStandardMaterial({color:dark?'#3b4654':'#b8c0c9',transparent:true,opacity:.16,side:T.DoubleSide,depthWrite:false});
+ const eg=new T.LineBasicMaterial({color:dark?'#56657a':'#9aa4af'});
+ const x1=-21.5,x2=0,y1=0,y2=25.6,ze=7.55,zn=6.0,zr=8.95,ym=10.07;
+ const quad=(pts)=>{const g=new T.BufferGeometry().setFromPoints(pts.map(p=>W(...p)));g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();house.add(new T.Mesh(g,gm));house.add(new T.LineLoop(new T.BufferGeometry().setFromPoints(pts.map(p=>W(...p))),eg))};
+ quad([[x1,y1,0],[x2,y1,0],[x2,y1,ze],[x1,y1,ze]]);quad([[x1,y2,0],[x2,y2,0],[x2,y2,zn],[x1,y2,zn]]);
+ quad([[x1,y1,ze],[x2,y1,ze],[x2,ym,zr],[x1,ym,zr]]);quad([[x1,y2,zn],[x2,y2,zn],[x2,ym,zr],[x1,ym,zr]]);
+ const tri=(x)=>{const g=new T.BufferGeometry().setFromPoints([W(x,y1,0),W(x,y2,0),W(x,y2,zn),W(x,ym,zr),W(x,y1,ze)]);g.setIndex([0,1,2,0,2,4,4,2,3]);g.computeVertexNormals();house.add(new T.Mesh(g,gm))};tri(x1);tri(x2);
+ const bt=new T.MeshStandardMaterial({color:'#9ca3af',roughness:.9});
+ [[XK,ySE(XK)],[XK,-.06]].forEach(([x,y])=>{const m=new T.Mesh(new T.BoxGeometry(.2,4.2,.2),bt);m.position.copy(W(x,y,2.1));house.add(m)});
+ quad([[XK,ySE(XK),0],[0,-2.811,0],[0,-2.811,4.2],[XK,ySE(XK),4.2]]);quad([[XK,ySE(XK),0],[XK,-.06,0],[XK,-.06,4.2],[XK,ySE(XK),4.2]]);
+ const ex=new T.MeshStandardMaterial({color:dark?'#6b7785':'#8b96a3',transparent:true,opacity:.55});
+
+ [[XC,YN],[XC,13],[XC,YS]].forEach(([x,y])=>{const m=new T.Mesh(new T.BoxGeometry(.8,.3,.8),bt);m.position.copy(W(x,y,-.15));house.add(m)});
+ const gnd=new T.Mesh(new T.PlaneGeometry(90,70),new T.MeshStandardMaterial({color:dark?'#18202a':'#dfe4e9',roughness:1}));gnd.rotation.x=-Math.PI/2;gnd.position.set(-6,-.31,-12);S.add(gnd);
+}
+function label(txt,pos,sz=1,col='#d1121f'){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle='#fff';g.beginPath();g.arc(64,64,56,0,7);g.fill();g.lineWidth=8;g.strokeStyle=col;g.stroke();g.fillStyle='#141a22';g.font='bold 58px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,64,68);
+ const s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),depthTest:false}));s.scale.set(sz,sz,1);s.position.copy(pos);s.renderOrder=9;axis.add(s)}
+{const lm=new T.LineDashedMaterial({color:'#d1121f',dashSize:.6,gapSize:.35,transparent:true,opacity:.7});
+ const ln=(a,b)=>{const g=new T.BufferGeometry().setFromPoints([a,b]);const l=new T.Line(g,lm);l.computeLineDistances();axis.add(l)};
+ for(const k in AX.x){const x=AX.x[k];ln(W(x,-6,.02),W(x,31,.02));label(k,W(x,-7,.5),1.3)}
+ for(const k in AX.y){const y=AX.y[k];ln(W(-24,y,.02),W(9,y,.02));label(k,W(10.2,y,.5),1.3)}
+ label('I350',W(XC,-6.5,.5),1.1,'#1d4ed8');
+}
+
+// ======================= GIAO DIỆN =======================
+const fmt=(v,d=1)=>v.toLocaleString('vi-VN',{minimumFractionDigits:d,maximumFractionDigits:d});
+const vis={};let tot=0;
+$('#layers').innerHTML=Object.keys(L).map(k=>{vis[k]=true;tot+=stats[k].kg;const s=stats[k];
+ return `<label class="lay" data-k="${k}"><input type="checkbox" checked><span class="nm"><span class="sw" style="background:${L[k].c}"></span>${L[k].n}<small>${k==='bolt'?s.n+' bộ':k==='weld'?s.n+' đường · '+fmt(s.m)+' m':s.n+' chi tiết'+(s.m?' · '+fmt(s.m)+' m':'')}</small></span><span class="kg">${k==='bolt'||k==='weld'?'':fmt(s.kg,0)+' kg'}</span></label>`}).join('');
+$('#total').textContent=fmt(tot,0)+' kg';
+document.querySelectorAll('.lay input').forEach(cb=>cb.addEventListener('change',e=>{const k=e.target.closest('.lay').dataset.k;groups[k].visible=vis[k]=e.target.checked}));
+$('#bAll').onclick=()=>{for(const k in L){groups[k].visible=vis[k]=true}document.querySelectorAll('.lay input').forEach(c=>c.checked=true)};
+const tgl=(btn,obj)=>{btn.onclick=()=>{obj.visible=!obj.visible;btn.classList.toggle('on',obj.visible)}};tgl($('#bHouse'),house);tgl($('#bAxis'),axis);
+
+// ---- Thống kê (tính trực tiếp từ mô hình) ----
+{const nf=(v,d=1)=>fmt(v,d);
+ const rows=(arr)=>arr.map(r=>`<tr class="${r.c||''}"><td>${r.a}</td>${r.b.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('');
+ const tbl=(head,arr)=>`<table class="st"><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>${rows(arr)}</table>`;
+ const grp=(filter)=>{const g={};pick.forEach(m=>{const u=m.userData;if(!u||u.layer==='bolt'||u.layer==='weld'||u.layer==='plate'||!filter(u))return;
+   const G=g[u.spec]||(g[u.spec]={n:0,m:0,kg:0,by:{}});G.n++;G.m+=u.len||0;G.kg+=u.kg||0;const B=G.by[u.layer]||(G.by[u.layer]={n:0,m:0,kg:0});B.n++;B.m+=u.len||0;B.kg+=u.kg||0});return g};
+ const shape=(g,title,note)=>{let T={n:0,m:0,kg:0},out=[];Object.keys(g).sort().forEach(sp=>{const G=g[sp];T.n+=G.n;T.m+=G.m;T.kg+=G.kg;
+   out.push({c:'h',a:sp,b:[G.n,nf(G.m),nf(G.kg,0)]});Object.keys(G.by).forEach(l=>{const B=G.by[l];out.push({c:'s',a:L[l].n,b:[B.n,nf(B.m),nf(B.kg,0)]})})});
+   out.push({c:'t',a:'Tổng',b:[T.n,nf(T.m),nf(T.kg,0)]});
+   return `<h2>${title}</h2>${tbl(['Quy cách / vị trí','Số đoạn','Dài (m)','kg'],out)}<p class="stn">${note}</p>`};
+ const isI=u=>/^[IH]-/.test(u.spec);
+ const isXG=u=>/^C-|^Hộp/.test(u.spec);
+ $('#p-hinh').innerHTML=shape(grp(isI),'Thống kê thép hình (I)','Số đoạn = số thanh cắt trong mô hình (chưa tính hao hụt cây 12 m). Cột biển, giằng ngắn CT4 và dầm biên cùng quy cách I-200 được cộng chung. Khối lượng = chiều dài hình học × đơn trọng TCVN.');
+ const vk=stats.vach,ve=stats.vachE,vs=stats.vachS,vo={m:50,kg:161.8},veo={m:106.09,kg:203.4};
+ $('#p-xg').innerHTML=`<h2>Vách tôn mới – xà gồ C150 so với bóc tách cũ</h2>${tbl(['Vị trí','Dài (m)','kg'],[
+  {c:'h',a:'Đầu hồi trục 1 (sau biển hiệu) – chỉ gian Home lạnh C→E',b:['','']},{c:'s',a:'Bóc tách cũ: 2 đường hộp 50×100 × 25 m (cả A→E)',b:[nf(vo.m),nf(vo.kg,0)]},{c:'s',a:'Mới: 5 đường C150 @1200, chỉ C→E (12 m)',b:[nf(vk.m),nf(vk.kg,0)]},
+  {c:'h',a:'Hông trục E (trục 1 → 4 + 1,5 m)',b:['','']},{c:'s',a:'Bóc tách cũ: 5 đường []30×60 (4×21,50 + 1×20,09)',b:[nf(veo.m),nf(veo.kg,0)]},{c:'s',a:'Mới: 5 đường C150 ≈1200',b:[nf(ve.m),nf(ve.kg,0)]},
+  {c:'h',a:'Sau trục 4 (chỉ C → E, tường tây xiên)',b:['','']},{c:'s',a:'Bóc tách cũ: không có',b:['0','0']},{c:'s',a:'Mới: 5 đường C150 ≈1200',b:[nf(vs.m),nf(vs.kg,0)]},
+  {c:'t',a:'Tổng C150 mới (3 vách)',b:[nf(vk.m+ve.m+vs.m),nf(vk.kg+ve.kg+vs.kg,0)]},{c:'t',a:'Tổng bóc tách cũ (3 vách)',b:[nf(vo.m+veo.m),nf(vo.kg+veo.kg,0)]}])}<p class="stn">Vách mới chỉ bắn trong gian Home lạnh G-1 (trục C → E, khung trần 12,63 m, 270 m²) theo chỉ đạo của chủ đầu tư: đoạn đầu hồi A→C không tính. C150 tính 4,41 kg/m (tiết diện C150 chưa ghi trong bản vẽ). Vách hông có đoạn đến 8,2 m: nên đặt cây 12 m hoặc nối tại cột.</p>`+shape(grp(isXG),'Thống kê xà gồ & thép hộp','Gồm xà gồ C250 biển hiệu (cắt theo nhịp giữa các cột biển), xà gồ canopy / mái NV hộp 50×100, hộp 40×40 xương biển, khung G-1/G-2 và cột hộp. Số đoạn là số thanh trong mô hình; đặt cây 6 m theo bảng bóc tách.');
+ // vật tư
+ const pl={},bo={},wl={},ot={};
+ pick.forEach(m=>{const u=m.userData;if(!u)return;
+  if(u.layer==='plate'){const G=pl[u.spec]||(pl[u.spec]={n:0,kg:0,w:{}});G.n++;G.kg+=u.kg||0;const w=(u.where||'').replace(/\d[\d,\.]*/g,'#').slice(0,48);G.w[w]=1}
+  else if(u.layer==='bolt'){const k=u.M+(u.host?' · '+u.host:'');bo[k]=(bo[k]||0)+1}
+  else if(u.layer==='weld'){const k=(u.name||'').split(' – ')[0].replace(/ trục.*$/,'');const G=wl[k]||(wl[k]={n:0,m:0});G.n++;G.m+=u.len||0}
+  else if(/^Thép tròn|^Ống/.test(u.spec)){const G=ot[u.spec]||(ot[u.spec]={n:0,m:0,kg:0});G.n++;G.m+=u.len||0;G.kg+=u.kg||0}});
+ const plr=Object.keys(pl).sort().map(k=>({a:k,b:[pl[k].n,nf(pl[k].kg/pl[k].n,1),nf(pl[k].kg,0)]}));
+ const bos=Object.keys(bo).sort();const bsum={};bos.forEach(k=>{const M=k.split(' · ')[0];bsum[M]=(bsum[M]||0)+bo[k]});
+ const bor=[];Object.keys(bsum).sort().forEach(M=>{bor.push({c:'h',a:'Bu lông '+M+' (bộ: bu lông + đai ốc + long đen)',b:[bsum[M]]});bos.filter(k=>k.startsWith(M+' ·')||k===M).forEach(k=>bor.push({c:'s',a:k.split(' · ')[1]||'(không rõ bản mã)',b:[bo[k]]}))});
+ const wlr=Object.keys(wl).sort((a,b)=>wl[b].m-wl[a].m).map(k=>({a:k,b:[wl[k].n,nf(wl[k].m)]}));
+ const otr=Object.keys(ot).map(k=>({a:k,b:[ot[k].n,nf(ot[k].m),nf(ot[k].kg,0)]}));
+ const pk=Object.keys(pl).reduce((a,k)=>a+pl[k].kg,0),pn=Object.keys(pl).reduce((a,k)=>a+pl[k].n,0),bn=Object.values(bsum).reduce((a,b)=>a+b,0),wm=Object.values(wl).reduce((a,b)=>a+b.m,0);
+ $('#p-vt').innerHTML=`<h2>Bản mã & sườn gia cường</h2>${tbl(['Quy cách','Số tấm','kg/tấm','kg'],plr.concat([{c:'t',a:'Tổng',b:[pn,'',nf(pk,0)]}]))}<p class="stn">Kích thước bản mã đọc/đo từ bản vẽ; nguồn từng tấm ghi trong thẻ thông tin khi bấm vào bản mã. 1/2 PL là sườn tam giác.</p>
+ <h2>Bu lông (theo bản mã / vị trí)</h2>${tbl(['Loại / vị trí','Số bộ'],bor.concat([{c:'t',a:'Tổng',b:[bn]}]))}<p class="stn">Bu lông neo chân cột và bu lông nở được tính theo từng bộ trong mô hình. Cấp bền 8.8 theo ghi chú bản vẽ; chiều dài bu lông chỉ ghi ở vài chi tiết.</p>
+ <h2>Đường hàn</h2>${tbl(['Hạng mục','Số đường','Dài (m)'],wlr.concat([{c:'t',a:'Tổng',b:['',nf(wm)]}]))}<p class="stn">Bản vẽ không ghi chiều cao đường hàn (hf) – xem lưu ý chung ở thẻ thông tin khi bấm vào đường hàn.</p>
+ <h2>Thép tròn, ống</h2>${tbl(['Quy cách','Số đoạn','Dài (m)','kg'],otr)}`;
+ const tabs=document.querySelectorAll('#tabs button');
+ tabs.forEach(b=>b.onclick=()=>{tabs.forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.pane').forEach(p=>p.hidden=p.id!=='p-'+b.dataset.p)});
+ // Deep link from the project app: #can-chot opens the open-issues tab, #vat-tu the materials tab.
+ const deep={'#can-chot':'warn','#vat-tu':'vt','#xa-go':'xg','#thep-hinh':'hinh'}[location.hash];
+ if(deep){const t=[...tabs].find(x=>x.dataset.p===deep);if(t)t.click();}
+}
+if(MOB){$('#side').classList.add('min');$('#tog').textContent='▴'}
+$('#tog').onclick=()=>{$('#side').classList.toggle('min');$('#tog').textContent=$('#side').classList.contains('min')?'▴':'▾';setTimeout(resize,60)};
+if(/^#(can-chot|vat-tu|xa-go|thep-hinh)$/.test(location.hash)&&$('#side').classList.contains('min'))$('#tog').click();
+
+// góc nhìn
+const VIEWS=[
+ ['Tổng thể',[24,26,-48],[-6,4,-12]],
+ ['Canopy & biển hiệu',[30,13,14],[2,6,-12]],
+ ['Mũi canopy bo tròn R230 (vươn 7.300)',[9.6,6.6,-11.0],[6.9,5.3,-13]],
+ ['Hoàn thiện canopy nhìn dọc',[14,8.5,-2],[3.5,5.5,-12]],
+ ['Cột thép hiện hữu trong nhà',[-9,14,20],[-11,4,-10]],
+ ['Dầm I-400 nâng cote +4.850 – trục D',[-3,6.5,-16],[-10,4.7,-20]],
+ ['Cầu trục 5 tấn hiện hữu',[6,9,-30],[-9.5,5.6,-10]],
+ ['Vì kèo mái hiện hữu + cột cũ',[12,11,-46],[-10,6.8,-13]],
+ ['Đứng dưới canopy nhìn lên',[4.0,1.65,-9.5],[4.6,5.05,-14.5]],
+ ['Đứng trước cửa hàng nhìn lên biển hiệu',[12.5,1.65,-12.4],[1.0,8.9,-13.6]],
+ ['Đứng trong nhà nhìn lên khung trần G-1',[-9.5,1.65,-15.5],[-11.5,4.6,-19.5]],
+ ['Mặt đứng trục 1',[34,7,-12.2],[2,6.5,-12.2]],
+ ['Pát xà gồ C250 – nút cột biển trục C',[1.95,7.95,-11.75],[.5,7.36,-13]],
+ ['Pát xà gồ C250 – nhìn từ trong ra',[-1.35,7.85,-14.35],[.5,7.36,-13]],
+ ['Cột biển I-150 cạnh cột cũ I-250 – trục C',[6.4,9.4,-8.6],[.3,7.9,-13]],
+ ['Chân cột biển trên dầm canopy – trục C',[3.5,6.5,-10.5],[.45,5.6,-13]],
+ ['Khung G-1 + thanh ngang',[-28,13,-4],[-10,4.5,-20]],
+ ['Khung G-2 & cột đầu trục C',[-3.5,3.2,-7.5],[-9,4.3,-13]],
+ ['Vách đầu hồi C150 – dọc khe 285',[.22,6.9,-4.2],[.22,6.9,-13]],
+ ['Vách hông trục E – C150',[-6,8.5,-36],[-10,4.2,-26.4]],
+ ['Vách sau trục 4 – C150',[-33,8.5,-19],[-20.9,4.2,-19]],
+ ['Vách đầu hồi C150 – pát tại cột C',[1.6,6.5,-11.6],[.22,6.1,-13]],
+ ['Mái nhà NV – 4 xà gồ dọc',[-26,10.5,14],[-12,6.6,3]],
+ ['Đầu nhà NV – mái điều chỉnh',[4.2,10.5,8],[-2.2,6.4,1.6]],
+ ['Kèo 02 + cột cấy trụ BT',[-1.2,8.3,3.6],[-4.25,5.8,1.5]],
+ ['Kèo 01 tại cột CT1',[1.6,7.6,5.2],[-1.5,6.8,2.9]],
+ ['Ty treo G-1',[-1.4,6.0,-19.6],[-0.15,5.4,-21.3]],
+ ['Mặt cắt biển hiệu',[3.2,8.2,5],[0.3,7.6,-6]],
+ ['Mái dôi trục 4',[-31,8,-10],[-21.6,4,-19]],
+ ['Đỉnh cột trục 1 (+10.8)',[2.4,11.5,-18.2],[0.25,10.6,-20]],
+ ['Cột biển CT4-1 – trục A\'',[3.6,9.4,6.8],[.45,8.0,2.8]],
+ ['Cột biển CT4-1 – trục E\'',[3.6,9.4,-33.6],[.45,8.0,-27.3]],
+ ['Giằng ngắn CT4 + bản mã',[1.4,7.7,3.5],[.3,6.95,2.81]],
+ ['Chân cột I-250',[7.6,1.1,-11.4],[6,.15,-13],'col'],
+ ['Đỉnh cột CT3',[7.3,5.6,-11.8],[6,4.8,-13]],
+ ['Mối nối CT2',[7.3,5.5,-14.4],[6,4.95,-15.28]],
+ ['Mặt bích CT5',[1.7,4.3,-18.7],[0.1,4.98,-20]],
+ ['Tai dầm + mỏ đua',[4.9,4.4,-8.2],[5.95,4.98,-7]]
+];
+let anim=null;
+function go(v){const [,p,t]=v;anim={p0:C.position.clone(),t0:O.target.clone(),p1:new T.Vector3(...p),t1:new T.Vector3(...t),s:performance.now()}}
+const VGRP={0:'Tổng quan',2:'Canopy',4:'Kết cấu hiện hữu',8:'Nhìn từ dưới lên',11:'Biển hiệu',16:'Khung trần G-1 / G-2',18:'Vách bắn mới',22:'Mái nhà nhân viên',24:'Kèo và chi tiết nâng cấp'};
+$('#views').innerHTML=`<button id="vbtn">Góc nhìn ▾</button><div id="vlist">${VIEWS.map((v,i)=>(VGRP[i]?`<div class="vsep">${VGRP[i]}</div>`:'')+`<button data-i="${i}">${v[0]}</button>`).join('')}</div>`;
+$('#vbtn').insertAdjacentHTML('afterend','<button id="wbtn">Đi bộ</button>');
+$('#vbtn').addEventListener('click',()=>$('#vlist').classList.toggle('open'));
+$('#vlist').addEventListener('click',e=>{const b=e.target.closest('button');if(b){if(walk)setWalk(false);go(VIEWS[+b.dataset.i]);$('#vlist').classList.remove('open');$('#vbtn').textContent=b.textContent+' ▾'}});
+addEventListener('click',e=>{if(!e.target.closest('#views'))$('#vlist').classList.remove('open')});
+
+// chọn cấu kiện
+const ray=new T.Raycaster(),mp=new T.Vector2();let sel=null,down=null;
+function hit(ev){const r=R.domElement.getBoundingClientRect();mp.set((ev.clientX-r.left)/r.width*2-1,-(ev.clientY-r.top)/r.height*2+1);ray.setFromCamera(mp,C);
+ const h=ray.intersectObjects(pick.filter(m=>vis[m.userData.layer]&&(m.parent.visible)),false);return h[0]&&h[0].object}
+function select(m){if(sel){sel.material=mats[sel.userData.layer]}sel=m;const card=$('#card');
+ if(!m){card.classList.remove('show');return}
+ m.material=selMat;const u=m.userData;
+ const rows=[['Nhóm',L[u.layer].n],u.len?['Chiều dài (mô hình)',fmt(u.len*1000,0)+' mm']:null,['Khối lượng ước tính',fmt(u.kg,u.kg<10?2:1)+' kg'],u.bolt?['Bu lông',u.bolt]:null,u.where?['Vị trí',u.where]:null].filter(Boolean);
+ card.innerHTML=`<h3>${u.name}</h3><div class="spec">${u.spec}</div><table>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>${u.note?`<p class="note">${u.note}</p>`:''}<div class="row" style="margin-top:8px"><button id="bOnly">Chỉ xem nhóm này</button><button id="bClose">Đóng</button></div>`;
+ card.classList.add('show');$('#scroll').scrollTop=0;
+ $('#bClose').onclick=()=>select(null);
+ $('#bOnly').onclick=()=>{for(const k in L){const on=k===u.layer||(u.layer==='plate'?false:k==='plate');groups[k].visible=vis[k]=on}document.querySelectorAll('.lay').forEach(l=>l.querySelector('input').checked=vis[l.dataset.k])};
+ if($('#side').classList.contains('min'))$('#tog').click();
+}
+R.domElement.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY]});
+R.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5)return;select(hit(e)||null)});
+const tip=$('#tip');
+R.domElement.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||e.buttons){tip.style.display='none';return}const m=hit(e);if(!m){tip.style.display='none';R.domElement.style.cursor='';return}
+ const r=stage.getBoundingClientRect();tip.textContent=m.userData.spec+' · '+m.userData.name;tip.style.display='block';tip.style.left=Math.min(e.clientX-r.left+14,r.width-tip.offsetWidth-6)+'px';tip.style.top=(e.clientY-r.top+14)+'px';R.domElement.style.cursor='pointer'});
+
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(stage);resize();
+C.position.set(...VIEWS[0][1]);O.target.set(...VIEWS[0][2]);
+// ---------- chế độ đi bộ dưới đất ----------
+let walk=false,yaw=0,pitch=.30,look=null;
+const wpos=new T.Vector3(), keys={}, mv={f:0,b:0,l:0,r:0}, EYE=1.65;
+const dirV=()=>new T.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
+function applyWalk(){C.position.copy(wpos);C.lookAt(wpos.clone().add(dirV()))}
+function setWalk(on){
+ walk=on;document.body.classList.toggle('walk',on);$('#wbtn').textContent=on?'Thoát đi bộ':'Đi bộ';
+ $('#vlist').classList.remove('open');
+ if(on){anim=null;O.enabled=false;
+  const d=new T.Vector3().subVectors(O.target,C.position);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,-1);d.normalize();
+  yaw=Math.atan2(d.x,d.z);pitch=.30;
+  const far=C.position.length()>34||C.position.x>11||C.position.x<-25||C.position.z<-31||C.position.z>7;
+  if(far){wpos.set(9,EYE,-13);yaw=-Math.PI/2;pitch=.22}
+  else wpos.set(Math.max(-22,Math.min(9,C.position.x)),EYE,Math.max(-28,Math.min(5,C.position.z)));
+  applyWalk();
+ }else{O.enabled=true;O.target.copy(C.position).addScaledVector(dirV(),6)}
+}
+$('#wbtn').addEventListener('click',()=>setWalk(!walk));
+addEventListener('keydown',e=>{if(!walk)return;keys[e.key.toLowerCase()]=1;if(e.key==='Escape')setWalk(false)});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=0});
+$('#pad').addEventListener('pointerdown',e=>{const b=e.target.closest('button[data-m]');if(b){mv[b.dataset.m]=1;b.setPointerCapture(e.pointerId);e.preventDefault()}});
+$('#pad').addEventListener('pointerup',e=>{const b=e.target.closest('button[data-m]');if(b)mv[b.dataset.m]=0});
+$('#pad').addEventListener('pointercancel',()=>{mv.f=mv.b=mv.l=mv.r=0});
+R.domElement.addEventListener('pointerdown',e=>{if(walk){look=[e.clientX,e.clientY];R.domElement.setPointerCapture(e.pointerId)}});
+R.domElement.addEventListener('pointermove',e=>{if(!walk||!look)return;
+ yaw-=(e.clientX-look[0])*.005;pitch=Math.max(-1.25,Math.min(1.45,pitch-(e.clientY-look[1])*.005));look=[e.clientX,e.clientY]});
+['pointerup','pointercancel'].forEach(t=>R.domElement.addEventListener(t,()=>{look=null}));
+function stepWalk(){
+ const f=(keys.w||keys.arrowup||mv.f?1:0)-(keys.s||keys.arrowdown||mv.b?1:0);
+ const r=(keys.d||keys.arrowright||mv.r?1:0)-(keys.a||keys.arrowleft||mv.l?1:0);
+ if(f||r){const sp=(keys.shift?.12:.055);
+  wpos.x+=(Math.sin(yaw)*f+Math.cos(yaw)*r)*sp; wpos.z+=(Math.cos(yaw)*f-Math.sin(yaw)*r)*sp;
+  wpos.x=Math.max(-24,Math.min(10,wpos.x)); wpos.z=Math.max(-30,Math.min(6,wpos.z)); wpos.y=EYE}
+ applyWalk()}
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function loop(t){requestAnimationFrame(loop);
+ if(anim){let k=reduce?1:Math.min(1,(t-anim.s)/900);k=1-Math.pow(1-k,3);C.position.lerpVectors(anim.p0,anim.p1,k);O.target.lerpVectors(anim.t0,anim.t1,k);if(k>=1)anim=null}
+ if(walk)stepWalk();else O.update();
+ R.render(S,C)}
+requestAnimationFrame(loop);
+$('#load').remove();
+}
+</script>
+</body>
+</html>

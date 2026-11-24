@@ -1,0 +1,187 @@
+/* Nâng cấp 11/2026: thẻ 3D nhà xưởng, trạng thái quá hạn, nút lên đầu trang. */
+
+/* ---------- Thẻ mô hình 3D nhà xưởng ---------- */
+.xuong3d-card {
+  --x-navy: var(--hs-navy, #0A2C54);
+  --x-red: var(--hs-red, #C8102E);
+  --x-paper: #EEF0F2;
+  --x-line: rgba(255, 255, 255, .09);
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  margin: 0 0 24px;
+  border-radius: 18px;
+  overflow: hidden;
+  color: #fff;
+  background-color: var(--x-navy);
+  /* Lưới giấy can: gợi bản vẽ kết cấu. */
+  background-image:
+    linear-gradient(var(--x-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--x-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+  border-left: 5px solid var(--x-red);
+  box-shadow: 0 18px 40px -24px rgba(5, 24, 46, .55);
+}
+.xuong3d-copy {
+  padding: 30px 30px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.xuong3d-kicker {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFD4DA;
+}
+.xuong3d-copy h3 {
+  margin: 0;
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  text-wrap: balance;
+  color: #fff;
+}
+.xuong3d-copy > p:not(.xuong3d-kicker) {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #C9D6E6;
+}
+.xuong3d-facts {
+  margin: 4px 0 0;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 0;
+  border-top: 1px solid rgba(255, 255, 255, .18);
+  border-bottom: 1px solid rgba(255, 255, 255, .18);
+}
+.xuong3d-facts div {
+  padding: 12px 18px 12px 0;
+  margin-right: 18px;
+  border-right: 1px solid rgba(255, 255, 255, .18);
+  min-width: 0;
+}
+.xuong3d-facts div:last-child { border-right: 0; margin-right: 0; }
+.xuong3d-facts dt { font-size: 12px; color: #9FB4CC; margin: 0 0 2px; }
+.xuong3d-facts dd { margin: 0; font-size: 14px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+.xuong3d-facts dd strong { font-size: 26px; line-height: 1; font-weight: 800; color: #FFC24D; margin-right: 2px; }
+.xuong3d-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.xuong3d-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background-color .15s, border-color .15s;
+}
+.xuong3d-primary { background: #fff; color: var(--x-navy); }
+.xuong3d-primary:hover { background: #FFE9EC; color: var(--x-red); }
+.xuong3d-secondary { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .35) !important; }
+.xuong3d-secondary:hover { border-color: #fff !important; background: rgba(255, 255, 255, .08); }
+.xuong3d-actions .btn:focus-visible,
+.xuong3d-visual:focus-visible { outline: 3px solid #FFC24D; outline-offset: 2px; }
+
+.xuong3d-visual {
+  position: relative;
+  display: block;
+  background: var(--x-paper);
+  min-height: 300px;
+  overflow: hidden;
+}
+.xuong3d-visual img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 45% 50%;
+  transition: transform .4s ease;
+}
+.xuong3d-visual:hover img { transform: scale(1.03); }
+.xuong3d-visual-hint {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(10, 44, 84, .88);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .xuong3d-visual img { transition: none; }
+  .xuong3d-visual:hover img { transform: none; }
+}
+@media (max-width: 1100px) {
+  .xuong3d-card { grid-template-columns: 1fr; }
+  .xuong3d-visual { min-height: 0; aspect-ratio: 16 / 10; order: -1; }
+}
+@media (max-width: 600px) {
+  .xuong3d-card { border-left: 0; border-top: 5px solid var(--x-red); border-radius: 16px; }
+  .xuong3d-copy { padding: 20px 18px 22px; }
+  .xuong3d-facts { grid-template-columns: 1fr 1fr; }
+  .xuong3d-facts div:nth-child(2) { border-right: 0; margin-right: 0; }
+  .xuong3d-facts div:last-child { grid-column: 1 / -1; border-top: 1px solid rgba(255, 255, 255, .18); }
+  .xuong3d-actions .btn { flex: 1 1 100%; justify-content: center; }
+}
+
+/* Nút 3D trong khu tra cứu và menu trái */
+.field-action.action-3d i { color: var(--hs-red, #C8102E); }
+
+/* ---------- Tiến độ quá hạn ---------- */
+.sidebar-status-card.is-overdue .mini-prog-fill { background: var(--hs-red, #C8102E) !important; }
+.hsh-overdue-text { color: #FF8A9A !important; font-weight: 700; }
+.d-day-countdown.is-overdue .countdown-num { color: var(--hs-red, #C8102E); }
+.d-day-countdown.is-overdue .countdown-sub { font-size: .45em; }
+
+/* ---------- Việc hôm nay: gom các nút Drive vào một hàng ---------- */
+#todayWork > a.btn,
+#todayWork > #fieldPhotoSend:not([hidden]) {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 8px 8px 0;
+  min-height: 44px;
+}
+
+/* ---------- Nút lên đầu trang ---------- */
+.hsh-back-to-top {
+  position: fixed;
+  right: 20px;
+  bottom: 24px;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--hs-navy, #0A2C54);
+  color: #fff;
+  font: 600 14px/1 Inter, system-ui, sans-serif;
+  box-shadow: 0 10px 24px -10px rgba(5, 24, 46, .6);
+  cursor: pointer;
+}
+.hsh-back-to-top[hidden] { display: none; }
+.hsh-back-to-top:hover { background: var(--hs-navy-light, #15457E); }
+.hsh-back-to-top:focus-visible { outline: 3px solid #FFC24D; outline-offset: 2px; }
+@media (max-width: 900px) {
+  /* Tránh thanh điều hướng dưới trên điện thoại. */
+  .hsh-back-to-top { bottom: 84px; right: 14px; padding: 12px; }
+  .hsh-back-to-top span { display: none; }
+}
